@@ -1,23 +1,45 @@
-require(shiny);
+library(shiny);
 ## widget : a web element a user can interact with
 ## inputId : name for the widget for the developer (object name)
 ## label : widget name for the user
 
 shinyUI(
     ui = fluidPage(
-        titlePanel("Thrombin Analyzer"),
+        titlePanel("Thrombin Analyzer"), ## App title
 
         sidebarLayout(
             sidebarPanel = sidebarPanel(
-                fileInput(inputId = "data", label = h3("File input"),
-                          accept = ("text/csv"))
+                fileInput(inputId = "data.cal", accept = ("text/csv"),
+                          label = h3("Calibration data file input")
+                          ),
+                fileInput(inputId = "data.tg", accept = ("text/csv"),
+                          label = h3("Thrombin generation data file input")
+                          )
             ),
             mainPanel = mainPanel(
-                h1("Plot of input signal", align = "left"),
-                plotOutput(outputId = "dataPlot")
-            )
-        ),
-        title = NULL,
+                tabsetPanel(
+                    id = "Signal type",
+                    tabPanel(title = "Calibration signal",
+                             ## h1("Plot of calibration signal", align = "left")
+                             plotOutput(outputId = "PlotCal")
+                             ),
+                    tabPanel(title = "Thrombin generation signal",
+                             ## h1("Plot of thrombin generation signal", align = "left")
+                             plotOutput(outputId = "PlotTG")
+                             ),
+                    tabPanel(title = "Thrombogram",
+                             ## h1("Plot of thrombin generation signal", align = "left")
+                             plotOutput(outputId = "PlotThromb")
+                             ),
+                    tabPanel(title = "Parameters",
+                             h1("Parameters from calibration experiment",
+                                align = "left"),
+                             dataTableOutput(outputId = "ParCalibr")
+                             )
+                )  ## End of tabsetPanel
+            )  ## End of mainPanel
+        ),  ## End of sidebarLayout
+        title = "Thrombin Analyzer",
         responsive = NULL,
         theme = NULL
     ) ## End of Fluidpage
