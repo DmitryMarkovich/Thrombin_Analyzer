@@ -5,38 +5,54 @@ library(shiny);
 
 shinyUI(
     ui = fluidPage(
-        titlePanel("Thrombin Analyzer"), ## App title
+        headerPanel("Thrombin Analyzer"), ## App title
+        ## titlePanel("Thrombin Analyzer"),
 
         sidebarLayout(
             sidebarPanel = sidebarPanel(
-                fileInput(inputId = "data.cal", accept = ("text/csv"),
+                fileInput(inputId = "cal.fname", accept = ("text/csv"),
                           label = h3("Calibration data file input")
                           ),
+                selectInput(inputId = "cal.model",
+                            label = h4("Select model to fit calibration signal"), 
+                            ## choices = list("LateMM" = "LateMM", "LateExp" = "LateExp",
+                            ##     "EarlyMM" = "EarlyMM", "LM" = "LM", "Auto" = "Auto"),
+                            choices = c("LateMM", "LateExp", "EarlyMM", "LM", "Auto"),
+                            selected = "LateMM"),
                 fileInput(inputId = "data.tg", accept = ("text/csv"),
                           label = h3("Thrombin generation data file input")
-                          )
+                          ),
+                selectInput(inputId = "tg.model",
+                            label = h4("Select model to fit thrombin generation signal"), 
+                            choices = list("T0GammaInt" = 1, "GammaInt" = 2,
+                                "2T0GammaInt" = 3, "T0Gamma", "Auto" = 4),
+                            selected = 1),
+                width = 4
             ),
             mainPanel = mainPanel(
                 tabsetPanel(
                     id = "Signal type",
                     tabPanel(title = "Calibration signal",
                              ## h1("Plot of calibration signal", align = "left")
-                             plotOutput(outputId = "PlotCal")
+                             plotOutput(outputId = "CalPlot")
+                             ## textOutput(outputId = "FitCal"),
+                             ## plotOutput(outputId = "PlotFit")
                              ),
-                    tabPanel(title = "Thrombin generation signal",
+                    tabPanel(title = "Thrombin generation signal"
                              ## h1("Plot of thrombin generation signal", align = "left")
-                             plotOutput(outputId = "PlotTG")
+                             ## plotOutput(outputId = "PlotTG")
                              ),
-                    tabPanel(title = "Thrombogram",
+                    tabPanel(title = "Thrombogram"
                              ## h1("Plot of thrombin generation signal", align = "left")
-                             plotOutput(outputId = "PlotThromb")
+                             ## plotOutput(outputId = "PlotThromb")
                              ),
                     tabPanel(title = "Parameters",
                              h1("Parameters from calibration experiment",
-                                align = "left"),
-                             dataTableOutput(outputId = "ParCalibr")
+                                align = "left")
+                             ## dataTableOutput(outputId = "ParCalibr")
                              )
-                )  ## End of tabsetPanel
+                ),  ## End of tabsetPanel
+                width = 8
             )  ## End of mainPanel
         ),  ## End of sidebarLayout
         title = "Thrombin Analyzer",
