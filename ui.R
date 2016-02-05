@@ -18,7 +18,8 @@ shinyUI(
                             ## choices = list("LateMM" = "LateMM", "LateExp" = "LateExp",
                             ##     "EarlyMM" = "EarlyMM", "LM" = "LM", "Auto" = "Auto"),
                             choices = c("LateMM", "LateExp", "EarlyMM", "LM", "Auto"),
-                            selected = "LateMM"),
+                            selected = NULL
+                            ),
                 fileInput(inputId = "data.tg", accept = ("text/csv"),
                           label = h3("Thrombin generation data file input")
                           ),
@@ -34,8 +35,8 @@ shinyUI(
                     id = "Signal type",
                     tabPanel(title = "Calibration signal",
                              ## h1("Plot of calibration signal", align = "left")
-                             plotOutput(outputId = "CalPlot")
-                             ## textOutput(outputId = "FitCal"),
+                             plotOutput(outputId = "cal.Plot"),
+                             textOutput(outputId = "cal.model")
                              ## plotOutput(outputId = "PlotFit")
                              ),
                     tabPanel(title = "Thrombin generation signal"

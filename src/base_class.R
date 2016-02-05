@@ -1,3 +1,4 @@
+################################################################################
 Base.load_signal <- function(inFile) {
     ## print(sub(pattern = ".*[.]", "", inFile$name));
     switch(sub(pattern = ".*[.]", "", inFile$name),
@@ -7,9 +8,11 @@ Base.load_signal <- function(inFile) {
            }
            )
 }  ## End of Base.LoadSignal
+################################################################################
 
+################################################################################
 Base.explore_numerically <- function(n = 3) {
-    if (!is.null(data) && is.null(num.smry)) {
+    if (!is.null(data) && length(num.smry) == 0) {
         dt <- data$x[2] - data$x[1]; N <- length(data$x); ampl <- max(data$y);
         drv1 <- rep(NA, N);
         drv1[1:(N - 3)] = (1 / (4 * dt)) * (
@@ -22,12 +25,34 @@ Base.explore_numerically <- function(n = 3) {
         num.smry <<- list(rat = rat, t.peak = t.peak, t.lin = t.lin,
                           ampl = ampl, cutoff = cutoff, drv1 = drv1);
     } else {
-        warning(">> num.smry not changed: data == NULL or num.smry != NULL.");
+        warning(">> num.smry not changed: data == NULL or num.smry not empty.");
     }
 }  ## End of Base.ExploreNumerically
+################################################################################
 
+################################################################################
+Base.ConvPValsToSignifCodes <- function(pvals) {
+    ## Use the symnum function to produce the symbols
+    return(
+        paste(
+            rev(table(
+                symnum(c(0.001, 0.01, 0.05, 0.1, 1, pvals), na = FALSE,
+                       cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                       symbols = c("***", "**", "*", ".", " "), legend = F)
+            ) - 1
+                ), collapse = ""
+        )
+    );
+}  ## End of Base.ConvPValsToSignifCodes
+################################################################################
+
+################################################################################
 Base <- setRefClass(
     Class = "Base",
-    methods = list(load_signal = Base.load_signal,
-        explore_numerically = Base.explore_numerically)
-);
+    methods = list(
+        load_signal = Base.load_signal,
+        explore_numerically = Base.explore_numerically,
+        conv_pvals_to_signif_codes = Base.ConvPValsToSignifCodes
+    )
+);  ## End of Base
+################################################################################

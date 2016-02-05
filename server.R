@@ -1,6 +1,7 @@
 library(shiny);
-## source("src/global_parameters.R");
-source("src/base_class.R");
+print(">> ################################################################################ <<");
+    ## source("src/global_parameters.R");
+    source("src/base_class.R");
 source("src/cal_class.R");
 ## source("src/tg_class.R");
 ## source("src/plotting_functions.R");
@@ -23,18 +24,17 @@ shinyServer(
         cal.fname <- reactive({
             return(input$cal.fname);
         })
-        output$CalPlot <- renderPlot({ ## runs each time user changes a widget
-            ## inFile <- input$data.cal;
+        output$cal.Plot <- renderPlot({ ## runs each time user changes a widget
             if (!is.null(cal.fname())) {
-                ## print(cal.fname())
-                ## print(">> Calling load_signal");
                 cal$load_signal(cal.fname());
+                cal$explore_numerically();
                 cal$plot();
-                ## e$data.cal <- read.table(file = inFile$datapath, header = TRUE,
-                ##                          col.names = c("x", "y"), sep = " ");
-                ## PlotSignal(e, signal.type = "Calibration");
+                if (!is.null(cal.model())) {
+                    cal$fit_model(cal.model());
+                    cal$plot_fit(cal.model());
+                }
             }
-        })  ## End of output$PlotCal
+        })  ## End of output$cal.Plot
         ## output$PlotTG <- renderPlot({ ## runs each time user changes a widget
         ##     inFile <- input$data.tg;
         ##     if (!is.null(inFile)) {
@@ -52,7 +52,7 @@ shinyServer(
         ## output$ParCalibr <- renderDataTable({
         ##     e$df.cal;
         ## })  ## End of output$ParCalibr
-        calModel <- reactive({
+        cal.model <- reactive({
             switch(input$cal.model,
                    "LateMM" = "LateMM",
                    "LateExp" = "LateExp",
@@ -60,11 +60,14 @@ shinyServer(
                    "LM" = "LM",
                    "Auto" = "Auto")
         })
-        ## output$FitCal <- renderText({
-        ##     if (!is.na(calModel()) && !is.null(e$data.cal)) {
-        ##         paste0(calModel(), " selected to fit calibration data!");
-        ##     }
-        ## })  ## End of output$FitCal
+        output$cal.model <- renderText({
+            if (!is.null(cal.model()) && !is.null(cal.fname())) {
+                paste0(cal.model(), " selected to fit calibration data ",
+                       cal.fname()$name);
+            } else {
+                paste(">> Model not selected or data not loaded.");
+            }
+        })  ## End of output$cal.model
         ## output$PlotFit <- renderPlot({
         ##     PlotFit(e);
         ## })
