@@ -1,0 +1,103 @@
+################################################################################
+Cal.fit_LateMM <- function(silent = FALSE) {
+    if (exists(x = "LateMM", where = fit)) {
+        warning(">> No fitting: LateMM fit already exists!");
+    } else {
+        print(">> fit_LateMM called!");
+        if (exists(x = "LateExp", where = fit)) {
+            ## use existing LateExp fit for estimate of p1 and p3
+            start.list <- list(b = data[[2]][1], p1 = fit$LateExp$cff[["p1"]],
+                               p2 = 1, p3 = fit$LateExp$cff[["p3"]]);
+        } else {
+            ## call fit_LateExp for estimate of p1 and p3
+            fit_LateExp(silent = TRUE);
+            start.list <- list(b = data[[2]][1], p1 = fit$LateExp$cff[["p1"]],
+                               p2 = 1, p3 = fit$LateExp$cff[["p3"]]);
+        }
+        ft <- NULL; n.try <- 1;
+        while (is.null(ft) && n.try <= N.tries) {
+            try(expr = {
+                ft <- nlsLM(
+                    y ~ b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * x)) / p2)),
+                    data = data, start = start.list, algorithm = "LM",
+                    lower = c(0, 0, 0, 0),
+                    upper = c(Inf, Inf, Inf, Inf),
+                    control = nls.lm.control(
+                        ftol = sqrt(.Machine$double.eps),
+                        ptol = sqrt(.Machine$double.eps),
+                        gtol = 0, nprint = -1, factor = 100,  ## between [0.1, 100]
+                        maxiter = 200
+                    )
+                )
+            }, silent = F);
+            n.try <- n.try + 1;
+            start.list <- list(b = data$y[1],
+                               p1 = runif(1) * num.smry$ampl,
+                               p2 = runif(1, 0, 2),
+                               p3 = runif(1) * fit$LateExp$cff[["p3"]]);
+        }
+        if (is.null(ft)) {
+            warning(">> Cal.fit_LateMM resulted in NULL");
+        } else {
+            fit$LateMM <<- list(
+                cff = coef(ft), smry = summary(ft),
+                diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
+            );
+            if (!silent)
+                print(fit);
+        }  ## End of if (is.null(ft))
+    }  ## End of if (exists())
+}  ## End of Cal.fit_LateMM
+################################################################################
+
+################################################################################
+Cal.get_LateMM <- function() {
+    if (exists(x = "LateMM", where = fit)) {
+        ## y ~ b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * x)) / p2)),
+        b <- fit$LateMM$cff[["b"]]; p1 <- fit$LateMM$cff[["p1"]];
+        p2 <- fit$LateMM$cff[["p2"]]; p3 <- fit$LateMM$cff[["p3"]];
+        return(b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * data$x)) / p2)));
+    } else {
+        warning(">> fit$LateMM does not exist!");
+    }
+}  ## End of Cal.get_LateMM
+################################################################################
+
+################################################################################
+LateMM <- function(x, cff) {
+    return(cff[["b"]] + cff[["p1"]] *
+               (1 - (W(cff[["p2"]] * exp(cff[["p2"]]) *
+                           exp(-cff[["p3"]] * x)) / cff[["p2"]])));
+}  ## End of LateMM
+################################################################################
+
+################################################################################
+LateMMLinearPart <- function(x, cff) {
+    ## calculates only the linear part of the product concentration ob
+    ## Late-times MM kinetics solution
+    ## time - time vector in minutes
+    ## late.cff - coefficients for Late-times MM formula obtained from fit
+    return(cff[["b"]] + (cff[["p1"]] * cff[["p3"]] / (1 + cff[["p2"]])) * x);
+}  ## End of LateMMLinearPart
+################################################################################
+
+################################################################################
+LateMMCFCAT <- function(cff, e0 = 100) {
+    return(e0 * (1 + cff[["p2"]]) / (cff[["p1"]] * cff[["p3"]]));
+}  ## End of LateMMCF
+################################################################################
+
+################################################################################
+LateMMCFDTU <- function(cff, e0 = 100) {
+    return(e0 / (cff[["p1"]] * cff[["p3"]]));
+}  ## End of LateMMCFDTU
+################################################################################
+
+################################################################################
+LateMMKinConst <- function(cff, e0 = 100, s0 = 454000) {
+    return(list(
+        e0 = e0, s0 = s0, C = cff[["p1"]] / s0, K.m = s0 / cff[["p2"]],
+        k.cat = (s0 / e0) * (cff[["p3"]] / cff[["p2"]])
+    ));
+}  ## End of LateMMKinConst
+################################################################################

@@ -1,5 +1,6 @@
 ################################################################################
 Base.load_signal <- function(inFile) {
+    print(">> load_signal called!");
     ## print(sub(pattern = ".*[.]", "", inFile$name));
     switch(sub(pattern = ".*[.]", "", inFile$name),
            "dat" = {
@@ -13,6 +14,7 @@ Base.load_signal <- function(inFile) {
 ################################################################################
 Base.explore_numerically <- function(n = 3) {
     if (!is.null(data) && length(num.smry) == 0) {
+        print(">> explore_numerically called!");
         dt <- data$x[2] - data$x[1]; N <- length(data$x); ampl <- max(data$y);
         drv1 <- rep(NA, N);
         drv1[1:(N - 3)] = (1 / (4 * dt)) * (

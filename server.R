@@ -1,12 +1,11 @@
-library(shiny);
-print(">> ################################################################################ <<");
-    ## source("src/global_parameters.R");
-    source("src/base_class.R");
-source("src/cal_class.R");
+library(shiny); library(minpack.lm); library(LambertW);
+print("################################################################################");
+source("src/global_parameters.R");
+source("src/Base_class.R");
+source("src/Cal_class.R");
 ## source("src/tg_class.R");
 ## source("src/plotting_functions.R");
 ## source("src/numerical_derivatives.R");
-## source("src/models.R");
 ## code here runs once when app is launched
 cal <- Cal$new();
 ## ## create environment e to store loaded data
@@ -23,13 +22,37 @@ shinyServer(
     func = function(input, output) { ## runs each time a user visits the app
         cal.fname <- reactive({
             return(input$cal.fname);
-        })
-        output$cal.Plot <- renderPlot({ ## runs each time user changes a widget
+        })  ## End of cal.fname
+        cal.data <- reactive({
             if (!is.null(cal.fname())) {
+                cal$clear();
                 cal$load_signal(cal.fname());
                 cal$explore_numerically();
+            }
+        })
+        cal.model <- reactive({
+            switch(input$cal.model,
+                   "LateMM" = "LateMM",
+                   "LateExp" = "LateExp",
+                   "EarlyMM" = "EarlyMM",
+                   "LM" = "LM",
+                   "Auto" = "Auto")
+        })  ## End of cal.model
+        output$cal.model <- renderText({
+            if (!is.null(cal.model()) && !is.null(cal.data())) {
+                paste0(cal.model(), " selected to fit calibration data ",
+                       cal.fname()$name);
+            } else {
+                paste(">> Model not selected or data not loaded.");
+            }
+        })  ## End of output$cal.model
+        output$cal.Plot <- renderPlot({ ## runs each time user changes a widget
+            if (!is.null(cal.data())) {
+                ## cal$load_signal(cal.fname());
+                ## cal$explore_numerically();
                 cal$plot();
                 if (!is.null(cal.model())) {
+                    print(cal.model());
                     cal$fit_model(cal.model());
                     cal$plot_fit(cal.model());
                 }
@@ -52,22 +75,7 @@ shinyServer(
         ## output$ParCalibr <- renderDataTable({
         ##     e$df.cal;
         ## })  ## End of output$ParCalibr
-        cal.model <- reactive({
-            switch(input$cal.model,
-                   "LateMM" = "LateMM",
-                   "LateExp" = "LateExp",
-                   "EarlyMM" = "EarlyMM",
-                   "LM" = "LM",
-                   "Auto" = "Auto")
-        })
-        output$cal.model <- renderText({
-            if (!is.null(cal.model()) && !is.null(cal.fname())) {
-                paste0(cal.model(), " selected to fit calibration data ",
-                       cal.fname()$name);
-            } else {
-                paste(">> Model not selected or data not loaded.");
-            }
-        })  ## End of output$cal.model
+
         ## output$PlotFit <- renderPlot({
         ##     PlotFit(e);
         ## })

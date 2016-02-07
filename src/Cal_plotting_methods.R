@@ -1,4 +1,10 @@
 ################################################################################
+Cal.clear <- function() {
+    data <<- data.frame(); num.smry <<- list(); fit <<- list();
+}  ## End of Cal.clear
+################################################################################
+
+################################################################################
 Cal.plot <- function() {
     if (length(data) != 0) {
         graphics::plot(data, xlab = "time, min", cex.lab = 2, cex.axis = 2,
@@ -14,32 +20,6 @@ Cal.plot <- function() {
 }  ## End of Cal.plot
 ################################################################################
 
-source("src/Cal_fitLM.R");
-source("src/late_mm.R");
-
-################################################################################
-Cal.fit_model <- function(calModel) {
-    switch(calModel,
-           "LM" = {
-               ## print(">> Call to Cal.fit_LM")
-               fit_LM(calModel)
-           },
-           "EarlyMM" = {
-               print(">> Call to Cal.fit_EarlyMM")
-           },
-           "LateExp" = {
-               print(">> Call to Cal.fit_LateExp")
-           },
-           "LateMM" = {
-               print(">> Call to Cal.fit_LateMM")
-           },
-           {
-               print(paste0(">> Call to unknown model", calModel()));
-           }
-           );
-}  ## End of Cal.fit_model
-################################################################################
-
 ################################################################################
 Cal.get_model <- function(calModel) {
     switch(calModel,
@@ -48,13 +28,16 @@ Cal.get_model <- function(calModel) {
                get_LM()
            },
            "EarlyMM" = {
-               print(">> Call to Cal.get_EarlyMM")
+               ## print(">> Call to Cal.get_EarlyMM")
+               get_EarlyMM();
            },
            "LateExp" = {
-               print(">> Call to Cal.get_LateExp")
+               ## print(">> Call to Cal.get_LateExp")
+               get_LateExp()
            },
            "LateMM" = {
-               print(">> Call to Cal.get_LateMM")
+               ## print(">> Call to Cal.get_LateMM")
+               get_LateMM()
            },
            {
                print(paste0(">> Call to unknown get_model", calModel()));
@@ -66,20 +49,6 @@ Cal.get_model <- function(calModel) {
 ################################################################################
 Cal.plot_fit <- function(calModel) {
     plot();
-    lines(data$x, get_model(calModel), col = "red");
+    lines(data$x, get_model(calModel), col = "red", lwd = 2);
 }  ## End of Cal.plot_fit
 ################################################################################
-
-################################################################################
-Cal <- setRefClass(
-    Class = "Cal", contains = "Base",
-    fields = list(data = "data.frame", num.smry = "list", fit = "list"),
-    methods = list(
-        plot = Cal.plot,
-        fit_LM = Cal.fitLM, get_LM = Cal.getLM,
-        fit_model = Cal.fit_model, get_model = Cal.get_model,
-        plot_fit = Cal.plot_fit
-    )
-);  ## End of Cal
-################################################################################
-## print(Cal);
