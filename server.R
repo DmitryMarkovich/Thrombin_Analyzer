@@ -46,6 +46,12 @@ shinyServer(
                 paste(">> Model not selected or data not loaded.");
             }
         })  ## End of output$cal.model
+        cal.e0 <- reactive ({
+            cal$set_e0(input$cal.e0);
+        })
+        cal.s0 <- reactive ({
+            cal$set_s0(input$cal.s0);
+        })
         output$cal.Plot <- renderPlot({ ## runs each time user changes a widget
             if (!is.null(cal.data())) {
                 ## cal$load_signal(cal.fname());
@@ -53,6 +59,7 @@ shinyServer(
                 cal$plot();
                 if (!is.null(cal.model())) {
                     print(cal.model());
+                    cal.e0(); cal.s0();
                     cal$fit_model(cal.model());
                     cal$plot_fit(cal.model());
                 }
@@ -72,13 +79,13 @@ shinyServer(
         ##         PlotSignal(e, signal.type = "Thrombogram");
         ##     }
         ## })  ## End of output$PlotThromb
-        ## output$ParCalibr <- renderDataTable({
-        ##     e$df.cal;
-        ## })  ## End of output$ParCalibr
-
-        ## output$PlotFit <- renderPlot({
-        ##     PlotFit(e);
-        ## })
+        output$cal.parms <- renderDataTable(expr = {
+            if (!is.null(cal.model())) {
+                cal.e0(); cal.s0();
+                ## print(cal$e0); print(cal$s0);
+                cal$parms_model(cal.model());
+            }
+        })  ## End of output$ParCalibr
     }  ## End of function
 )  ## End of shinyServer
 ################################################################################

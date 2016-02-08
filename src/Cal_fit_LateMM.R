@@ -63,41 +63,63 @@ Cal.get_LateMM <- function() {
 }  ## End of Cal.get_LateMM
 ################################################################################
 
-################################################################################
-LateMM <- function(x, cff) {
-    return(cff[["b"]] + cff[["p1"]] *
-               (1 - (W(cff[["p2"]] * exp(cff[["p2"]]) *
-                           exp(-cff[["p3"]] * x)) / cff[["p2"]])));
-}  ## End of LateMM
-################################################################################
+##         e0 = e0, s0 = s0, C = cff[["p1"]] / s0, K.m = s0 / cff[["p2"]],
+##         k.cat = (s0 / e0) * (cff[["p3"]] / cff[["p2"]])
 
 ################################################################################
-LateMMLinearPart <- function(x, cff) {
-    ## calculates only the linear part of the product concentration ob
-    ## Late-times MM kinetics solution
-    ## time - time vector in minutes
-    ## late.cff - coefficients for Late-times MM formula obtained from fit
-    return(cff[["b"]] + (cff[["p1"]] * cff[["p3"]] / (1 + cff[["p2"]])) * x);
-}  ## End of LateMMLinearPart
+Cal.parms_LateMM <- function() {
+    if (exists(x = "LateMM", where = fit)) {
+        p1 <- fit$LateMM$cff[["p1"]]; p2 <- fit$LateMM$cff[["p2"]];
+        p3 <- fit$LateMM$cff[["p3"]];
+        return(parms <<- data.frame(
+            Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "C"),
+            Value = c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),
+                1e3 * s0 / p2, (1e3 * s0 / e0) * (p3 / p2), p1 / (1e3 * s0)),
+            StdErr = rep(NA, 7), Units = c("nM", "uM", "nM * min / a.u.",
+                                     "nM * min / a.u.", "nM", "nM / min",
+                                     "a.u. / nM"))
+               );
+    } else {
+        warning(">> fit$LateMM does not exist!");
+    }
+}  ## End of Cal.parms_LateMM
 ################################################################################
 
-################################################################################
-LateMMCFCAT <- function(cff, e0 = 100) {
-    return(e0 * (1 + cff[["p2"]]) / (cff[["p1"]] * cff[["p3"]]));
-}  ## End of LateMMCF
-################################################################################
+## ################################################################################
+## LateMM <- function(x, cff) {
+##     return(cff[["b"]] + cff[["p1"]] *
+##                (1 - (W(cff[["p2"]] * exp(cff[["p2"]]) *
+##                            exp(-cff[["p3"]] * x)) / cff[["p2"]])));
+## }  ## End of LateMM
+## ################################################################################
 
-################################################################################
-LateMMCFDTU <- function(cff, e0 = 100) {
-    return(e0 / (cff[["p1"]] * cff[["p3"]]));
-}  ## End of LateMMCFDTU
-################################################################################
+## ################################################################################
+## LateMMLinearPart <- function(x, cff) {
+##     ## calculates only the linear part of the product concentration ob
+##     ## Late-times MM kinetics solution
+##     ## time - time vector in minutes
+##     ## late.cff - coefficients for Late-times MM formula obtained from fit
+##     return(cff[["b"]] + (cff[["p1"]] * cff[["p3"]] / (1 + cff[["p2"]])) * x);
+## }  ## End of LateMMLinearPart
+## ################################################################################
 
-################################################################################
-LateMMKinConst <- function(cff, e0 = 100, s0 = 454000) {
-    return(list(
-        e0 = e0, s0 = s0, C = cff[["p1"]] / s0, K.m = s0 / cff[["p2"]],
-        k.cat = (s0 / e0) * (cff[["p3"]] / cff[["p2"]])
-    ));
-}  ## End of LateMMKinConst
-################################################################################
+## ################################################################################
+## LateMMCFCAT <- function(cff, e0 = 100) {
+##     return(e0 * (1 + cff[["p2"]]) / (cff[["p1"]] * cff[["p3"]]));
+## }  ## End of LateMMCF
+## ################################################################################
+
+## ################################################################################
+## LateMMCFDTU <- function(cff, e0 = 100) {
+##     return(e0 / (cff[["p1"]] * cff[["p3"]]));
+## }  ## End of LateMMCFDTU
+## ################################################################################
+
+## ################################################################################
+## LateMMKinConst <- function(cff, e0 = 100, s0 = 454000) {
+##     return(list(
+##         e0 = e0, s0 = s0, C = cff[["p1"]] / s0, K.m = s0 / cff[["p2"]],
+##         k.cat = (s0 / e0) * (cff[["p3"]] / cff[["p2"]])
+##     ));
+## }  ## End of LateMMKinConst
+## ################################################################################

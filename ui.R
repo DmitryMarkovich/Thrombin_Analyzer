@@ -11,8 +11,14 @@ shinyUI(
         sidebarLayout(
             sidebarPanel = sidebarPanel(
                 fileInput(inputId = "cal.fname", accept = ("text/csv"),
-                          label = h3("Calibration data file input")
+                          label = h4("Calibration data file input")
                           ),
+                numericInput(inputId = "cal.e0",
+                             label = "Set Thrombin Calibrator concentration (nM):",
+                             value = 100, min = 1, max = 500),
+                numericInput(inputId = "cal.s0",
+                             label = "Set FluCa concentration (uM):",
+                             value = 454, min = 200, max = 500),
                 selectInput(inputId = "cal.model",
                             label = h4("Select model to fit calibration signal"), 
                             ## choices = list("LateMM" = "LateMM", "LateExp" = "LateExp",
@@ -21,7 +27,7 @@ shinyUI(
                             selected = NULL
                             ),
                 fileInput(inputId = "data.tg", accept = ("text/csv"),
-                          label = h3("Thrombin generation data file input")
+                          label = h4("Thrombin generation data file input")
                           ),
                 selectInput(inputId = "tg.model",
                             label = h4("Select model to fit thrombin generation signal"), 
@@ -48,9 +54,8 @@ shinyUI(
                              ## plotOutput(outputId = "PlotThromb")
                              ),
                     tabPanel(title = "Parameters",
-                             h1("Parameters from calibration experiment",
-                                align = "left")
-                             ## dataTableOutput(outputId = "ParCalibr")
+                             ## h1("Parameters from calibration experiment", align = "left")
+                             dataTableOutput(outputId = "cal.parms")
                              )
                 ),  ## End of tabsetPanel
                 width = 8

@@ -60,3 +60,18 @@ Cal.get_LateExp <- function() {
     }
 }  ## End of Cal.get_LateExp
 ################################################################################
+
+################################################################################
+Cal.parms_LateExp <- function() {
+    if (exists(x = "LateExp", where = fit)) {
+        ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
+        return(parms <<- data.frame(
+            Parameter = c("e0", "s0", "CF_CAT"),
+            Value = c(e0, s0, e0 / (fit$LateExp$cff[["p1"]] * fit$LateExp$cff[["p3"]])),
+            StdErr = rep(NA, 3), Units = c("nM", "uM", "nM * min / a.u."))
+               );
+    } else {
+        warning(">> fit$LateExp does not exist!");
+    }
+}  ## End of Cal.parms_LateExp
+################################################################################

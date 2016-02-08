@@ -59,6 +59,21 @@ Cal.get_EarlyMM <- function() {
 }  ## End of Cal.get_EarlyMM
 ################################################################################
 
+################################################################################
+Cal.parms_EarlyMM <- function() {
+    if (exists(x = "EarlyMM", where = fit)) {
+        ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
+        return(parms <<- data.frame(
+            Parameter = c("e0", "s0", "CF_CAT"),
+            Value = c(e0, s0, e0 / fit$EarlyMM$cff[["p1"]]),
+            StdErr = rep(NA, 3), Units = c("nM", "uM", "nM * min / a.u."))
+               );
+    } else {
+        warning(">> fit$EarlyMM does not exist!");
+    }
+}  ## End of Cal.parms_EarlyMM
+################################################################################
+
 ## EarlyMM <- function(time, early.cff) {
 ##     p.b <- early.cff[[1]]; p1 <- early.cff[[2]]; p2 <- early.cff[[3]];
 ##     early.cff[[2]] *
