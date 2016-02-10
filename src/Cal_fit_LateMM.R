@@ -1,5 +1,5 @@
 ################################################################################
-Cal.fit_LateMM <- function(silent = FALSE) {
+Cal.fit_LateMM <- function(silent = TRUE) {
     if (exists(x = "LateMM", where = fit)) {
         warning(">> No fitting: LateMM fit already exists!");
     } else {
@@ -44,7 +44,7 @@ Cal.fit_LateMM <- function(silent = FALSE) {
                 diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
             );
             if (!silent)
-                print(fit);
+                print(fit[names(fit) != "LM"]);
         }  ## End of if (is.null(ft))
     }  ## End of if (exists())
 }  ## End of Cal.fit_LateMM
@@ -68,9 +68,11 @@ Cal.get_LateMM <- function() {
 
 ################################################################################
 Cal.parms_LateMM <- function() {
+    print(">> Call to Cal.parms_LateMM");
     if (exists(x = "LateMM", where = fit)) {
         p1 <- fit$LateMM$cff[["p1"]]; p2 <- fit$LateMM$cff[["p2"]];
         p3 <- fit$LateMM$cff[["p3"]];
+        ## print(parms); str(fit$LateMM);
         return(parms <<- data.frame(
             Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "C"),
             Value = c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),

@@ -5,7 +5,7 @@ Cal.fit_model <- function(cal.model) {
            "LM" = fit_LM(),
            "EarlyMM" = fit_EarlyMM(),
            "LateExp" = fit_LateExp(),
-           "LateMM" = fit_LateMM(),
+           "LateMM" = fit_LateMM(silent = TRUE),
            { print(paste0(">> Call to unknown model", cal.model))}
            );
 }  ## End of Cal.fit_model
@@ -14,7 +14,6 @@ source("src/Cal_fit_LM.R");
 source("src/Cal_fit_EarlyMM.R");
 source("src/Cal_fit_LateExp.R");
 source("src/Cal_fit_LateMM.R");
-
 ################################################################################
 Cal.set_e0 <- function(cal.e0) {
     e0 <<- cal.e0;

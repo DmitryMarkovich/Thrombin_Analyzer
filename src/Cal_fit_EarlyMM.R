@@ -40,7 +40,7 @@ Cal.fit_EarlyMM <- function(silent = FALSE) {
                 diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
             );
             if (!silent)
-                print(fit);
+                print(fit[names(fit) != "LM"]);
         }  ## End of if (is.null(ft))
     }  ## End of if (exists())
 }  ## End of Cal.fit_EarlyMM

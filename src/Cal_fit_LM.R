@@ -1,5 +1,5 @@
 ################################################################################
-Cal.fit_LM <- function(silent = FALSE) {
+Cal.fit_LM <- function(silent = TRUE) {
     if (exists(x = "LM", where = fit)) {
         warning(">> No fitting: LM fit already exists!");
     } else {
@@ -11,7 +11,7 @@ Cal.fit_LM <- function(silent = FALSE) {
         );
         if (!silent)
             print(fit);
-        parms_LM();
+        ## parms_LM();
     }  ## End of if (exists)
 }  ## End of Cal.fit_LM
 ################################################################################
@@ -28,6 +28,7 @@ Cal.get_LM <- function() {
 
 ################################################################################
 Cal.parms_LM <- function() {
+    print(">> Call to Cal.parms_LM");
     if (exists(x = "LM", where = fit)) {
         ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
         return(parms <<- data.frame(

@@ -11,10 +11,8 @@ Cal.plot <- function() {
         graphics::plot(data, xlab = "time, min", cex.lab = 2, cex.axis = 2,
                        ylab = "Fluorescence, a.u.", pch = 16, type = "b",
                        main = paste0("Calibration signal"));
-        legend("bottom", leg = signif(num.smry$rat$x, 3), cex = 1, seg.len = 0,
-               bty = "y", pch = NA);
-        legend("top", leg = signif(num.smry$rat$y, 3), cex = 1, seg.len = 0,
-               bty = "y", pch = NA);
+        mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1);
+        mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1);
     } else {
         warning(">> Cal$data == NULL!");
     }

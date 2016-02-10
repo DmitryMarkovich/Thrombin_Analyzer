@@ -15,25 +15,22 @@ shinyUI(
                           ),
                 numericInput(inputId = "cal.e0",
                              label = "Set Thrombin Calibrator concentration (nM):",
-                             value = 100, min = 1, max = 500),
+                             value = 100, min = 0, max = Inf),
                 numericInput(inputId = "cal.s0",
                              label = "Set FluCa concentration (uM):",
-                             value = 454, min = 200, max = 500),
+                             value = 454, min = 0, max = Inf),
                 selectInput(inputId = "cal.model",
                             label = h4("Select model to fit calibration signal"), 
-                            ## choices = list("LateMM" = "LateMM", "LateExp" = "LateExp",
-                            ##     "EarlyMM" = "EarlyMM", "LM" = "LM", "Auto" = "Auto"),
-                            choices = c("LateMM", "LateExp", "EarlyMM", "LM", "Auto"),
-                            selected = NULL
+                            choices = c("LateMM", "LateExp", "EarlyMM", "LM"),  ## Auto
+                            selected = "LateMM"
                             ),
-                fileInput(inputId = "data.tg", accept = ("text/csv"),
+                fileInput(inputId = "tg.fname", accept = ("text/csv"),
                           label = h4("Thrombin generation data file input")
                           ),
                 selectInput(inputId = "tg.model",
                             label = h4("Select model to fit thrombin generation signal"), 
-                            choices = list("T0GammaInt" = 1, "GammaInt" = 2,
-                                "2T0GammaInt" = 3, "T0Gamma", "Auto" = 4),
-                            selected = 1),
+                            choices = c("T0GammaInt", "T0Gamma"), ## Auto
+                            selected = "T0GammaInt"),
                 width = 4
             ),
             mainPanel = mainPanel(
@@ -42,20 +39,19 @@ shinyUI(
                     tabPanel(title = "Calibration signal",
                              ## h1("Plot of calibration signal", align = "left")
                              plotOutput(outputId = "cal.Plot"),
-                             textOutput(outputId = "cal.model")
-                             ## plotOutput(outputId = "PlotFit")
+                             htmlOutput(outputId = "cal.model")
                              ),
-                    tabPanel(title = "Thrombin generation signal"
+                    tabPanel(title = "Thrombin generation signal",
                              ## h1("Plot of thrombin generation signal", align = "left")
-                             ## plotOutput(outputId = "PlotTG")
+                             plotOutput(outputId = "tg.Plot")
                              ),
-                    tabPanel(title = "Thrombogram"
+                    tabPanel(title = "Thrombogram",
                              ## h1("Plot of thrombin generation signal", align = "left")
-                             ## plotOutput(outputId = "PlotThromb")
+                             plotOutput(outputId = "tg.PlotDrv1")
                              ),
                     tabPanel(title = "Parameters",
                              ## h1("Parameters from calibration experiment", align = "left")
-                             dataTableOutput(outputId = "cal.parms")
+                             dataTableOutput(outputId = "cal.ShowParms")
                              )
                 ),  ## End of tabsetPanel
                 width = 8
