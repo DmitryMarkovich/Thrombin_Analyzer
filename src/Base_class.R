@@ -20,12 +20,15 @@ Base.explore_numerically <- function(n = 3) {
         drv1[1:(N - 3)] = (1 / (4 * dt)) * (
             -data$y[1:(N - 3)] -data$y[2:(N - 2)] + data$y[3:(N - 1)] +
                 data$y[4:N]);
+        drv2 <- rep(NA, N);
+        drv2[1:(N - 4)] = (1 / (4 * dt ^ 2)) * (
+            data$y[1:(N - 4)] -2 * data$y[3:(N - 2)] + data$y[5:N]);
         cutoff <- median(drv1, na.rm = TRUE);
         t.peak <- data$x[drv1 == max(drv1, na.rm = TRUE)][1];
         t.lin <- data$x[sum(drv1 >= cutoff, na.rm = TRUE)];
         rat <- list(x = data$x[N] / t.peak, y = ampl / min(data$y));
-        num.smry <<- list(rat = rat, t.peak = t.peak, t.lin = t.lin,
-                          ampl = ampl, cutoff = cutoff, drv1 = drv1);
+        num.smry <<- list(rat = rat, t.peak = t.peak, t.lin = t.lin, ampl = ampl,
+                          cutoff = cutoff, drv1 = drv1, drv2 = drv2);
     } else {
         warning(">> num.smry not changed: data == NULL or num.smry not empty.");
     }

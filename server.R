@@ -21,6 +21,7 @@ shinyServer(
                 cal$clear();
                 cal$load_signal(cal.fname());
                 cal$explore_numerically();
+                ## cal.model(); cal.model.fit();  TODO fix fitting with chosen model when a new file is loaded
                 return(0);
             }
         })  ## End of cal.data
@@ -28,25 +29,28 @@ shinyServer(
             print(paste0(">> cal.model is ", input$cal.model));
             return(input$cal.model);
         })  ## End of cal.model
+        cal.model.fit <- reactive(x = {
+            if (!is.null(cal.model()) && cal.model() != "None") {
+                cal$fit_model(cal.model());
+                return(0);
+            } else {
+                return(NULL);
+            }
+        })  ## End of cal.model.fit
         output$cal.Plot <- renderPlot(expr = { ## runs each time user changes a widget
             if (!is.null(cal.data())) {  ## data is now loaded
                 cal$plot();
-                if (!is.null(cal.model())) {  ## model is now chosen
-                    ## print(cal.model());
-                    ## cal.e0(); cal.s0();
-                    cal$fit_model(cal.model());
+                if (!is.null(cal.model.fit()))
                     cal$plot_fit(cal.model());
-                }
             }
         })  ## End of output$cal.Plot
         output$cal.model <- renderUI(expr = {
-            if (!is.null(cal.model()) && !is.null(cal.data())) {
+            if (!is.null(cal.model()) && cal.model() != "None" && !is.null(cal.data())) {
                 paste0(cal.model(), " selected to fit calibration data ",
-                       cal.fname()$name); ##exists(x = cal.model(), where = cal$fit)
-                if (exists(x = cal.model(), where = cal$fit)) {
-                ##     paste0(cal.model(), "fit also exists");
-                x <- GetSummary(cal$fit[[cal.model()]]$smry);
-                HTML(paste(x, collapse = '<br/>'));
+                       cal.fname()$name);
+                if (!is.null(cal.model.fit()) && exists(x = cal.model(), where = cal$fit)) {
+                    x <- GetSummary(cal$fit[[cal.model()]]$smry);
+                    HTML(paste(x, collapse = '<br/>'));
                 }
             } else {
                 paste(">> Model not selected or data not loaded.");
@@ -70,15 +74,30 @@ shinyServer(
                 return(0);
             }
         })  ## End of tg.data
+        tg.model <- reactive(x = {
+            print(paste0(">> tg.model is ", input$tg.model));
+            return(input$tg.model);
+        })  ## End of tg.model
+        tg.model.fit <- reactive(x = {
+            if (!is.null(tg.model()) && tg.model() != "None") {
+                tg$fit_model(tg.model());
+                return(0);
+            } else {
+                return(NULL);
+            }
+        })  ## End of tg.model.fit
         output$tg.Plot <- renderPlot(expr = { ## runs each time user changes a widget
             if (!is.null(tg.data())) {  ## data is now loaded
                 tg$plot();
+                if (!is.null(tg.model.fit()))
+                    tg$plot_fit(tg.model());
             }
         })  ## End of output$tg.Plot
 ######################################## Thrombogram tab
-        output$tg.PlotDrv1 <- renderPlot(expr = { ## runs each time user changes a widget 
+        output$tg.PlotDrv1 <- renderPlot(expr = { ## runs each time user changes a widget
             if (!is.null(tg.data()) && length(tg$num.smry) != 0) {
-                tg$plot_drv1();
+                par(mfrow = c(1, 2));
+                tg$plot_drv1(); tg$plot_drv2();
             }
         })  ## End of output$PlotThromb
 ######################################## Parameters tab

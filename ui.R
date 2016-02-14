@@ -21,16 +21,17 @@ shinyUI(
                              value = 454, min = 0, max = Inf),
                 selectInput(inputId = "cal.model",
                             label = h4("Select model to fit calibration signal"), 
-                            choices = c("LateMM", "LateExp", "EarlyMM", "LM"),  ## Auto
-                            selected = "LateMM"
+                            choices = c("LateMM", "LateExp", "EarlyMM", "LM",
+                                "None"),  ## Auto
+                            selected = "None"
                             ),
                 fileInput(inputId = "tg.fname", accept = ("text/csv"),
                           label = h4("Thrombin generation data file input")
                           ),
                 selectInput(inputId = "tg.model",
                             label = h4("Select model to fit thrombin generation signal"), 
-                            choices = c("T0GammaInt", "T0Gamma"), ## Auto
-                            selected = "T0GammaInt"),
+                            choices = c("T0GammaInt", "T0Gamma", "Gamma", "None"), ## Auto
+                            selected = "None"),
                 width = 4
             ),
             mainPanel = mainPanel(
