@@ -1,5 +1,5 @@
 ################################################################################
-Gamma <- function(x, cff) {
+T0Gamma <- function(x, cff) {
     return(cff[["b"]] + cff[["A"]] *
                pgamma(q = x, shape = cff[["k"]], scale = cff[["theta"]]));
 }  ## End of Gamma()
@@ -68,23 +68,33 @@ PreFitGamma <- function(data, num.smry = NA, silent = TRUE) {
 ################################################################################
 
 ################################################################################
-TG.fit_Gamma <- function(silent = TRUE) {
+TG.fit_T0Gamma <- function(silent = TRUE) {
 ################################################################################
-    if (exists(x = "Gamma", where = fit)) {
-        warning(">> No fitting: Gamma fit already exists!");
+    if (exists(x = "T0Gamma", where = fit)) {
+        warning(">> No fitting: T0Gamma fit already exists!");
     } else {
-        ft <- NULL; start.list <- list(b = data$y[1], A = 0.5 * num.smry$ampl,
-                                       k = 3, theta = num.smry$t.peak / 2);
-        n.try <- 1;
+        if (exists(x = "Gamma", where = fit)) {
+            ## use existing Gamma fit for estimates of all parameters except t0
+            start.list <- list(b = fit$Gamma$cff[["b"]], A = fit$Gamma$cff[["A"]],
+                               k = fit$Gamma$cff[["k"]], theta = fit$Gamma$cff[["theta"]],
+                               t0 = 0);
+        } else {
+            ## call fit_Gamma for estimate all parameters except t0
+            fit_Gamma(silent = TRUE);
+            start.list <- list(b = fit$Gamma$cff[["b"]], A = fit$Gamma$cff[["A"]],
+                               k = fit$Gamma$cff[["k"]], theta = fit$Gamma$cff[["theta"]],
+                               t0 = 0);
+        }
+        ft <- NULL; n.try <- 1;
         while (is.null(ft) && n.try <= N.tries) {
             try(expr = {
                 ft <- nlsLM(
-                    y ~ b + A * pgamma(q = x, shape = k, scale = theta),
+                    y ~ b + A * pgamma(q = x - t0, shape = k, scale = theta),
                     data = data, start = start.list, trace = F,
-                    ## lower = c(b.min, A.min, k.min, theta.min),
-                    ## upper = c(b.max, A.max, k.max, theta.max),
-                    lower = c(  0,   0,   1,   0),
-                    upper = c(Inf, Inf, Inf, Inf),
+                    ## lower = c(b.min, A.min, k.min, theta.min, t0.min),
+                    ## upper = c(b.max, A.max, k.max, theta.max, t0.max),
+                    lower = c(  0,   0, 1.5,   0,   0),
+                    upper = c(Inf, Inf, Inf, Inf, Inf),
                     algorithm = "LM",
                     control = nls.lm.control(
                         ftol = sqrt(.Machine$double.eps),
@@ -96,12 +106,13 @@ TG.fit_Gamma <- function(silent = TRUE) {
             }, silent = FALSE);
             n.try <- n.try + 1;
             start.list <- list(b = data[[2]][1], A = runif(1) * num.smry$ampl,
-                               k = runif(1, 1, 10), theta = runif(1, 1, 30));
+                               k = runif(1, 1, 10), theta = runif(1, 1, 30),
+                               t0 = 0);
         }
         if (is.null(ft)) {
-            warning(">> fit_Gamma resulted in NULL!");
+            warning(">> fit_T0Gamma resulted in NULL!");
         } else {
-            fit$Gamma <<- list(
+            fit$T0Gamma <<- list(
                 cff = coef(ft), smry = summary(ft),
                 diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
             );
@@ -110,36 +121,38 @@ TG.fit_Gamma <- function(silent = TRUE) {
         }  ## End of if is.null(fit)
     }  ## End of if exists()
 ################################################################################
-}  ## End of TG_fitGamma
+}  ## End of TG_fitT0Gamma
 ################################################################################
 
 ################################################################################
-TG.get_Gamma <- function() {
-    if (exists(x = "Gamma", where = fit)) {
-        return(fit$Gamma$cff[[1]] + fit$Gamma$cff[[2]] *
-                   pgamma(q = data$x, shape = fit$Gamma$cff[[3]],
-                          scale = fit$Gamma$cff[[4]]));
+TG.get_T0Gamma <- function() {
+    if (exists(x = "T0Gamma", where = fit)) {
+        return(fit$T0Gamma$cff[[1]] + fit$T0Gamma$cff[[2]] *
+                   pgamma(q = data$x - fit$T0Gamma$cff[["t0"]],
+                          shape = fit$T0Gamma$cff[[3]],
+                          scale = fit$T0Gamma$cff[[4]]));
     } else {
-        warning(">> fit$Gamma does not exist!");
+        warning(">> fit$T0Gamma does not exist!");
     }
-}  ## End of TG_get_Gamma
+}  ## End of TG_get_T0Gamma
 ################################################################################
 
 ################################################################################
-TG.parms_Gamma <- function() {
-    print(">> Call to TG.parms_Gamma");
-    if (exists(x = "Gamma", where = fit)) {
+TG.parms_T0Gamma <- function() {
+    print(">> Call to TG.parms_T0Gamma");
+    if (exists(x = "T0Gamma", where = fit)) {
         ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
         return(parms <<- data.frame(
             Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
-            Value = c(fit$Gamma$cff[[1]], fit$Gamma$cff[[1]],
-                fit$Gamma$cff[[3]] * (fit$Gamma$cff[[2]] - 1),
-                      fit$Gamma$cff[[2]], 0),
+            Value = c(fit$T0Gamma$cff[[1]], fit$T0Gamma$cff[[1]],
+                fit$T0Gamma$cff[["t0"]] +
+                    fit$T0Gamma$cff[[3]] * (fit$T0Gamma$cff[[2]] - 1),
+                fit$T0Gamma$cff[[2]], fit$T0Gamma$cff[["t0"]]),
             StdErr = rep(NA, 5),
             Units = c("nM * min", "nM", "min", "nM / min", "min"))
                );
     } else {
-        warning(">> fit$Gamma does not exist!");
+        warning(">> fit$T0Gamma does not exist!");
     }
-}  ## End of TG.parms_LM
+}  ## End of TG.parms_T0Gamma
 ################################################################################

@@ -48,32 +48,6 @@ TG.plot_drv2 <- function() {
 ################################################################################
 
 ################################################################################
-TG.get_model <- function(tg.model) {
-    switch(tg.model,
-           "Gamma" = {
-               ## print(">> TGl to TG.fit_LM")
-               get_Gamma()
-           },
-           ## "EarlyMM" = {
-           ##     ## print(">> Call to TG.get_EarlyMM")
-           ##     get_EarlyMM();
-           ## },
-           ## "LateExp" = {
-           ##     ## print(">> Call to TG.get_LateExp")
-           ##     get_LateExp()
-           ## },
-           ## "LateMM" = {
-           ##     ## print(">> Call to TG.get_LateMM")
-           ##     get_LateMM()
-           ## },
-           {
-               print(paste0(">> Call to unknown get_model", tg.model));
-           }
-           );
-}  ## End of TG.get_model
-################################################################################
-
-################################################################################
 TG.plot_fit <- function(tg.model) {
     plot();
     lines(data$x, get_model(tg.model), col = "red", lwd = 2);

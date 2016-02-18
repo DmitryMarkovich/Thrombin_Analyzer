@@ -30,7 +30,8 @@ shinyUI(
                           ),
                 selectInput(inputId = "tg.model",
                             label = h4("Select model to fit thrombin generation signal"), 
-                            choices = c("T0GammaInt", "T0Gamma", "Gamma", "None"), ## Auto
+                            choices = c("T0GammaInt", "GammaInt", "T0Gamma",
+                                "Gamma", "None"), ## Auto
                             selected = "None"),
                 width = 4
             ),
