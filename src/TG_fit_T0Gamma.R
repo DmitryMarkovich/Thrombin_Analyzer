@@ -138,6 +138,29 @@ TG.get_T0Gamma <- function() {
 ################################################################################
 
 ################################################################################
+TG.get_T0Gamma_thrombin_int <- function() {
+    if (exists(x = "T0Gamma", where = fit)) {
+        return(fit$T0Gamma$cff[[2]] *
+                   pgamma(q = data$x - fit$T0Gamma$cff[["t0"]],
+                          shape = fit$T0Gamma$cff[[3]],
+                          scale = fit$T0Gamma$cff[[4]]));
+    } else {
+        warning(">> fit$T0Gamma does not exist!");
+    }
+}  ## End of TG_get_T0Gamma
+################################################################################
+
+################################################################################
+TG.get_T0Gamma_A2mT_int <- function() {
+    if (exists(x = "T0Gamma", where = fit)) {
+        return(rep(0, length(data$x)));
+    } else {
+        warning(">> fit$T0Gamma does not exist!");
+    }
+}  ## End of TG_get_T0Gamma
+################################################################################
+
+################################################################################
 TG.parms_T0Gamma <- function() {
     print(">> Call to TG.parms_T0Gamma");
     if (exists(x = "T0Gamma", where = fit)) {

@@ -74,6 +74,34 @@ TG.get_GammaInt <- function() {
 ################################################################################
 
 ################################################################################
+TG.get_GammaInt_thrombin_int <- function() {
+    if (exists(x = "GammaInt", where = fit)) {
+        A <- fit$GammaInt$cff[["A"]]; k <- fit$GammaInt$cff[["k"]];
+        theta <- fit$GammaInt$cff[["theta"]];
+        return(A * pgamma(q = data$x, shape = k, scale = theta));
+    } else {
+        warning(">> fit$GammaInt does not exist!");
+    }
+}  ## End of TG_get_GammaInt
+################################################################################
+
+################################################################################
+TG.get_GammaInt_A2mT_int <- function() {
+    if (exists(x = "GammaInt", where = fit)) {
+        A <- fit$GammaInt$cff[["A"]]; k <- fit$GammaInt$cff[["k"]];
+        theta <- fit$GammaInt$cff[["theta"]]; k.a2m <- fit$GammaInt$cff[["k.a2m"]];
+        return((A * k.a2m / gamma(k)) * (
+            gamma(k) *
+                pgamma(q = data$x, shape = k, scale = theta) * data$x -
+                    gamma(k + 1) * theta *
+                        pgamma(q = data$x, shape = k + 1, scale = theta)));
+    } else {
+        warning(">> fit$GammaInt does not exist!");
+    }
+}  ## End of TG_get_GammaInt
+################################################################################
+
+################################################################################
 TG.parms_GammaInt <- function() {
     print(">> Call to TG.parms_GammaInt");
     if (exists(x = "GammaInt", where = fit)) {

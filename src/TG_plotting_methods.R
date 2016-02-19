@@ -10,7 +10,8 @@ TG.plot <- function() {
     if (length(data) != 0) {
         graphics::plot(data, xlab = "time, min", cex.lab = 2, cex.axis = 2,
                        ylab = "Fluorescence, a.u.", pch = 16, type = "b",
-                       main = paste0("Thrombin generation signal"));
+                       main = paste0("Thrombin generation signal"),
+                       ylim = c(0, max(data$y)));
         mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1);
         mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1);
     } else {
@@ -51,5 +52,13 @@ TG.plot_drv2 <- function() {
 TG.plot_fit <- function(tg.model) {
     plot();
     lines(data$x, get_model(tg.model), col = "red", lwd = 2);
+    lines(data$x, get_thrombin_int(tg.model), col = "blue", lwd = 2);
+    lines(data$x, get_A2mT_int(tg.model), col = "cyan", lwd = 2);
+    legend("topleft",
+           legend = c("Raw data", paste0(tg.model, " fit"), "Thrombin Integral",
+               expression(paste(alpha[2], "M-T integral"))),
+           pch = c(16, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
+           col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
+           cex = 1.25);
 }  ## End of TG.plot_fit
 ################################################################################

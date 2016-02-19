@@ -30,7 +30,8 @@ shinyUI(
                           ),
                 selectInput(inputId = "tg.model",
                             label = h4("Select model to fit thrombin generation signal"), 
-                            choices = c("T0GammaInt", "GammaInt", "T0Gamma",
+                            choices = c("LateExpT0GammaInt", "LateExpGammaInt",
+                                "T0GammaInt", "GammaInt", "T0Gamma",
                                 "Gamma", "None"), ## Auto
                             selected = "None"),
                 width = 4
@@ -45,7 +46,8 @@ shinyUI(
                              ),
                     tabPanel(title = "Thrombin generation signal",
                              ## h1("Plot of thrombin generation signal", align = "left")
-                             plotOutput(outputId = "tg.Plot")
+                             plotOutput(outputId = "tg.Plot"),
+                             htmlOutput(outputId = "tg.model")
                              ),
                     tabPanel(title = "Thrombogram",
                              ## h1("Plot of thrombin generation signal", align = "left")

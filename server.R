@@ -93,6 +93,18 @@ shinyServer(
                     tg$plot_fit(tg.model());
             }
         })  ## End of output$tg.Plot
+        output$tg.model <- renderUI(expr = {
+            if (!is.null(tg.model()) && tg.model() != "None" && !is.null(tg.data())) {
+                paste0(tg.model(), " selected to fit thrombin generation data ",
+                       tg.fname()$name);
+                if (!is.null(tg.model.fit()) && exists(x = tg.model(), where = tg$fit)) {
+                    x <- GetSummary(tg$fit[[tg.model()]]$smry);
+                    HTML(paste(x, collapse = '<br/>'));
+                }
+            } else {
+                paste(">> Model not selected or data not loaded.");
+            }
+        })  ## End of output$tg.model
 ######################################## Thrombogram tab
         output$tg.PlotDrv1 <- renderPlot(expr = { ## runs each time user changes a widget
             if (!is.null(tg.data()) && length(tg$num.smry) != 0) {

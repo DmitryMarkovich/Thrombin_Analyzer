@@ -86,6 +86,35 @@ TG.get_T0GammaInt <- function() {
 ################################################################################
 
 ################################################################################
+TG.get_T0GammaInt_thrombin_int <- function() {
+    if (exists(x = "T0GammaInt", where = fit)) {
+        A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
+        theta <- fit$T0GammaInt$cff[["theta"]]; t0 <- fit$T0GammaInt$cff[["t0"]];
+        return(A * pgamma(q = data$x - t0, shape = k, scale = theta));
+    } else {
+        warning(">> fit$T0GammaInt does not exist!");
+    }
+}  ## End of TG_get_T0GammaInt_thrombin_int
+################################################################################
+
+################################################################################
+TG.get_T0GammaInt_A2mT_int <- function() {
+    if (exists(x = "T0GammaInt", where = fit)) {
+        A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
+        theta <- fit$T0GammaInt$cff[["theta"]];
+        k.a2m <- fit$T0GammaInt$cff[["k.a2m"]]; t0 <- fit$T0GammaInt$cff[["t0"]];
+        return((A * k.a2m / gamma(k)) * (
+            gamma(k) *
+                pgamma(q = data$x - t0, shape = k, scale = theta) * (data$x - t0) -
+                    gamma(k + 1) * theta *
+                        pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
+    } else {
+        warning(">> fit$T0GammaInt does not exist!");
+    }
+}  ## End of TG_get_T0GammaInt_A2mT_int
+################################################################################
+
+################################################################################
 TG.parms_T0GammaInt <- function() {
     print(">> Call to TG.parms_T0GammaInt");
     if (exists(x = "T0GammaInt", where = fit)) {
