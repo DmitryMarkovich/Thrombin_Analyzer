@@ -5,8 +5,6 @@ source("src/common_functions.R");
 source("src/Base_class.R");
 source("src/Cal_class.R");
 source("src/TG_class.R");
-## source("src/plotting_functions.R");
-## source("src/numerical_derivatives.R");
 ## code here runs once when app is launched
 cal <- Cal$new(); tg <- TG$new();
 ################################################################################
@@ -107,10 +105,14 @@ shinyServer(
         })  ## End of output$tg.model
 ######################################## Thrombogram tab
         output$tg.PlotDrv1 <- renderPlot(expr = { ## runs each time user changes a widget
-            if (!is.null(tg.data()) && length(tg$num.smry) != 0) {
-                par(mfrow = c(1, 2));
-                tg$plot_drv1(); tg$plot_drv2();
-            }
+                if (!is.null(tg.data()) && length(tg$num.smry) != 0) {
+                    par(mfrow = c(1, 2));
+                    tg$plot_drv1(); tg$plot_drv2();
+                    if (!is.null(tg.model.fit())) {
+                        par(mfrow = c(1, 2));
+                        tg$plot_thrombogram(tg.model()); tg$plot_drv2();
+                    }
+                }
         })  ## End of output$PlotThromb
 ######################################## Parameters tab
         output$cal.ShowParms <- renderDataTable(expr = {

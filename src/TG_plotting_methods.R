@@ -62,3 +62,19 @@ TG.plot_fit <- function(tg.model) {
            cex = 1.25);
 }  ## End of TG.plot_fit
 ################################################################################
+
+################################################################################
+TG.plot_thrombogram <- function(tg.model) {
+    plot_drv1();
+    lines(data$x, get_thrombin(tg.model), col = "blue", lwd = 2);
+    lines(data$x, get_A2mT(tg.model), col = "cyan", lwd = 2);
+    ## lines(data$x, get_thrombin_int(tg.model), col = "blue", lwd = 2);
+    ## lines(data$x, get_A2mT_int(tg.model), col = "cyan", lwd = 2);
+    ## legend("topleft",
+    ##        legend = c("Raw data", paste0(tg.model, " fit"), "Thrombin Integral",
+    ##            expression(paste(alpha[2], "M-T integral"))),
+    ##        pch = c(16, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
+    ##        col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
+    ##        cex = 1.25);
+}  ## End of TG.plot_thrombogram
+################################################################################
