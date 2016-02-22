@@ -5,7 +5,8 @@ Base.load_signal <- function(inFile) {
     switch(sub(pattern = ".*[.]", "", inFile$name),
            "dat" = {
                data <<- read.table(file = inFile$datapath, header = TRUE,
-                                   col.names = c("x", "y"), sep = " ")
+                                   col.names = c("x", "y"), sep = " ");
+               data <<- data[complete.cases(data), ];
            }
            )
 }  ## End of Base.LoadSignal

@@ -111,7 +111,7 @@ shinyServer(
                     if (!is.null(tg.model.fit())) {
                         par(mfrow = c(1, 2));
                         tg$plot_thrombogram(tg.model());
-                        tg$plot_velocity(tg.model());
+                        ## tg$plot_velocity(tg.model());
                     }
                 }
         })  ## End of output$PlotThromb
