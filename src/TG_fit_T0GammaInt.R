@@ -35,7 +35,7 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
                     data = data, start = start.list, trace = F,
                     ## lower = c(b.min, A.min, k.min, theta.min),
                     ## upper = c(b.max, A.max, k.max, theta.max),
-                    lower = c(  0,   0, 1.75,   0,   0,   0),
+                    lower = c(  0,   0, 1.5,   0,   0,   0),
                     upper = c(Inf, Inf, Inf, Inf, Inf, Inf),
                     algorithm = "LM",
                     control = nls.lm.control(
@@ -115,18 +115,43 @@ TG.get_T0GammaInt_A2mT_int <- function() {
 ################################################################################
 
 ################################################################################
-TG.parms_T0GammaInt <- function() {
+TG.parms_T0GammaInt <- function(cal.CF) {
     print(">> Call to TG.parms_T0GammaInt");
     if (exists(x = "T0GammaInt", where = fit)) {
-        ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
-        return(parms <<- data.frame(
-            Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
-            Value = c(fit$T0GammaInt$cff[[1]], fit$T0GammaInt$cff[[1]],
-                fit$T0GammaInt$cff[[3]] * (fit$T0GammaInt$cff[[2]] - 1),
-                      fit$T0GammaInt$cff[[2]], 0),
-            StdErr = rep(NA, 5),
-            Units = c("nM * min", "nM", "min", "nM / min", "min"))
-               );
+        A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
+        theta <- fit$T0GammaInt$cff[["theta"]];
+        if (k > 2) {
+            v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
+                exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
+        } else {
+            v <- max(num.smry$drv2, na.rm = TRUE);
+        }
+        if (cal.CF != 1) {
+            CF <- cal.CF;
+            return(parms <<- data.frame(
+                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Value = c(
+                    CF * A,
+                    CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
+                    theta * (k - 1),
+                    CF * v,
+                    fit$T0GammaInt$cff[["t0"]]),
+                StdErr = rep(NA, 5),
+                Units = c("nM * min", "nM", "min", "nM / min", "min"))
+                   );
+        } else {
+            return(parms <<- data.frame(
+                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Value = c(
+                    A,
+                    A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
+                    theta * (k - 1),
+                    v,
+                    fit$T0GammaInt$cff[["t0"]]),
+                StdErr = rep(NA, 5),
+                Units = c("a.u.", "a.u. / min", "min", "a.u. / min * min", "min"))
+                   );
+        }
     } else {
         warning(">> fit$T0GammaInt does not exist!");
     }

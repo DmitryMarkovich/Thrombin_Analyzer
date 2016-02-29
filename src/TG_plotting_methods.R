@@ -59,7 +59,7 @@ TG.plot_fit <- function(tg.model) {
     lines(data$x, get_A2mT_int(tg.model), col = "cyan", lwd = 2);
     lines(data$x, get_model(tg.model), col = "red", lwd = 2);
     lines(data$x, get_thrombin_int(tg.model), col = "blue", lwd = 2);
-    legend("bottomright",
+    legend("topleft",
            legend = c("Raw data", paste0(tg.model, " fit"), "Thrombin Integral",
                expression(paste(alpha[2], "M-T integral"))),
            pch = c(16, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,

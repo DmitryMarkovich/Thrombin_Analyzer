@@ -19,6 +19,9 @@ shinyUI(
                 numericInput(inputId = "cal.s0",
                              label = "Set FluCa concentration (uM):",
                              value = 454, min = 0, max = Inf),
+                numericInput(inputId = "cal.CF",
+                             label = "Set calibration factor value (nM * min / a.u.):",
+                             value = 1, min = 0, max = Inf),
                 selectInput(inputId = "cal.model",
                             label = h4("Select model to fit calibration signal"), 
                             choices = c("LateMM", "LateExp", "EarlyMM", "LM",
@@ -55,7 +58,8 @@ shinyUI(
                              ),
                     tabPanel(title = "Parameters",
                              ## h1("Parameters from calibration experiment", align = "left")
-                             dataTableOutput(outputId = "cal.ShowParms")
+                             dataTableOutput(outputId = "cal.ShowParms"),
+                             dataTableOutput(outputId = "tg.ShowParms")
                              )
                 ),  ## End of tabsetPanel
                 width = 8

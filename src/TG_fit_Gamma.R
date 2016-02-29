@@ -79,18 +79,39 @@ TG.get_Gamma_A2mT_int <- function() {
 ################################################################################
 
 ################################################################################
-TG.parms_Gamma <- function() {
+TG.parms_Gamma <- function(cal.model) {
     print(">> Call to TG.parms_Gamma");
     if (exists(x = "Gamma", where = fit)) {
-        ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
-        return(parms <<- data.frame(
-            Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
-            Value = c(fit$Gamma$cff[[1]], fit$Gamma$cff[[1]],
-                fit$Gamma$cff[[3]] * (fit$Gamma$cff[[2]] - 1),
-                      fit$Gamma$cff[[2]], 0),
-            StdErr = rep(NA, 5),
-            Units = c("nM * min", "nM", "min", "nM / min", "min"))
-               );
+        A <- fit$Gamma$cff[["A"]]; k <- fit$Gamma$cff[["k"]];
+        theta <- fit$Gamma$cff[["theta"]];
+        if (!is.null(cal.model) && cal.model != "None") {
+            CF <- cal$parms$Parameter[["CF_DTU"]];
+            return(parms <<- data.frame(
+                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Value = c(
+                    CF * A,
+                    CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
+                    theta * (k - 1),
+                    CF * A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
+                        exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2),
+                    0),
+                StdErr = rep(NA, 5),
+                Units = c("nM * min", "nM", "min", "nM / min", "min"))
+                   );
+        } else {
+            return(parms <<- data.frame(
+                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Value = c(
+                    A,
+                    A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
+                    theta * (k - 1),
+                    A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
+                        exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2),
+                    0),
+                StdErr = rep(NA, 5),
+                Units = c("a.u.", "a.u. / min", "min", "a.u. / min^2", "min"))
+                   );
+        }
     } else {
         warning(">> fit$Gamma does not exist!");
     }

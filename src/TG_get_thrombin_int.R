@@ -45,7 +45,8 @@ TG.get_thrombin_int <- function(tg.model) {
                if (exists(x = "LateExpGammaInt", where = fit)) {
                    A <- fit$LateExpGammaInt$cff[["A"]]; k <- fit$LateExpGammaInt$cff[["k"]];
                    theta <- fit$LateExpGammaInt$cff[["theta"]]; p1 <- fit$LateExpGammaInt$cff[["p1"]];
-                   return(p1 * (1 - exp(-A * pgamma(q = data$x, shape = k, scale = theta))));
+                   ## return(p1 * (1 - exp(-A * pgamma(q = data$x, shape = k, scale = theta))));
+                   return(p1 * A * pgamma(q = data$x, shape = k, scale = theta));
                } else {
                    warning(">> fit$LateExpGammaInt does not exist!");
                    return(rep(0, length(data$x)));
@@ -56,7 +57,8 @@ TG.get_thrombin_int <- function(tg.model) {
                    A <- fit$LateExpT0GammaInt$cff[["A"]]; k <- fit$LateExpT0GammaInt$cff[["k"]];
                    theta <- fit$LateExpT0GammaInt$cff[["theta"]]; p1 <- fit$LateExpT0GammaInt$cff[["p1"]];
                    t0 <- fit$LateExpT0GammaInt$cff[["t0"]];
-                   return(p1 * (1 - exp(-A * pgamma(q = data$x - t0, shape = k, scale = theta))));
+                   ## return(p1 * (1 - exp(-A * pgamma(q = data$x - t0, shape = k, scale = theta))));
+                   return(p1 * A * pgamma(q = data$x - t0, shape = k, scale = theta))
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
                    return(rep(0, length(data$x)));

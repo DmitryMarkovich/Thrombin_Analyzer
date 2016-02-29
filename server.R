@@ -12,7 +12,7 @@ shinyServer(
     func = function(input, output) { ## runs each time a user visits the app
 ######################################## Calibration signal tab
         cal.fname <- reactive(x = {
-            return(input$cal.fname);
+          return(input$cal.fname);
         })  ## End of cal.fname
         cal.data <- reactive(x = {
             if (!is.null(cal.fname())) {
@@ -59,6 +59,9 @@ shinyServer(
         })
         cal.s0 <- reactive(x = {
             cal$set_s0(input$cal.s0);
+        })
+        cal.CF <- reactive({
+            return(input$cal.CF);
         })
 ######################################## Thrombin generation signal tab
         tg.fname <- reactive(x = {
@@ -111,7 +114,7 @@ shinyServer(
                     if (!is.null(tg.model.fit())) {
                         par(mfrow = c(1, 2));
                         tg$plot_thrombogram(tg.model());
-                        ## tg$plot_velocity(tg.model());
+                        tg$plot_velocity(tg.model());
                     }
                 }
         })  ## End of output$PlotThromb
@@ -125,6 +128,13 @@ shinyServer(
                 NULL;
             }
         })  ## End of output$cal.ShowParms
+        output$tg.ShowParms <- renderDataTable(expr = {
+            if (!is.null(tg.model()) && exists(x = tg.model(), where = tg$fit)) {
+                tg$parms_model(tg.model(), cal.CF());
+            } else {
+                NULL;
+            }
+        })  ## End of output$tg.ShowParms
     }  ## End of function
 )  ## End of shinyServer
 ################################################################################
