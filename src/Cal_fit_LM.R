@@ -11,6 +11,7 @@ Cal.fit_LM <- function(silent = TRUE) {
         );
         if (!silent)
             print(fit);
+        return(fit$LM);
         ## parms_LM();
     }  ## End of if (exists)
 }  ## End of Cal.fit_LM

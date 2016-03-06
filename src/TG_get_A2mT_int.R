@@ -74,11 +74,19 @@ TG.get_A2mT_int <- function(tg.model) {
                    ##                 pgamma(q = data$x - t0, shape = k + 1, scale = theta)))));
                    return(p1 * (A * k.a2m / gamma(k)) * (
                        gamma(k) *
-                           pgamma(q = data$x - t0, shape = k, scale = theta) * (data$x) -
+                           pgamma(q = data$x - t0, shape = k, scale = theta) * (data$x - t0) -
                                gamma(k + 1) * theta *
-                                   pgamma(q = data$x, shape = k + 1, scale = theta)));
+                                   pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
+           "Auto" = {
+               if (exists(x = "Auto", where = fit)) {
+                   return(get_A2mT_int(fit$Auto_model));
+               } else {
+                   warning(">> fit$Auto does not exist!");
                    return(rep(0, length(data$x)));
                }
            },

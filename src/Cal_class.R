@@ -1,31 +1,47 @@
-source("src/Cal_plotting_methods.R");
-################################################################################
-Cal.fit_model <- function(cal.model) {
-    switch(cal.model,
-           "LM" = fit_LM(),
-           "EarlyMM" = fit_EarlyMM(),
-           "LateExp" = fit_LateExp(),
-           "LateMM" = fit_LateMM(silent = TRUE),
-           { print(paste0(">> Call to unknown model", cal.model))}
-           );
-}  ## End of Cal.fit_model
-################################################################################
-source("src/Cal_fit_LM.R");
-source("src/Cal_fit_EarlyMM.R");
-source("src/Cal_fit_LateExp.R");
-source("src/Cal_fit_LateMM.R");
 ################################################################################
 Cal.set_e0 <- function(cal.e0) {
     e0 <<- cal.e0;
 }  ## End of Cal.set_e0
 ################################################################################
-
-################################################################################
 Cal.set_s0 <- function(cal.s0) {
     s0 <<- cal.s0;
 }  ## End of Cal.set_s0
 ################################################################################
-
+source("src/Cal_fit_LM.R");
+source("src/Cal_fit_EarlyMM.R");
+source("src/Cal_fit_LateExp.R");
+source("src/Cal_fit_LateMM.R");
+source("src/Cal_fit_Auto.R");
+################################################################################
+Cal.fit_model <- function(cal.model) {
+    switch(cal.model,
+           "LM" = fit_LM(silent = TRUE),
+           "EarlyMM" = fit_EarlyMM(silent = TRUE),
+           "LateExp" = fit_LateExp(silent = TRUE),
+           "LateMM" = fit_LateMM(silent = TRUE),
+           "Auto" = fit_Auto(silent = TRUE),
+           {
+               warning(paste0(">> Call to unknown model", cal.model));
+               return(NULL);
+           }
+           );
+}  ## End of Cal.fit_model
+################################################################################
+Cal.get_model <- function(cal.model) {
+    switch(cal.model,
+           "LM" = get_LM(),
+           "EarlyMM" = get_EarlyMM(),
+           "LateExp" = get_LateExp(),
+           "LateMM" = get_LateMM(),
+           "Auto" = get_Auto(),
+           {
+               warning(paste0(">> Call to unknown get_model", cal.model));
+               return(NULL);
+           }
+           );
+}  ## End of Cal.get_model
+################################################################################
+source("src/Cal_plotting_methods.R");
 ################################################################################
 Cal.parms_model <- function(cal.model) {
     switch(cal.model,
@@ -33,7 +49,11 @@ Cal.parms_model <- function(cal.model) {
            "EarlyMM" = parms_EarlyMM(),
            "LateExp" = parms_LateExp(),
            "LateMM" = parms_LateMM(),
-           { print(paste0(">> Call to unknown model", cal.model))}
+           "Auto" = parms_Auto(),
+           {
+               warning(paste0(">> Call to unknown model", cal.model));
+               return(NULL);
+           }
            );
 }  ## End of Cal.parms_model
 ################################################################################
@@ -46,14 +66,26 @@ Cal <- setRefClass(
         e0 = "numeric", s0 = "numeric", parms = "data.frame"
     ),
     methods = list(
-        clear = Cal.clear, plot = Cal.plot, set_e0 = Cal.set_e0, set_s0 = Cal.set_s0,
+        clear = Cal.clear, plot = Cal.plot,
+        set_e0 = Cal.set_e0, set_s0 = Cal.set_s0,
+        ## LM
         fit_LM = Cal.fit_LM, get_LM = Cal.get_LM, parms_LM = Cal.parms_LM,
-        fit_EarlyMM = Cal.fit_EarlyMM, get_EarlyMM = Cal.get_EarlyMM, parms_EarlyMM = Cal.parms_EarlyMM,
-        fit_LateExp = Cal.fit_LateExp, get_LateExp = Cal.get_LateExp, parms_LateExp = Cal.parms_LateExp,
-        fit_LateMM = Cal.fit_LateMM, get_LateMM = Cal.get_LateMM, parms_LateMM = Cal.parms_LateMM,
-        fit_model = Cal.fit_model, get_model = Cal.get_model, parms_model = Cal.parms_model,
-        plot_fit = Cal.plot_fit
+        ## EarlyMM
+        fit_EarlyMM = Cal.fit_EarlyMM, get_EarlyMM = Cal.get_EarlyMM,
+        parms_EarlyMM = Cal.parms_EarlyMM,
+        ## LateExp
+        fit_LateExp = Cal.fit_LateExp, get_LateExp = Cal.get_LateExp,
+        parms_LateExp = Cal.parms_LateExp,
+        ## LateMM
+        fit_LateMM = Cal.fit_LateMM, get_LateMM = Cal.get_LateMM,
+        parms_LateMM = Cal.parms_LateMM,
+        ## Auto
+        fit_Auto = Cal.fit_Auto, get_Auto = Cal.get_Auto,
+        parms_Auto = Cal.parms_Auto,
+        ## Model
+        fit_model = Cal.fit_model, get_model = Cal.get_model,
+        parms_model = Cal.parms_model,
+        plot_fit = Cal.plot_fit, plot_residuals = Cal.plot_residuals
     )
 );  ## End of Cal setRefClass
 ################################################################################
-## print(Cal);

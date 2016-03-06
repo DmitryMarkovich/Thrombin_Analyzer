@@ -79,7 +79,18 @@ TG.get_thrombin <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
-           { print(paste0(">> Call to unknown tg.model ", tg.model))}
+           "Auto" = {
+               if (exists(x = "Auto", where = fit)) {
+                   return(get_thrombin(fit$Auto_model));
+               } else {
+                   warning(">> fit$Auto does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
+           {  ## Default
+               warning(paste0(">> Call to unknown tg.model ", tg.model));
+               return(rep(0, length(data$x)));
+           }
            );  ## End of switch(tg.model)
 }  ## End of TG.get_thrombin
 ################################################################################

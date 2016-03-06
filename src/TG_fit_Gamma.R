@@ -79,21 +79,26 @@ TG.get_Gamma_A2mT_int <- function() {
 ################################################################################
 
 ################################################################################
-TG.parms_Gamma <- function(cal.model) {
+TG.parms_Gamma <- function(cal.CF) {
     print(">> Call to TG.parms_Gamma");
     if (exists(x = "Gamma", where = fit)) {
         A <- fit$Gamma$cff[["A"]]; k <- fit$Gamma$cff[["k"]];
         theta <- fit$Gamma$cff[["theta"]];
-        if (!is.null(cal.model) && cal.model != "None") {
-            CF <- cal$parms$Parameter[["CF_DTU"]];
+        if (k > 2) {
+            v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
+                exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
+        } else {
+            v <- max(num.smry$drv2, na.rm = TRUE);
+        }
+        if (cal.CF != 1) {
+            CF <- cal.CF;
             return(parms <<- data.frame(
                 Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
                 Value = c(
                     CF * A,
                     CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
                     theta * (k - 1),
-                    CF * A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
-                        exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2),
+                    v,
                     0),
                 StdErr = rep(NA, 5),
                 Units = c("nM * min", "nM", "min", "nM / min", "min"))
@@ -105,8 +110,7 @@ TG.parms_Gamma <- function(cal.model) {
                     A,
                     A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
                     theta * (k - 1),
-                    A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
-                        exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2),
+                    v,
                     0),
                 StdErr = rep(NA, 5),
                 Units = c("a.u.", "a.u. / min", "min", "a.u. / min^2", "min"))
@@ -114,75 +118,7 @@ TG.parms_Gamma <- function(cal.model) {
         }
     } else {
         warning(">> fit$Gamma does not exist!");
+        return(NULL);
     }
 }  ## End of TG.parms_LM
 ################################################################################
-
-## ################################################################################
-## Gamma <- function(x, cff) {
-##     return(cff[["b"]] + cff[["A"]] *
-##                pgamma(q = x, shape = cff[["k"]], scale = cff[["theta"]]));
-## }  ## End of Gamma()
-## ################################################################################
-
-## ################################################################################
-## Thr <- function(x, cff) {
-##     return(cff[["A"]] *
-##                pgamma(q = x, shape = cff[["k"]], scale = cff[["theta"]]));
-## }  ## End of Thr()
-## ################################################################################
-
-## ################################################################################
-## Thromb <- function(x, cff) {
-##     return(cff[["A"]] *
-##                dgamma(x = x, shape = cff[["k"]], scale = cff[["theta"]]));
-## }  ## End of Thromb()
-## ################################################################################
-
-## ################################################################################
-## ThrombVel <- function(x, cff) {
-##     v <- rep(0, length(x));
-##     v[x != 0] <- cff[["A"]] * exp(-x[x != 0] / cff[["theta"]]) *
-##         x[x != 0] ^ (cff[["k"]] - 1) *
-##             ((-1 / cff[["theta"]]) +
-##                  ((cff[["k"]] - 1) / x[x != 0])) /
-##                      (gamma(cff[["k"]]) * cff[["theta"]] ^ cff[["k"]]);
-##     return(v);
-## }  ## End of ThrombVel
-## ################################################################################
-
-## ################################################################################
-## PreFitGamma <- function(data, num.smry = NA, silent = TRUE) {
-## ################################################################################
-##     ## check if num.smry is supplied, calculate it otherwise
-##     if (is.na(num.smry[1])) {
-##         num.smry <- ExploreNumerically(data);
-##     }
-##     ## fit polynomial growth to pre-peak part of data
-##     pre.fit <- NULL; n.try <- 1;
-##     start.list <- list(b = data[[2]][1], A = 0.5 * num.smry$ampl, k = 3);
-##     while (is.null(pre.fit) && n.try <= N.tries) {
-##         ## print(paste0(">> n.try = ", n.try, ", start.list = ")); print(start.list);
-##         try(expr = {
-##             pre.fit <- nlsLM(formula = y ~ b + A * x ^ (k - 1),
-##                              data = data[data[[1]] <= num.smry$t.peak, ],
-##                              start = start.list, trace = F,
-##                              lower = c(  0,   0,   1),
-##                              upper = c(Inf, Inf, Inf)
-##                              );
-##         }, silent = F);
-##         n.try <- n.try + 1;
-##         start.list <- list(b = data[[2]][1], A = runif(1, 0, 1) * num.smry$ampl,
-##                            k = runif(n = 1, min = 1, max = 10));
-##     }
-##     if (is.null(pre.fit)) {
-##         message(">> PreFitGamma returning NULL!"); return(NULL);
-##     } else {
-##         if (!silent) { print(summary(pre.fit));}
-##         return(list(b = coef(pre.fit)[[1]], A = coef(pre.fit)[[2]],
-##                     k = coef(pre.fit)[[3]],
-##                     theta = num.smry$t.peak / (coef(pre.fit)[[3]] - 1)));
-##     }
-## ################################################################################
-## }  ## End of PreFitGamma()
-## ################################################################################

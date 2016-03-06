@@ -43,6 +43,7 @@ Cal.fit_LateExp <- function(silent = FALSE) {
             );
             if (!silent)
                 print(fit[names(fit) != "LM"]);
+            return(fit$LateExp);
         }  ## End of if (is.null(ft))
     }  ## End of if (exists())
 }  ## End of Cal.fit_LateExp

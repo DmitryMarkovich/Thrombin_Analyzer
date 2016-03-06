@@ -10,32 +10,26 @@ shinyUI(
 
         sidebarLayout(
             sidebarPanel = sidebarPanel(
+                h2("Calibration", align = "center"),
                 fileInput(inputId = "cal.fname", accept = ("text/csv"),
                           label = h4("Calibration data file input")
                           ),
-                numericInput(inputId = "cal.e0",
-                             label = "Set Thrombin Calibrator concentration (nM):",
-                             value = 100, min = 0, max = Inf),
-                numericInput(inputId = "cal.s0",
-                             label = "Set FluCa concentration (uM):",
-                             value = 454, min = 0, max = Inf),
-                numericInput(inputId = "cal.CF",
-                             label = "Set calibration factor value (nM * min / a.u.):",
-                             value = 1, min = 0, max = Inf),
                 selectInput(inputId = "cal.model",
                             label = h4("Select model to fit calibration signal"), 
-                            choices = c("LateMM", "LateExp", "EarlyMM", "LM",
-                                "None"),  ## Auto
+                            choices = c("Auto", "LateMM", "LateExp", "EarlyMM", "LM",
+                                "None"),
                             selected = "None"
                             ),
+                h2("Thrombin generation", align = "center"),
                 fileInput(inputId = "tg.fname", accept = ("text/csv"),
                           label = h4("Thrombin generation data file input")
                           ),
                 selectInput(inputId = "tg.model",
                             label = h4("Select model to fit thrombin generation signal"), 
-                            choices = c("LateExpT0GammaInt", "LateExpGammaInt",
+                            choices = c("Auto",
+                                "LateExpT0GammaInt", "LateExpGammaInt",
                                 "T0GammaInt", "GammaInt", "T0Gamma",
-                                "Gamma", "None"), ## Auto
+                                "Gamma", "None"),
                             selected = "None"),
                 width = 4
             ),
@@ -45,12 +39,31 @@ shinyUI(
                     tabPanel(title = "Calibration signal",
                              ## h1("Plot of calibration signal", align = "left")
                              plotOutput(outputId = "cal.Plot"),
-                             htmlOutput(outputId = "cal.model")
+                             fluidRow(
+                                 column(width = 6, offset = 0,
+                                        ## h2("Place for residuals")
+                                        plotOutput(outputId = "cal.PlotResid")
+                                        ),
+                                 column(width = 6,
+                                        ## h2("Place for summary")
+                                        htmlOutput(outputId = "cal.model")
+                                        )
+                                 )  ## End of fluidRow
                              ),
                     tabPanel(title = "Thrombin generation signal",
                              ## h1("Plot of thrombin generation signal", align = "left")
                              plotOutput(outputId = "tg.Plot"),
-                             htmlOutput(outputId = "tg.model")
+                             ## htmlOutput(outputId = "tg.model")
+                             fluidRow(
+                                 column(width = 6, offset = 0,
+                                        ## h2("Place for residuals")
+                                        plotOutput(outputId = "tg.PlotResid")
+                                        ),
+                                 column(width = 6,
+                                        ## h2("Place for summary")
+                                        htmlOutput(outputId = "tg.model")
+                                        )
+                                 )  ## End of fluidRow
                              ),
                     tabPanel(title = "Thrombogram",
                              ## h1("Plot of thrombin generation signal", align = "left")
@@ -58,7 +71,27 @@ shinyUI(
                              ),
                     tabPanel(title = "Parameters",
                              ## h1("Parameters from calibration experiment", align = "left")
+                             ## numericInput(inputId = "AAA",
+                             ##              label = "Dummy input",
+                             ##              value = 1, min = 0, max = Inf),
+                             fluidRow(
+                                 column(width = 6, offset = 0,
+                                        numericInput(inputId = "cal.e0",
+                                                     label = "Set Thrombin Calibrator concentration e0 (nM):",
+                                                     value = 100, min = 0, max = Inf,
+                                                     width = "100%")
+                                        ),
+                                 column(width = 6, offset = 0,
+                                        numericInput(inputId = "cal.s0",
+                                                     label = "Set FluCa concentration s0 (uM):",
+                                                     value = 454, min = 0, max = Inf,
+                                                     width = "100%")
+                                        )
+                                 ),
                              dataTableOutput(outputId = "cal.ShowParms"),
+                             numericInput(inputId = "cal.CF",
+                                          label = "Set calibration factor value CF (nM * min / a.u.):",
+                                          value = 1, min = 0, max = Inf, width = "100%"),
                              dataTableOutput(outputId = "tg.ShowParms")
                              )
                 ),  ## End of tabsetPanel
@@ -67,7 +100,7 @@ shinyUI(
         ),  ## End of sidebarLayout
         title = "Thrombin Analyzer",
         responsive = NULL,
-        theme = NULL
+        theme = "bootstrap.css"
     ) ## End of Fluidpage
 )  ## End of ShinyUI
 

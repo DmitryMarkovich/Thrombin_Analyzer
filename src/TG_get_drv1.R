@@ -83,9 +83,18 @@ TG.get_drv1 <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
-           { warning(paste0(">> Call to unknown tg.model ", tg.model));
-             return(rep(0, length(data$x)));
-         }
+           "Auto" = {
+               if (exists(x = "Auto", where = fit)) {
+                   return(get_drv1(fit$Auto_model));
+               } else {
+                   warning(">> fit$Auto does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
+           {  ## Default
+               warning(paste0(">> Call to unknown tg.model ", tg.model));
+               return(rep(0, length(data$x)));
+           }
            );  ## End of switch(tg.model)
 }  ## End of TG.get_drv1
 ################################################################################<

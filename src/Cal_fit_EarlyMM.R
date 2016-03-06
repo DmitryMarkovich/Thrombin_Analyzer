@@ -41,6 +41,7 @@ Cal.fit_EarlyMM <- function(silent = FALSE) {
             );
             if (!silent)
                 print(fit[names(fit) != "LM"]);
+            return(fit$EarlyMM);
         }  ## End of if (is.null(ft))
     }  ## End of if (exists())
 }  ## End of Cal.fit_EarlyMM

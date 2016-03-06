@@ -53,6 +53,7 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
         }
         if (is.null(ft)) {
             warning(">> fit_T0GammaInt resulted in NULL!");
+            return(NULL);
         } else {
             fit$T0GammaInt <<- list(
                 cff = coef(ft), smry = summary(ft),
@@ -60,6 +61,7 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
             );
             if (!silent)
                 print(fit[names(fit) != "LM"]);
+            return(fit$T0GammaInt);
         }  ## End of if is.null(fit)
     }  ## End of if exists()
 ################################################################################
@@ -86,40 +88,12 @@ TG.get_T0GammaInt <- function() {
 ################################################################################
 
 ################################################################################
-TG.get_T0GammaInt_thrombin_int <- function() {
-    if (exists(x = "T0GammaInt", where = fit)) {
-        A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
-        theta <- fit$T0GammaInt$cff[["theta"]]; t0 <- fit$T0GammaInt$cff[["t0"]];
-        return(A * pgamma(q = data$x - t0, shape = k, scale = theta));
-    } else {
-        warning(">> fit$T0GammaInt does not exist!");
-    }
-}  ## End of TG_get_T0GammaInt_thrombin_int
-################################################################################
-
-################################################################################
-TG.get_T0GammaInt_A2mT_int <- function() {
-    if (exists(x = "T0GammaInt", where = fit)) {
-        A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
-        theta <- fit$T0GammaInt$cff[["theta"]];
-        k.a2m <- fit$T0GammaInt$cff[["k.a2m"]]; t0 <- fit$T0GammaInt$cff[["t0"]];
-        return((A * k.a2m / gamma(k)) * (
-            gamma(k) *
-                pgamma(q = data$x - t0, shape = k, scale = theta) * (data$x - t0) -
-                    gamma(k + 1) * theta *
-                        pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
-    } else {
-        warning(">> fit$T0GammaInt does not exist!");
-    }
-}  ## End of TG_get_T0GammaInt_A2mT_int
-################################################################################
-
-################################################################################
 TG.parms_T0GammaInt <- function(cal.CF) {
     print(">> Call to TG.parms_T0GammaInt");
     if (exists(x = "T0GammaInt", where = fit)) {
         A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
         theta <- fit$T0GammaInt$cff[["theta"]];
+        t0 <- fit$T0GammaInt$cff[["t0"]];
         if (k > 2) {
             v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
                 exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
@@ -133,9 +107,9 @@ TG.parms_T0GammaInt <- function(cal.CF) {
                 Value = c(
                     CF * A,
                     CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
-                    theta * (k - 1),
+                    t0 + theta * (k - 1),
                     CF * v,
-                    fit$T0GammaInt$cff[["t0"]]),
+                    t0),
                 StdErr = rep(NA, 5),
                 Units = c("nM * min", "nM", "min", "nM / min", "min"))
                    );
@@ -145,9 +119,9 @@ TG.parms_T0GammaInt <- function(cal.CF) {
                 Value = c(
                     A,
                     A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
-                    theta * (k - 1),
+                    t0 + theta * (k - 1),
                     v,
-                    fit$T0GammaInt$cff[["t0"]]),
+                    t0),
                 StdErr = rep(NA, 5),
                 Units = c("a.u.", "a.u. / min", "min", "a.u. / min * min", "min"))
                    );

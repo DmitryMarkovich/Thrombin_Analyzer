@@ -38,6 +38,7 @@ Cal.fit_LateMM <- function(silent = TRUE) {
         }
         if (is.null(ft)) {
             warning(">> Cal.fit_LateMM resulted in NULL");
+            return(NULL);
         } else {
             fit$LateMM <<- list(
                 cff = coef(ft), smry = summary(ft),
@@ -45,6 +46,7 @@ Cal.fit_LateMM <- function(silent = TRUE) {
             );
             if (!silent)
                 print(fit[names(fit) != "LM"]);
+            return(fit$LateMM);
         }  ## End of if (is.null(ft))
     }  ## End of if (exists())
 }  ## End of Cal.fit_LateMM

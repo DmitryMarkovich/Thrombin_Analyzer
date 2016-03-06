@@ -42,6 +42,11 @@ shinyServer(
                     cal$plot_fit(cal.model());
             }
         })  ## End of output$cal.Plot
+        output$cal.PlotResid <- renderPlot({
+            if (!is.null(cal.data()) && !is.null(cal.model()) && cal.model() != "None") {
+                cal$plot_residuals(cal.model());
+            }
+        })  ## End of output$cal.PlotResid
         output$cal.model <- renderUI(expr = {
             if (!is.null(cal.model()) && cal.model() != "None" && !is.null(cal.data())) {
                 paste0(cal.model(), " selected to fit calibration data ",
@@ -49,6 +54,7 @@ shinyServer(
                 if (!is.null(cal.model.fit()) && exists(x = cal.model(), where = cal$fit)) {
                     x <- GetSummary(cal$fit[[cal.model()]]$smry);
                     HTML(paste(x, collapse = '<br/>'));
+                    ## HTML(paste(x, collapse = '<br/>'));
                 }
             } else {
                 paste(">> Model not selected or data not loaded.");
@@ -67,7 +73,7 @@ shinyServer(
         tg.fname <- reactive(x = {
             return(input$tg.fname);
         })  ## End of tg.fname
-        tg.data <- reactive(x = {
+        tg.data <- reactive({
             if (!is.null(tg.fname())) {
                 tg$clear();
                 tg$load_signal(tg.fname());
@@ -106,6 +112,11 @@ shinyServer(
                 paste(">> Model not selected or data not loaded.");
             }
         })  ## End of output$tg.model
+        output$tg.PlotResid <- renderPlot({
+            if (!is.null(tg.data()) && !is.null(tg.model()) && tg.model() != "None") {
+                tg$plot_residuals(tg.model());
+            }
+        })  ## End of output$tg.PlotResid
 ######################################## Thrombogram tab
         output$tg.PlotDrv1 <- renderPlot(expr = { ## runs each time user changes a widget
                 if (!is.null(tg.data()) && length(tg$num.smry) != 0) {

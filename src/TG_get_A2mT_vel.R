@@ -36,7 +36,31 @@ TG.get_A2mT_vel <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
-           { warning(">> Unknown model called!"); return(rep(0, length(data$x)));}
+           "LateExpT0GammaInt" = {
+               if (exists(x = "LateExpT0GammaInt", where = fit)) {
+                   A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
+                   theta <- fit$T0GammaInt$cff[["theta"]]; k.a2m <- fit$T0GammaInt$cff[["k.a2m"]];
+                   t0 <- fit$T0GammaInt$cff[["t0"]];
+                   v <- p1 * k.a2m * A * dgamma(x = data$x - t0, shape = k, scale = theta);
+                   ## v[data$x == 0] <- 0;
+                   return(v);
+               } else {
+                   warning(">> fit$T0GammaInt does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
+           "Auto" = {
+               if (exists(x = "Auto", where = fit)) {
+                   return(get_A2mT_vel(fit$Auto_model));
+               } else {
+                   warning(">> fit$Auto does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
+           {  ## Default
+               warning(paste0(">> Call to unknown tg.model ", tg.model));
+               return(rep(0, length(data$x)));
+           }
            );  ## End of switch(tg.model)
 }  ## End of TG.get_A2mT_vel
 ################################################################################
