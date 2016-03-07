@@ -3,6 +3,7 @@ TG.fit_T0Gamma <- function(silent = TRUE) {
 ################################################################################
     if (exists(x = "T0Gamma", where = fit)) {
         warning(">> No fitting: T0Gamma fit already exists!");
+        return(fit$T0Gamma);
     } else {
         if (exists(x = "Gamma", where = fit)) {
             ## use existing Gamma fit for estimates of all parameters except t0
@@ -66,6 +67,7 @@ TG.get_T0Gamma <- function() {
                           scale = fit$T0Gamma$cff[[4]]));
     } else {
         warning(">> fit$T0Gamma does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of TG_get_T0Gamma
 ################################################################################

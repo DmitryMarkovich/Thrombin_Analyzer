@@ -2,6 +2,7 @@
 Cal.fit_LateExp <- function(silent = FALSE) {
     if (exists(x = "LateExp", where = fit)) {
         warning(">> No fitting: LateExp fit already exists!");
+        return(fit$LateExp);
     } else {
         print(">> fit_LateExp called!");
         if (exists(x = "LM", where = fit)) {
@@ -36,6 +37,7 @@ Cal.fit_LateExp <- function(silent = FALSE) {
         }
         if (is.null(ft)) {
             warning(">> Cal.fit_LateExp resulted in NULL");
+            return(NULL);
         } else {
             fit$LateExp <<- list(
                 cff = coef(ft), smry = summary(ft),
@@ -58,12 +60,13 @@ Cal.get_LateExp <- function() {
         );
     } else {
         warning(">> fit$LateExp does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of Cal.get_LateExp
 ################################################################################
 
 ################################################################################
-Cal.parms_LateExp <- function() {
+Cal.parms_LateExp <- function(e0, s0) {
     if (exists(x = "LateExp", where = fit)) {
         ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
         return(parms <<- data.frame(
@@ -73,6 +76,7 @@ Cal.parms_LateExp <- function() {
                );
     } else {
         warning(">> fit$LateExp does not exist!");
+        return(NULL);
     }
 }  ## End of Cal.parms_LateExp
 ################################################################################

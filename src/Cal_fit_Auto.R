@@ -1,6 +1,7 @@
 ################################################################################
 Cal.fit_Auto <- function(silent = TRUE) {
     if (exists(x = "Auto", where = fit)) {
+        print(fit$Auto);
         warning(">> No fitting: Auto fit already exists!");
     } else {
         print(">>> Cal.fit_Auto called!");
@@ -34,10 +35,10 @@ Cal.get_Auto <- function() {
 ################################################################################
 
 ################################################################################
-Cal.parms_Auto <- function(cal.CF) {
+Cal.parms_Auto <- function(e0, s0) {
     print(">> Call to Cal.parms_Auto");
     if (exists(x = "Auto", where = fit)) {
-        return(parms_model(fit$Auto_model));
+        return(parms_model(fit$Auto_model, e0, s0));
     } else {
         warning(">> fit$Auto does not exist!");
         return(NULL);

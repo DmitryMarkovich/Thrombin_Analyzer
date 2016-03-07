@@ -2,6 +2,7 @@
 Cal.fit_LM <- function(silent = TRUE) {
     if (exists(x = "LM", where = fit)) {
         warning(">> No fitting: LM fit already exists!");
+        return(fit$LM);
     } else {
         print(">> fit_LM called!");
         ft <- lm(y ~ x, data = data);
@@ -12,7 +13,6 @@ Cal.fit_LM <- function(silent = TRUE) {
         if (!silent)
             print(fit);
         return(fit$LM);
-        ## parms_LM();
     }  ## End of if (exists)
 }  ## End of Cal.fit_LM
 ################################################################################
@@ -23,15 +23,15 @@ Cal.get_LM <- function() {
         return(fit$LM$cff[[1]] + fit$LM$cff[[2]] * data$x);
     } else {
         warning(">> fit$LM does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of Cal.get_LM
 ################################################################################
 
 ################################################################################
-Cal.parms_LM <- function() {
+Cal.parms_LM <- function(e0, s0) {
     print(">> Call to Cal.parms_LM");
     if (exists(x = "LM", where = fit)) {
-        ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
         return(parms <<- data.frame(
             Parameter = c("e0", "s0", "CF_CAT"),
             Value = c(e0, s0, e0 / fit$LM$cff[[2]]),
@@ -39,6 +39,7 @@ Cal.parms_LM <- function() {
                );
     } else {
         warning(">> fit$LM does not exist!");
+        return(NULL);
     }
 }  ## End of Cal.parms_LM
 ################################################################################

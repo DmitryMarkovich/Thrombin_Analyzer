@@ -2,6 +2,7 @@
 Cal.fit_LateMM <- function(silent = TRUE) {
     if (exists(x = "LateMM", where = fit)) {
         warning(">> No fitting: LateMM fit already exists!");
+        return(fit$LateMM);
     } else {
         print(">> fit_LateMM called!");
         if (exists(x = "LateExp", where = fit)) {
@@ -61,6 +62,7 @@ Cal.get_LateMM <- function() {
         return(b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * data$x)) / p2)));
     } else {
         warning(">> fit$LateMM does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of Cal.get_LateMM
 ################################################################################
@@ -69,12 +71,19 @@ Cal.get_LateMM <- function() {
 ##         k.cat = (s0 / e0) * (cff[["p3"]] / cff[["p2"]])
 
 ################################################################################
-Cal.parms_LateMM <- function() {
+Cal.parms_LateMM <- function(e0, s0) {
     print(">> Call to Cal.parms_LateMM");
     if (exists(x = "LateMM", where = fit)) {
+        ## print(fit$LateMM);
         p1 <- fit$LateMM$cff[["p1"]]; p2 <- fit$LateMM$cff[["p2"]];
         p3 <- fit$LateMM$cff[["p3"]];
-        ## print(parms); str(fit$LateMM);
+        print(paste0(p1, p2, p3));
+        print(paste0(e0, s0));
+        Value <- c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),
+                   1e3 * s0 / p2, (1e3 * s0 / e0) * (p3 / p2), p1 / (1e3 * s0));
+        ## print(Value);
+        ## print(parms);  ##str(fit$LateMM);
+
         return(parms <<- data.frame(
             Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "C"),
             Value = c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),
@@ -85,6 +94,7 @@ Cal.parms_LateMM <- function() {
                );
     } else {
         warning(">> fit$LateMM does not exist!");
+        return(NULL);
     }
 }  ## End of Cal.parms_LateMM
 ################################################################################

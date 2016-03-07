@@ -1,9 +1,10 @@
 ################################################################################
-GetSummary <- function(smry, full = FALSE) {
+GetSummary <- function(smry, model, full = FALSE) {
 ################################################################################
+    print(smry);
     x <- capture.output(print(smry));
     ## x <- printed("print(fit$smry)");
-    if (full) {
+    if (full || model == "LM") {
         return(x);
     } else {
         x <- x[x != ""];

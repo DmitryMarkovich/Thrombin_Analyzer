@@ -3,6 +3,7 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
 ################################################################################
     if (exists(x = "T0GammaInt", where = fit)) {
         warning(">> No fitting: T0GammaInt fit already exists!");
+        return(fit$T0GammaInt);
     } else {
         if (exists(x = "GammaInt", where = fit)) {
             start.list <- list(
@@ -83,6 +84,7 @@ TG.get_T0GammaInt <- function() {
                );
     } else {
         warning(">> fit$T0GammaInt does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of TG_get_T0GammaInt
 ################################################################################
@@ -128,6 +130,7 @@ TG.parms_T0GammaInt <- function(cal.CF) {
         }
     } else {
         warning(">> fit$T0GammaInt does not exist!");
+        return(NULL);
     }
 }  ## End of TG.parms_T0GammaInt
 ################################################################################

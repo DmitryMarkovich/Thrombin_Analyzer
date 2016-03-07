@@ -100,7 +100,8 @@ shinyUI(
         ),  ## End of sidebarLayout
         title = "Thrombin Analyzer",
         responsive = NULL,
-        theme = "bootstrap.css"
+        ## theme = "bootstrap.css"
+        theme = NULL
     ) ## End of Fluidpage
 )  ## End of ShinyUI
 

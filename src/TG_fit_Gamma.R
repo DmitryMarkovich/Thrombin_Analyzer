@@ -3,6 +3,7 @@ TG.fit_Gamma <- function(silent = TRUE) {
 ################################################################################
     if (exists(x = "Gamma", where = fit)) {
         warning(">> No fitting: Gamma fit already exists!");
+        return(fit$Gamma);
     } else {
         ft <- NULL; start.list <- list(b = data$y[1], A = 0.5 * num.smry$ampl,
                                        k = 3, theta = num.smry$t.peak / 2);
@@ -31,6 +32,7 @@ TG.fit_Gamma <- function(silent = TRUE) {
         }
         if (is.null(ft)) {
             warning(">> fit_Gamma resulted in NULL!");
+            return(NULL);
         } else {
             fit$Gamma <<- list(
                 cff = coef(ft), smry = summary(ft),
@@ -38,6 +40,7 @@ TG.fit_Gamma <- function(silent = TRUE) {
             );
             if (!silent)
                 print(fit[names(fit) != "LM"]);
+            return(fit$Gamma);
         }  ## End of if is.null(fit)
     }  ## End of if exists()
 ################################################################################
@@ -52,30 +55,9 @@ TG.get_Gamma <- function() {
                           scale = fit$Gamma$cff[[4]]));
     } else {
         warning(">> fit$Gamma does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of TG_get_Gamma
-################################################################################
-
-################################################################################
-TG.get_Gamma_thrombin_int <- function() {
-    if (exists(x = "Gamma", where = fit)) {
-        return(fit$Gamma$cff[[2]] *
-                   pgamma(q = data$x, shape = fit$Gamma$cff[[3]],
-                          scale = fit$Gamma$cff[[4]]));
-    } else {
-        warning(">> fit$Gamma does not exist!");
-    }
-}  ## End of TG_get_Gamma_thrombin_int
-################################################################################
-
-################################################################################
-TG.get_Gamma_A2mT_int <- function() {
-    if (exists(x = "Gamma", where = fit)) {
-        return(rep(0, length(data$x)));
-    } else {
-        warning(">> fit$Gamma does not exist!");
-    }
-}  ## End of TG_get_Gamma_thrombin_int
 ################################################################################
 
 ################################################################################
@@ -120,5 +102,5 @@ TG.parms_Gamma <- function(cal.CF) {
         warning(">> fit$Gamma does not exist!");
         return(NULL);
     }
-}  ## End of TG.parms_LM
+}  ## End of TG.parms_Gamma
 ################################################################################

@@ -1,7 +1,7 @@
 ################################################################################
 Cal.clear <- function() {
     data <<- data.frame(); num.smry <<- list(); fit <<- list();
-    e0 <<- double(); s0 <<- double(); parms <<- data.frame();
+    parms <<- data.frame();
 }  ## End of Cal.clear
 ################################################################################
 
@@ -55,7 +55,7 @@ Cal.plot_residuals <- function(cal.model) {
                    ylab = "Fluorescence, a.u.");
     ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
     par(mar = c(4, 6, 2, 0.75), mgp = c(10, 1, 0)); options(scipen = -2);
-    graphics::plot(data$x, resid, axes = FALSE, xlab = NA,
+    graphics::plot(data$x, resid, axes = FALSE, xlab = NA, type = "b",
                    ylab = NA, cex = 1.25, lwd = 2);
     grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
     box();

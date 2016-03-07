@@ -36,7 +36,7 @@ TG.plot_drv1 <- function() {
     if (length(data) != 0 && length(num.smry) != 0) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
         par(mar = c(4, 6, 2, 0.25), mgp = c(10, 1, 0)); options(scipen = -2);
-        graphics::plot(data$x, num.smry$drv1, axes = FALSE, xlab = NA,
+        graphics::plot(data$x, num.smry$drv1, axes = FALSE, xlab = NA, type = "b",
                        ylab = NA, cex = 1.25, lwd = 2,
                        ylim = c(min(min(num.smry$drv1, na.rm = TRUE), 0),
                            1.1 * max(num.smry$drv1, na.rm = TRUE))
@@ -63,7 +63,7 @@ TG.plot_drv2 <- function() {
     if (length(data) != 0 && length(num.smry) != 0) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
         par(mar = c(4, 7, 2, 0.75), mgp = c(10, 1, 0)); options(scipen = -2);
-        graphics::plot(data$x, num.smry$drv2, axes = FALSE, xlab = NA,
+        graphics::plot(data$x, num.smry$drv2, axes = FALSE, xlab = NA, type = "b",
                        ylab = NA, cex = 1.25, lwd = 2,
                        ylim = c(min(min(num.smry$drv2, na.rm = TRUE), 0),
                            1.1 * max(num.smry$drv2, na.rm = TRUE))
@@ -117,7 +117,7 @@ TG.plot_residuals <- function(tg.model) {
                    ylab = "Fluorescence, a.u.");
     ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
     par(mar = c(4, 6, 2, 0.75), mgp = c(10, 1, 0)); options(scipen = -2);
-    graphics::plot(data$x, resid, axes = FALSE, xlab = NA,
+    graphics::plot(data$x, resid, axes = FALSE, xlab = NA, type = "b",
                    ylab = NA, cex = 1.25, lwd = 2);
     grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
     box();

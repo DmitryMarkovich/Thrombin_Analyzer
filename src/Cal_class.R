@@ -1,12 +1,4 @@
 ################################################################################
-Cal.set_e0 <- function(cal.e0) {
-    e0 <<- cal.e0;
-}  ## End of Cal.set_e0
-################################################################################
-Cal.set_s0 <- function(cal.s0) {
-    s0 <<- cal.s0;
-}  ## End of Cal.set_s0
-################################################################################
 source("src/Cal_fit_LM.R");
 source("src/Cal_fit_EarlyMM.R");
 source("src/Cal_fit_LateExp.R");
@@ -43,13 +35,13 @@ Cal.get_model <- function(cal.model) {
 ################################################################################
 source("src/Cal_plotting_methods.R");
 ################################################################################
-Cal.parms_model <- function(cal.model) {
+Cal.parms_model <- function(cal.model, e0, s0) {
     switch(cal.model,
-           "LM" = parms_LM(),
-           "EarlyMM" = parms_EarlyMM(),
-           "LateExp" = parms_LateExp(),
-           "LateMM" = parms_LateMM(),
-           "Auto" = parms_Auto(),
+           "LM" = parms_LM(e0, s0),
+           "EarlyMM" = parms_EarlyMM(e0, s0),
+           "LateExp" = parms_LateExp(e0, s0),
+           "LateMM" = parms_LateMM(e0, s0),
+           "Auto" = parms_Auto(e0, s0),
            {
                warning(paste0(">> Call to unknown model", cal.model));
                return(NULL);
@@ -63,11 +55,10 @@ Cal <- setRefClass(
     Class = "Cal", contains = "Base",
     fields = list(
         data = "data.frame", num.smry = "list", fit = "list",
-        e0 = "numeric", s0 = "numeric", parms = "data.frame"
+        parms = "data.frame"
     ),
     methods = list(
         clear = Cal.clear, plot = Cal.plot,
-        set_e0 = Cal.set_e0, set_s0 = Cal.set_s0,
         ## LM
         fit_LM = Cal.fit_LM, get_LM = Cal.get_LM, parms_LM = Cal.parms_LM,
         ## EarlyMM

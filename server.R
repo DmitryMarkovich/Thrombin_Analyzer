@@ -19,11 +19,11 @@ shinyServer(
                 cal$clear();
                 cal$load_signal(cal.fname());
                 cal$explore_numerically();
-                ## cal.model(); cal.model.fit();  TODO fix fitting with chosen model when a new file is loaded
                 return(0);
             }
         })  ## End of cal.data
-        cal.model <- reactive(x = {
+        cal.model <- reactive({
+            cal.data();  ## needs dependency from cal.data() when model is kept but a new signal is loaded
             print(paste0(">> cal.model is ", input$cal.model));
             return(input$cal.model);
         })  ## End of cal.model
@@ -52,19 +52,19 @@ shinyServer(
                 paste0(cal.model(), " selected to fit calibration data ",
                        cal.fname()$name);
                 if (!is.null(cal.model.fit()) && exists(x = cal.model(), where = cal$fit)) {
-                    x <- GetSummary(cal$fit[[cal.model()]]$smry);
+                    x <- GetSummary(cal$fit[[cal.model()]]$smry, cal.model(),
+                                    full = TRUE);
                     HTML(paste(x, collapse = '<br/>'));
-                    ## HTML(paste(x, collapse = '<br/>'));
                 }
             } else {
                 paste(">> Model not selected or data not loaded.");
             }
         })  ## End of output$cal.model
-        cal.e0 <- reactive(x = {
-            cal$set_e0(input$cal.e0);
+        cal.e0 <- reactive({
+            return(input$cal.e0);
         })
-        cal.s0 <- reactive(x = {
-            cal$set_s0(input$cal.s0);
+        cal.s0 <- reactive({
+            return(input$cal.s0);
         })
         cal.CF <- reactive({
             return(input$cal.CF);
@@ -81,7 +81,8 @@ shinyServer(
                 return(0);
             }
         })  ## End of tg.data
-        tg.model <- reactive(x = {
+        tg.model <- reactive({
+            tg.data();
             print(paste0(">> tg.model is ", input$tg.model));
             return(input$tg.model);
         })  ## End of tg.model
@@ -105,7 +106,8 @@ shinyServer(
                 paste0(tg.model(), " selected to fit thrombin generation data ",
                        tg.fname()$name);
                 if (!is.null(tg.model.fit()) && exists(x = tg.model(), where = tg$fit)) {
-                    x <- GetSummary(tg$fit[[tg.model()]]$smry);
+                    x <- GetSummary(tg$fit[[tg.model()]]$smry, tg.model(),
+                                    full = TRUE);
                     HTML(paste(x, collapse = '<br/>'));
                 }
             } else {
@@ -132,9 +134,7 @@ shinyServer(
 ######################################## Parameters tab
         output$cal.ShowParms <- renderDataTable(expr = {
             if (!is.null(cal.model()) && exists(x = cal.model(), where = cal$fit)) {
-                cal.e0(); cal.s0();
-                ## print(cal$e0); print(cal$s0);
-                cal$parms_model(cal.model());
+                cal$parms_model(cal.model(), cal.e0(), cal.s0());
             } else {
                 NULL;
             }

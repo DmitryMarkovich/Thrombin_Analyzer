@@ -2,6 +2,7 @@
 Cal.fit_EarlyMM <- function(silent = FALSE) {
     if (exists(x = "EarlyMM", where = fit)) {
         warning(">> No fitting: EarlyMM fit already exists!");
+        return(fit$EarlyMM);
     } else {
         print(">> fit_EarlyMM called!");
         if (exists(x = "LM", where = fit)) {
@@ -34,6 +35,7 @@ Cal.fit_EarlyMM <- function(silent = FALSE) {
         }
         if (is.null(ft)) {
             warning(">> Cal.fit_EarlyMM resulted in NULL");
+            return(NULL);
         } else {
             fit$EarlyMM <<- list(
                 cff = coef(ft), smry = summary(ft),
@@ -56,12 +58,13 @@ Cal.get_EarlyMM <- function() {
         return(b + p1 * (data$x - ((1 - exp(-p2 * data$x)) / p2)));
     } else {
         warning(">> fit$EarlyMM does not exist!");
+        return(rep(0, length(data$x)));
     }
 }  ## End of Cal.get_EarlyMM
 ################################################################################
 
 ################################################################################
-Cal.parms_EarlyMM <- function() {
+Cal.parms_EarlyMM <- function(e0, s0) {
     if (exists(x = "EarlyMM", where = fit)) {
         ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
         return(parms <<- data.frame(
@@ -71,6 +74,7 @@ Cal.parms_EarlyMM <- function() {
                );
     } else {
         warning(">> fit$EarlyMM does not exist!");
+        return(NULL);
     }
 }  ## End of Cal.parms_EarlyMM
 ################################################################################
