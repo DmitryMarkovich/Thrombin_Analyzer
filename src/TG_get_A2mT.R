@@ -37,14 +37,16 @@ TG.get_A2mT <- function(tg.model) {
                    A <- fit$LateExpGammaInt$cff[["A"]]; k <- fit$LateExpGammaInt$cff[["k"]];
                    theta <- fit$LateExpGammaInt$cff[["theta"]]; p1 <- fit$LateExpGammaInt$cff[["p1"]];
                    k.a2m <- fit$LateExpGammaInt$cff[["k.a2m"]];
-                   return(p1 * exp(-(A * pgamma(q = data$x, shape = k, scale = theta) +
-                                         (A * k.a2m / gamma(k)) * (
-                                             gamma(k) *
-                                                 pgamma(q = data$x, shape = k, scale = theta) * (data$x) -
-                                                     gamma(k + 1) * theta *
-                                                         pgamma(q = data$x, shape = k + 1, scale = theta))
-                                     )) * (k.a2m * A * pgamma(q = data$x, shape = k, scale = theta))
-                          );
+                   return(
+                       ## p1 * exp(-(A * pgamma(q = data$x, shape = k, scale = theta) +
+                       ##                (A * k.a2m / gamma(k)) * (
+                       ##                    gamma(k) *
+                       ##                        pgamma(q = data$x, shape = k, scale = theta) * (data$x) -
+                       ##                            gamma(k + 1) * theta *
+                       ##                                pgamma(q = data$x, shape = k + 1, scale = theta))
+                       ##            )) * (k.a2m * A * pgamma(q = data$x, shape = k, scale = theta))
+                       p1 * k.a2m * A * pgamma(q = data$x, shape = k, scale = theta)
+                       );
                } else {
                    warning(">> fit$LateExpGammaInt does not exist!");
                    return(rep(0, length(data$x)));
@@ -56,14 +58,16 @@ TG.get_A2mT <- function(tg.model) {
                    theta <- fit$LateExpT0GammaInt$cff[["theta"]]; p1 <- fit$LateExpT0GammaInt$cff[["p1"]];
                    k.a2m <- fit$LateExpT0GammaInt$cff[["k.a2m"]];
                    t0 <- fit$LateExpT0GammaInt$cff[["t0"]];
-                   return(p1 * exp(-(A * pgamma(q = data$x - t0, shape = k, scale = theta) +
-                                         (A * k.a2m / gamma(k)) * (
-                                             gamma(k) *
-                                                 pgamma(q = data$x - t0, shape = k, scale = theta) * (data$x - t0) -
-                                                     gamma(k + 1) * theta *
-                                                         pgamma(q = data$x - t0, shape = k + 1, scale = theta))
-                                     )) * (k.a2m * A * pgamma(q = data$x - t0, shape = k, scale = theta))
-                          );
+                   return(
+                       ## p1 * exp(-(A * pgamma(q = data$x - t0, shape = k, scale = theta) +
+                       ##                (A * k.a2m / gamma(k)) * (
+                       ##                    gamma(k) *
+                       ##                        pgamma(q = data$x - t0, shape = k, scale = theta) * (data$x - t0) -
+                       ##                            gamma(k + 1) * theta *
+                       ##                                pgamma(q = data$x - t0, shape = k + 1, scale = theta))
+                       ##            )) * (k.a2m * A * pgamma(q = data$x - t0, shape = k, scale = theta))
+                       p1 * k.a2m * A * pgamma(q = data$x - t0, shape = k, scale = theta)
+                       );
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
                    return(rep(0, length(data$x)));

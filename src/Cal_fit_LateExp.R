@@ -6,11 +6,11 @@ Cal.fit_LateExp <- function(silent = FALSE) {
     } else {
         print(">> fit_LateExp called!");
         if (exists(x = "LM", where = fit)) {
-            ## use existing LM fit for estimate of p1
+            ## use existing LM fit for estimate of p3
             start.list <- list(b = data$y[[1]], p1 = num.smry$ampl,
                                p3 = fit$LM$cff[[2]]);
         } else {
-            ## call fitLM and use cff[[2]] as estimate for p1
+            ## call fitLM and use cff[[2]] as estimate for p3
             fit_LM(silent = TRUE);
             start.list <- list(b = data$y[[1]], p1 = num.smry$ampl,
                                p3 = fit$LM$cff[[2]]);
@@ -66,13 +66,29 @@ Cal.get_LateExp <- function() {
 ################################################################################
 
 ################################################################################
+Cal.get_init_rate_LateExp <- function() {
+    print(">> Call to Cal.parms_LateExp");
+    if (exists(x = "LateExp", where = fit)) {
+        b <- fit$LateExp$cff[["b"]];
+        p1 <- fit$LateExp$cff[["p1"]]; p3 <- fit$LateExp$cff[["p3"]];
+        return(b + (p1 * p3) * data$x);
+    } else {
+        warning(">> fit$LateExp does not exist!");
+        return(rep(0, length(data$x)));
+    }
+}  ## End of Cal.get_init_rate_LateExp
+################################################################################
+
+################################################################################
 Cal.parms_LateExp <- function(e0, s0) {
     if (exists(x = "LateExp", where = fit)) {
         ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
+        p1 <- fit$LateExp$cff[["p1"]]; p3 <- fit$LateExp$cff[["p3"]];
         return(parms <<- data.frame(
-            Parameter = c("e0", "s0", "CF_CAT"),
-            Value = c(e0, s0, e0 / (fit$LateExp$cff[["p1"]] * fit$LateExp$cff[["p3"]])),
-            StdErr = rep(NA, 3), Units = c("nM", "uM", "nM * min / a.u."))
+            Parameter = c("e0", "s0", "CF_CAT", "TC_Initial_Slope"),
+            Value = c(e0, s0, e0 / (p1 * p3), p1 * p3),
+            ## StdErr = rep(NA, 3),
+            Units = c("nM", "uM", "nM * min / a.u.", "a.u. / min"))
                );
     } else {
         warning(">> fit$LateExp does not exist!");

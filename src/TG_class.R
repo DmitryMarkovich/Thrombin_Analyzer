@@ -43,8 +43,8 @@ TG.parms_model <- function(tg.model, cal.CF) {
            "T0Gamma" = parms_T0Gamma(cal.CF),
            "GammaInt" = parms_GammaInt(cal.CF),
            "T0GammaInt" = parms_T0GammaInt(cal.CF),
-           "LateExpGammaInt" = parms_LateExpGammaInt(),
-           "LateExpT0GammaInt" = parms_LateExpT0GammaInt(),
+           "LateExpGammaInt" = parms_LateExpGammaInt(cal.CF),
+           "LateExpT0GammaInt" = parms_LateExpT0GammaInt(cal.CF),
            "Auto" = parms_Auto(cal.CF),
            { warning(paste0(">> Call to unknown model ", tg.model))}
            );

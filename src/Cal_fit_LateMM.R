@@ -77,26 +77,42 @@ Cal.parms_LateMM <- function(e0, s0) {
         ## print(fit$LateMM);
         p1 <- fit$LateMM$cff[["p1"]]; p2 <- fit$LateMM$cff[["p2"]];
         p3 <- fit$LateMM$cff[["p3"]];
-        print(paste0(p1, p2, p3));
-        print(paste0(e0, s0));
+        ## print(paste0(p1, p2, p3));
+        ## print(paste0(e0, s0));
         Value <- c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),
-                   1e3 * s0 / p2, (1e3 * s0 / e0) * (p3 / p2), p1 / (1e3 * s0));
-        ## print(Value);
+                   1e3 * s0 / p2, (1e3 * s0 / e0) * (p3 / p2), p1 / (1e3 * s0),
+                   (p1 * p3 / (1 + p2)));
+        print(Value);
         ## print(parms);  ##str(fit$LateMM);
 
         return(parms <<- data.frame(
-            Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "C"),
-            Value = c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),
-                1e3 * s0 / p2, (1e3 * s0 / e0) * (p3 / p2), p1 / (1e3 * s0)),
-            StdErr = rep(NA, 7), Units = c("nM", "uM", "nM * min / a.u.",
-                                     "nM * min / a.u.", "nM", "nM / min",
-                                     "a.u. / nM"))
+            Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "C",
+                "TC_Initial_Slope"),
+            Value = Value,
+            ## StdErr = rep(NA, 7),
+            Units = c("nM", "uM", "nM * min / a.u.",
+                "nM * min / a.u.", "nM", "nM / min",
+                "a.u. / nM", "a.u. / min"))
                );
     } else {
         warning(">> fit$LateMM does not exist!");
         return(NULL);
     }
 }  ## End of Cal.parms_LateMM
+################################################################################
+
+################################################################################
+Cal.get_init_rate_LateMM <- function() {
+    print(">> Call to Cal.parms_LateMM");
+    if (exists(x = "LateMM", where = fit)) {
+        p1 <- fit$LateMM$cff[["p1"]]; p2 <- fit$LateMM$cff[["p2"]];
+        p3 <- fit$LateMM$cff[["p3"]]; b <- fit$LateMM$cff[["b"]];
+        return(b + (p1 * p3 / (1 + p2)) * data$x);
+    } else {
+        warning(">> fit$LateMM does not exist!");
+        return(rep(0, length(data$x)));
+    }
+}  ## End of Cal.get_init_rate_LateMM
 ################################################################################
 
 ## ################################################################################

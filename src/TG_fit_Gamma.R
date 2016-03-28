@@ -75,27 +75,32 @@ TG.parms_Gamma <- function(cal.CF) {
         if (cal.CF != 1) {
             CF <- cal.CF;
             return(parms <<- data.frame(
-                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+                    "Alpha2M_Level"),
                 Value = c(
+                    0,
                     CF * A,
                     CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
                     theta * (k - 1),
-                    v,
+                    CF * v,
                     0),
-                StdErr = rep(NA, 5),
-                Units = c("nM * min", "nM", "min", "nM / min", "min"))
+                ## StdErr = rep(NA, 5),
+                Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
                    );
         } else {
             return(parms <<- data.frame(
-                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+                    "Alpha2M_Level"),
                 Value = c(
+                    0,
                     A,
                     A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
                     theta * (k - 1),
                     v,
                     0),
-                StdErr = rep(NA, 5),
-                Units = c("a.u.", "a.u. / min", "min", "a.u. / min^2", "min"))
+                ## StdErr = rep(NA, 5),
+                Units = c("min", "a.u.", "a.u. / min", "min",
+                    "a.u. / min * min", "nM"))
                    );
         }
     } else {

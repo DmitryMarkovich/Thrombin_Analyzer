@@ -68,9 +68,10 @@ Cal.parms_EarlyMM <- function(e0, s0) {
     if (exists(x = "EarlyMM", where = fit)) {
         ## print(e0); print(s0); print(e0 / fit$LM$cff[[2]]);
         return(parms <<- data.frame(
-            Parameter = c("e0", "s0", "CF_CAT"),
-            Value = c(e0, s0, e0 / fit$EarlyMM$cff[["p1"]]),
-            StdErr = rep(NA, 3), Units = c("nM", "uM", "nM * min / a.u."))
+            Parameter = c("e0", "s0", "CF_CAT", "TC_Initial_Slope"),
+            Value = c(e0, s0, e0 / fit$EarlyMM$cff[["p1"]], fit$EarlyMM$cff[["p1"]]),
+            ## StdErr = rep(NA, 3),
+            Units = c("nM", "uM", "nM * min / a.u.", "a.u. / min"))
                );
     } else {
         warning(">> fit$EarlyMM does not exist!");

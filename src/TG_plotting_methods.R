@@ -91,9 +91,14 @@ TG.plot_fit <- function(tg.model) {
     lines(data$x, get_A2mT_int(tg.model), col = "cyan", lwd = 2);
     lines(data$x, get_model(tg.model), col = "red", lwd = 3);
     lines(data$x, get_thrombin_int(tg.model), col = "blue", lwd = 2);
-    if (tg.model == "LateExpT0GammaInt") {
+    if (any(tg.model == c("LateExpGammaInt", "LateExpT0GammaInt"))) {
         lines(data$x, fit$LateExpT0GammaInt$cff[["b"]] +
-                  get_thrombin_int(tg.model) + get_A2mT_int(tg.model), col = "orange");
+                  get_thrombin_int(tg.model) + get_A2mT_int(tg.model),
+              col = "orange", lwd = 2);
+        legend("bottomright",
+               legend = c("Compensated for \n substrate consumption"),
+               pch = NA, lty = 1, seg.len = 0.5,
+               lwd = 4, col = "orange", bg = "white", bty = "y", cex = 1.25);
     }
     if (tg.model == "Auto") {
         model.label <- paste0(fit$Auto_model, " fit (A)");
@@ -127,9 +132,15 @@ TG.plot_residuals <- function(tg.model) {
     axis(side = 2, tck = -0.025, labels = NA, col = "black");
     axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
     title(ylab = "Fluorescence, a.u.", line = 4.5, cex.lab = 1.5);
-    title(main = "Residual error", line = 0.5, cex.main = 1.5);
-    abline(h = fit[[tg.model]]$smry$sigma);
-    abline(h = -fit[[tg.model]]$smry$sigma);
+    title(main = "Residuals of the fit", line = 0.5, cex.main = 1.5);
+    abline(h = fit[[tg.model]]$smry$sigma, lwd = 3);
+    abline(h = -fit[[tg.model]]$smry$sigma, lwd = 3);
+    legend("top", legend = c("Residuals"), pch = c(1), lty = c(NA),
+           seg.len = 0.5, lwd = 4, col = c("black"), bg = "white", bty = "y",
+           cex = 1);
+    legend("bottom", legend = c("Residual standard error of the fit"),
+           pch = c(NA), lty = c(1), seg.len = 0.5, lwd = 4, col = c("black"),
+           bg = "white", bty = "y", cex = 1);
 }  ## End of TG.plot_residuals
 ################################################################################
 

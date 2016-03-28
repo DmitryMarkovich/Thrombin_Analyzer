@@ -33,9 +33,10 @@ Cal.parms_LM <- function(e0, s0) {
     print(">> Call to Cal.parms_LM");
     if (exists(x = "LM", where = fit)) {
         return(parms <<- data.frame(
-            Parameter = c("e0", "s0", "CF_CAT"),
-            Value = c(e0, s0, e0 / fit$LM$cff[[2]]),
-            StdErr = rep(NA, 3), Units = c("nM", "uM", "nM * min / a.u."))
+            Parameter = c("e0", "s0", "CF_CAT", "TC_Initial_Slope"),
+            Value = c(e0, s0, e0 / fit$LM$cff[[2]], fit$LM$cff[[2]]),
+            ## StdErr = rep(NA, 3),
+            Units = c("nM", "uM", "nM * min / a.u.", "a.u. / min"))
                );
     } else {
         warning(">> fit$LM does not exist!");

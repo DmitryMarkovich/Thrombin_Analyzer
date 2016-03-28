@@ -95,7 +95,7 @@ TG.parms_T0GammaInt <- function(cal.CF) {
     if (exists(x = "T0GammaInt", where = fit)) {
         A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
         theta <- fit$T0GammaInt$cff[["theta"]];
-        t0 <- fit$T0GammaInt$cff[["t0"]];
+        t0 <- fit$T0GammaInt$cff[["t0"]]; k.a2m <- fit$T0GammaInt$cff[["k.a2m"]]; 
         if (k > 2) {
             v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
                 exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
@@ -105,27 +105,33 @@ TG.parms_T0GammaInt <- function(cal.CF) {
         if (cal.CF != 1) {
             CF <- cal.CF;
             return(parms <<- data.frame(
-                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+                    "Alpha2M_Level"),
                 Value = c(
+                    t0,
                     CF * A,
                     CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
                     t0 + theta * (k - 1),
                     CF * v,
-                    t0),
-                StdErr = rep(NA, 5),
-                Units = c("nM * min", "nM", "min", "nM / min", "min"))
+                    CF * k.a2m * A
+                    ),
+                ## StdErr = rep(NA, 5),
+                Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
                    );
         } else {
             return(parms <<- data.frame(
-                Parameter = c("ETP", "Peak", "ttPeak", "Vel Index", "Lagtime"),
+                Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+                    "Alpha2M_Level"),
                 Value = c(
+                    t0,
                     A,
                     A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
                     t0 + theta * (k - 1),
                     v,
-                    t0),
-                StdErr = rep(NA, 5),
-                Units = c("a.u.", "a.u. / min", "min", "a.u. / min * min", "min"))
+                    k.a2m * A
+                    ),
+                Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
+                    "nM"))
                    );
         }
     } else {

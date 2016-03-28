@@ -61,7 +61,11 @@ TG.get_thrombin_vel <- function(tg.model) {
                if (exists(x = "LateExpGammaInt", where = fit)) {
                    A <- fit$LateExpGammaInt$cff[["A"]]; k <- fit$LateExpGammaInt$cff[["k"]];
                    theta <- fit$LateExpGammaInt$cff[["theta"]]; p1 <- fit$LateExpGammaInt$cff[["p1"]];
-                   return(p1 * (1 - exp(-A * dgamma(x = data$x, shape = k, scale = theta))));
+                   v <- p1 * A * exp(-(data$x) / theta) * (data$x) ^ (k - 1) *
+                       ((-1 / theta) + ((k - 1) / (data$x))) /
+                           (gamma(k) * theta ^ k);
+                   v[data$x <= 0] <- 0;
+                   return(v);
                } else {
                    warning(">> fit$LateExpGammaInt does not exist!");
                    return(rep(0, length(data$x)));
@@ -72,9 +76,11 @@ TG.get_thrombin_vel <- function(tg.model) {
                    A <- fit$LateExpT0GammaInt$cff[["A"]]; k <- fit$LateExpT0GammaInt$cff[["k"]];
                    theta <- fit$LateExpT0GammaInt$cff[["theta"]]; p1 <- fit$LateExpT0GammaInt$cff[["p1"]];
                    t0 <- fit$LateExpT0GammaInt$cff[["t0"]];
-                   return(p1 * A * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k - 1) *
-                              ((-1 / theta) + ((k - 1) / (data$x - t0))) /
-                                  (gamma(k) * theta ^ k));
+                   v <- p1 * A * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k - 1) *
+                       ((-1 / theta) + ((k - 1) / (data$x - t0))) /
+                           (gamma(k) * theta ^ k);
+                   v[data$x <= t0] <- 0;
+                   return(v);
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
                    return(rep(0, length(data$x)));

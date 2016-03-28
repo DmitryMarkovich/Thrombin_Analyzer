@@ -33,6 +33,19 @@ Cal.get_model <- function(cal.model) {
            );
 }  ## End of Cal.get_model
 ################################################################################
+################################################################################
+Cal.get_init_rate <- function(cal.model) {
+    switch(cal.model,
+           "LateExp" = get_init_rate_LateExp(),
+           "LateMM" = get_init_rate_LateMM(),
+           "Auto" = get_init_rate_Auto(),
+           {
+               warning(paste0(">> Call to unknown get_model", cal.model));
+               return(rep(0, length(data$x)));
+           }
+           );
+}  ## End of Cal.get_model
+################################################################################
 source("src/Cal_plotting_methods.R");
 ################################################################################
 Cal.parms_model <- function(cal.model, e0, s0) {
@@ -66,16 +79,16 @@ Cal <- setRefClass(
         parms_EarlyMM = Cal.parms_EarlyMM,
         ## LateExp
         fit_LateExp = Cal.fit_LateExp, get_LateExp = Cal.get_LateExp,
-        parms_LateExp = Cal.parms_LateExp,
+        parms_LateExp = Cal.parms_LateExp, get_init_rate_LateExp = Cal.get_init_rate_LateExp,
         ## LateMM
         fit_LateMM = Cal.fit_LateMM, get_LateMM = Cal.get_LateMM,
-        parms_LateMM = Cal.parms_LateMM,
+        parms_LateMM = Cal.parms_LateMM, get_init_rate_LateMM = Cal.get_init_rate_LateMM,
         ## Auto
         fit_Auto = Cal.fit_Auto, get_Auto = Cal.get_Auto,
         parms_Auto = Cal.parms_Auto,
         ## Model
         fit_model = Cal.fit_model, get_model = Cal.get_model,
-        parms_model = Cal.parms_model,
+        parms_model = Cal.parms_model, get_init_rate = Cal.get_init_rate,
         plot_fit = Cal.plot_fit, plot_residuals = Cal.plot_residuals
     )
 );  ## End of Cal setRefClass
