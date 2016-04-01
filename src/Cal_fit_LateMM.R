@@ -86,7 +86,7 @@ Cal.parms_LateMM <- function(e0, s0) {
         ## print(parms);  ##str(fit$LateMM);
 
         return(parms <<- data.frame(
-            Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "C",
+            Parameter = c("e0", "s0", "CF_CAT", "CF_DTU", "K.m", "k.cat", "I",
                 "TC_Initial_Slope"),
             Value = Value,
             ## StdErr = rep(NA, 7),

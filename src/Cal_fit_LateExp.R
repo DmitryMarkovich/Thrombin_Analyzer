@@ -32,8 +32,8 @@ Cal.fit_LateExp <- function(silent = FALSE) {
                 )
             }, silent = F);
             n.try <- n.try + 1;
-            start.list <- list(b = data$y[1], p1 = runif(1) * num.smry$ampl,
-                               p3 = runif(1) * fit$LM$cff[[2]]);
+            start.list <- list(b = data$y[1], p1 = runif(1, 0, 2) * num.smry$ampl,
+                               p3 = runif(1, 0, 2) * fit$LM$cff[[2]]);
         }
         if (is.null(ft)) {
             warning(">> Cal.fit_LateExp resulted in NULL");

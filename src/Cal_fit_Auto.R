@@ -12,6 +12,13 @@ Cal.fit_Auto <- function(silent = TRUE) {
                 fit$Auto <<- ft;
                 fit$Auto_model <<- "EarlyMM";
             }
+        } else if (num.smry$rat$x >= 5 && num.smry$rat$x <= 25 &&
+                   num.smry$rat$y >= 10 && num.smry$rat$y <= 30) {
+            ft <- fit_LateExp(silent = TRUE);
+            if (!is.null(ft)) {
+                fit$Auto <<- ft;
+                fit$Auto_model <<- "LateExp";
+            }
         } else if (num.smry$rat$x >= 15 && num.smry$rat$y >= 40) {
             ft <- fit_LateMM(silent = TRUE);
             if (!is.null(ft)) {

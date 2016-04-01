@@ -1,4 +1,4 @@
-N.tries <- 100;  ## attempts to perform fitting
+N.tries <- 1000;  ## attempts to perform fitting
 kPlotTypes <- c("Calibration", "Thrombin generation", "Thrombogram");
 kDataCodes <- c("cal", "tg", "tg.drv1");
 kCalDFPar <- c("e0", "s0", "K.m", "k.cat", "C", "CF_CAT", "CF_DTU");
