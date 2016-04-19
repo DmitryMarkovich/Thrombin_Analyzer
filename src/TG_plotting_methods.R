@@ -92,7 +92,8 @@ TG.plot_fit <- function(tg.model) {
     lines(data$x, get_model(tg.model), col = "red", lwd = 3);
     lines(data$x, get_thrombin_int(tg.model), col = "blue", lwd = 2);
     if (any(tg.model == c("LateExpGammaInt", "LateExpT0GammaInt"))) {
-        lines(data$x, fit$LateExpT0GammaInt$cff[["b"]] +
+        ## print(tg.model);
+        lines(data$x, fit[[tg.model]]$cff[["b"]] +
                   get_thrombin_int(tg.model) + get_A2mT_int(tg.model),
               col = "orange", lwd = 2);
         legend("bottomright",

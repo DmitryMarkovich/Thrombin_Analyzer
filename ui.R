@@ -2,6 +2,7 @@ library(shiny);
 
 shinyUI(
     ui = fluidPage(
+        tags$head(tags$style(".rightAlign{float:right;}")),
         headerPanel("Thrombin Analyzer"), ## App title
 
         sidebarLayout(
@@ -39,6 +40,16 @@ shinyUI(
                                 "Thrombin generation - Paper Control",
                                 "Thrombin generation - Paper Green",
                                 "Thrombin generation - Paper Red",
+                                "Synthetic - Calibration - LM",
+                                "Synthetic - Calibration - EarlyMM",
+                                "Synthetic - Calibration - LateExp",
+                                "Synthetic - Calibration - LateMM",
+                                "Synthetic - Thrombin generation - Gamma",
+                                "Synthetic - Thrombin generation - T0Gamma",
+                                "Synthetic - Thrombin generation - GammaInt",
+                                "Synthetic - Thrombin generation - T0GammaInt",
+                                "Synthetic - Thrombin generation - LateExpGammaInt",
+                                "Synthetic - Thrombin generation - LateExpT0GammaInt",
                                 "None"
                                 ),
                             selected = "None"),
@@ -57,7 +68,9 @@ shinyUI(
                                  column(width = 6,
                                         htmlOutput(outputId = "cal.model")
                                         )
-                                 )  ## End of fluidRow
+                                 ),  ## End of fluidRow
+                             uiOutput(outputId = "cal.SynthHint",
+                                      class = "rightAlign")
                              ),
                     tabPanel(title = "Thrombin generation signal",
                              plotOutput(outputId = "tg.Plot"),
@@ -68,7 +81,9 @@ shinyUI(
                                  column(width = 6,
                                         htmlOutput(outputId = "tg.model")
                                         )
-                                 )  ## End of fluidRow
+                                 ),  ## End of fluidRow
+                             uiOutput(outputId = "tg.SynthHint",
+                                      class = "rightAlign")
                              ),
                     tabPanel(title = "Thrombogram",
                              plotOutput(outputId = "tg.PlotDrv1")

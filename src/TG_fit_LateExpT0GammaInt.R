@@ -124,7 +124,7 @@ TG.parms_LateExpT0GammaInt <- function(cal.CF) {
                     p1 * k.a2m * A
                     ),
                 Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
-                    "nM"))
+                    "a.u. / min"))
                    );
         }
     } else {

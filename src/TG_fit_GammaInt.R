@@ -117,7 +117,7 @@ TG.parms_GammaInt <- function(cal.CF) {
                     0),
                 ## StdErr = rep(NA, 5),
                 Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
-                    "nM"))
+                    "a.u. / min"))
                    );
         }
     } else {

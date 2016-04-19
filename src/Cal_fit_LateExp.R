@@ -8,7 +8,7 @@ Cal.fit_LateExp <- function(silent = FALSE) {
         if (exists(x = "LM", where = fit)) {
             ## use existing LM fit for estimate of p3
             start.list <- list(b = data$y[[1]], p1 = num.smry$ampl,
-                               p3 = fit$LM$cff[[2]]);
+                               p3 = fit$LM$cff[[2]] / num.smry$ampl);
         } else {
             ## call fitLM and use cff[[2]] as estimate for p3
             fit_LM(silent = TRUE);
@@ -33,7 +33,7 @@ Cal.fit_LateExp <- function(silent = FALSE) {
             }, silent = F);
             n.try <- n.try + 1;
             start.list <- list(b = data$y[1], p1 = runif(1, 0, 2) * num.smry$ampl,
-                               p3 = runif(1, 0, 2) * fit$LM$cff[[2]]);
+                               p3 = runif(1, 0, 2) * fit$LM$cff[[2]] / num.smry$ampl);
         }
         if (is.null(ft)) {
             warning(">> Cal.fit_LateExp resulted in NULL");

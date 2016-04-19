@@ -1,11 +1,8 @@
-library(shiny); library(minpack.lm); library(LambertW);
+library(shiny); library(minpack.lm); library(LambertW);  ## additional R libraries
 print("################################################################################");
 app.path <- getwd();  ## stores current directory
-source("src/global_parameters.R");
-source("src/common_functions.R");
-source("src/Base_class.R");
-source("src/Cal_class.R");
-source("src/TG_class.R");
+source("src/global_parameters.R"); source("src/common_functions.R");
+source("src/Base_class.R"); source("src/Cal_class.R"); source("src/TG_class.R");
 
 cal <- Cal$new(); tg <- TG$new();
 ################################################################################
@@ -62,6 +59,34 @@ shinyServer(
                 }
             }
         })  ## End of output$cal.model
+        output$cal.SynthHint <- renderTable({
+            if (!is.null(cal.data()) && !is.null(cal.model()) &&
+                cal.model() != "None" &&
+                substr(input$cal.fname$name, 0, 9) == "Synthetic") {
+                switch(cal.model(),
+                       "LM" = { return(t(data.frame(
+                           Parameter_Name = c("Intercept", "Slope", "Residual standard error"),
+                           True_Value = c(100, 10, 2))));
+                            },
+                       "EarlyMM" = { return(t(data.frame(
+                           Parameter_Name = c("b", "p1", "p2", "Residual standard error"),
+                           True_Value = c(10, 10, 1, 2))));
+                                 },
+                       "LateExp" = { return(t(data.frame(
+                           Parameter_Name = c("b", "p1", "p3", "Residual standard error"),
+                           True_Value = c(10, 1000, 0.05, 2))));
+                                 },
+                       "LateMM" = { return(t(data.frame(
+                           Parameter_Name = c("b", "p1", "p2", "p3", "Residual standard error"),
+                           True_Value = c(10, 1500, 0.75, 0.1, 2))));
+                                },
+                       { ## Default
+                           warning(">> Returning NULL table!");
+                           return(NULL);
+                       }
+                       );  ## End of switch()
+            }  ## End of if()
+        })  ## End of output$cal.SynthHint
         cal.e0 <- reactive({
             return(input$cal.e0);
         })
@@ -121,6 +146,42 @@ shinyServer(
                 tg$plot_residuals(tg.model());
             }
         })  ## End of output$tg.PlotResid
+        output$tg.SynthHint <- renderTable({
+            if (!is.null(tg.data()) && !is.null(tg.model()) &&
+                tg.model() != "None" &&
+                substr(input$tg.fname$name, 0, 9) == "Synthetic") {
+                switch(tg.model(),
+                       "Gamma" = { return(t(data.frame(
+                           Parameter_Name = c("b", "A", "k", "theta", "Residual standard error"),
+                           True_Value = c(50, 500, 3, 7, 2))));
+                               },
+                       "T0Gamma" = { return(t(data.frame(
+                           Parameter_Name = c("b", "A", "k", "theta", "t0", "Residual standard error"),
+                           True_Value = c(50, 500, 3, 7, 10, 2))));
+                                 },
+                       "GammaInt" = { return(t(data.frame(
+                           Parameter_Name = c("b", "A", "k", "theta", "k.a2m", "Residual standard error"),
+                           True_Value = c(10, 600, 5, 2, 0.01, 2))));
+                                  },
+                       "T0GammaInt" = { return(t(data.frame(
+                           Parameter_Name = c("b", "A", "k", "theta", "k.a2m", "t0", "Residual standard error"),
+                           True_Value = c(10, 600, 5, 2, 0.01, 10, 2))));
+                                    },
+                       "LateExpGammaInt" = { return(t(data.frame(
+                           Parameter_Name = c("b", "p1", "A", "k", "theta", "k.a2m", "Residual standard error"),
+                           True_Value = c(10, 1200, 0.5, 5, 2, 0.01, 2))));
+                                         },
+                       "LateExpT0GammaInt" = { return(t(data.frame(
+                           Parameter_Name = c("b", "p1", "A", "k", "theta", "k.a2m", "t0", "Residual standard error"),
+                           True_Value = c(10, 1200, 0.5, 5, 2, 0.01, 10, 2))));
+                                           },
+                       { ## Default
+                           warning(">> Returning NULL table!");
+                           return(NULL);
+                       }
+                       );  ## End of switch()
+            }  ## End of if()
+        })  ## End of output$tg.SynthHint
 ################################################################################
 ######################################## Thrombogram tab
 ################################################################################
@@ -159,93 +220,174 @@ shinyServer(
 ################################################################################
         demo.signal <- reactive({
             signal <- input$demo.signal;
-            if (substr(signal, 0, 11) == "Calibration") {
-                switch(signal,
-                       "Calibration - LM, EarlyMM" = {
-                           return(list(
-                               fname = "DEMO-Calibration-LM-EarlyMM.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Calibration-LM-EarlyMM.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Calibration - LateExp" = {
-                           return(list(
-                               fname = "DEMO-Calibration-LateExp.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Calibration-LateExp.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Calibration - LateMM" = {
-                           return(list(
-                               fname = "DEMO-Calibration-LateMM.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Calibration-LateMM.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Calibration - Paper" = {
-                           return(list(
-                               fname = "DEMO-Calibration-Paper.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Calibration-Paper.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       }
-                       )  ## End of switch
-            } else if (substr(signal, 0, 8) == "Thrombin") {
-                switch(signal,
-                       "Thrombin generation - Gamma, T0Gamma" = {
-                           return(list(
-                               fname = "DEMO-Thrombin-generation-Gamma-T0Gamma.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Thrombin-generation-Gamma-T0Gamma.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Thrombin generation - GammaInt, T0GammaInt" = {
-                           return(list(
-                               fname = "DEMO-Thrombin-generation-GammaInt-T0GammaInt.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Thrombin-generation-GammaInt-T0GammaInt.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Thrombin generation - LateExpGammaInt, LateExpT0GammaInt" = {
-                           return(list(
-                               fname = "DEMO-Thrombin-generation-LateExpGammaInt-LateExpT0GammaInt.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Thrombin-generation-LateExpGammaInt-LateExpT0GammaInt.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Thrombin generation - Paper Control" = {
-                           return(list(
-                               fname = "DEMO-Thrombin-generation-Paper-Control.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Thrombin-generation-Paper-Control.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Thrombin generation - Paper Green" = {
-                           return(list(
-                               fname = "DEMO-Thrombin-generation-Paper-Green.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Thrombin-generation-Paper-Green.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       },
-                       "Thrombin generation - Paper Red" = {
-                           return(list(
-                               fname = "DEMO-Thrombin-generation-Paper-Red.dat",
-                               data = read.table(
-                                   file = "data/DEMO-Thrombin-generation-Paper-Red.dat",
-                                   header = T, col.names = c("x", "y"), sep = " ")
-                               ))
-                       }
-                       )  ## End of switch
-            }
+            switch(signal,
+                   "Calibration - LM, EarlyMM" = {
+                       return(list(
+                           fname = "DEMO-Calibration-LM-EarlyMM.dat",
+                           data = read.table(
+                               file = "data/DEMO-Calibration-LM-EarlyMM.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Calibration - LateExp" = {
+                       return(list(
+                           fname = "DEMO-Calibration-LateExp.dat",
+                           data = read.table(
+                               file = "data/DEMO-Calibration-LateExp.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Calibration - LateMM" = {
+                       return(list(
+                           fname = "DEMO-Calibration-LateMM.dat",
+                           data = read.table(
+                               file = "data/DEMO-Calibration-LateMM.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Calibration - Paper" = {
+                       return(list(
+                           fname = "DEMO-Calibration-Paper.dat",
+                           data = read.table(
+                               file = "data/DEMO-Calibration-Paper.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Thrombin generation - Gamma, T0Gamma" = {
+                       return(list(
+                           fname = "DEMO-Thrombin-generation-Gamma-T0Gamma.dat",
+                           data = read.table(
+                               file = "data/DEMO-Thrombin-generation-Gamma-T0Gamma.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Thrombin generation - GammaInt, T0GammaInt" = {
+                       return(list(
+                           fname = "DEMO-Thrombin-generation-GammaInt-T0GammaInt.dat",
+                           data = read.table(
+                               file = "data/DEMO-Thrombin-generation-GammaInt-T0GammaInt.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Thrombin generation - LateExpGammaInt, LateExpT0GammaInt" = {
+                       return(list(
+                           fname = "DEMO-Thrombin-generation-LateExpGammaInt-LateExpT0GammaInt.dat",
+                           data = read.table(
+                               file = "data/DEMO-Thrombin-generation-LateExpGammaInt-LateExpT0GammaInt.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Thrombin generation - Paper Control" = {
+                       return(list(
+                           fname = "DEMO-Thrombin-generation-Paper-Control.dat",
+                           data = read.table(
+                               file = "data/DEMO-Thrombin-generation-Paper-Control.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Thrombin generation - Paper Green" = {
+                       return(list(
+                           fname = "DEMO-Thrombin-generation-Paper-Green.dat",
+                           data = read.table(
+                               file = "data/DEMO-Thrombin-generation-Paper-Green.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Thrombin generation - Paper Red" = {
+                       return(list(
+                           fname = "DEMO-Thrombin-generation-Paper-Red.dat",
+                           data = read.table(
+                               file = "data/DEMO-Thrombin-generation-Paper-Red.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Calibration - LM" = {
+                       return(list(
+                           fname = "Synthetic-Calibration-LM.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Calibration-LM.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Calibration - EarlyMM" = {
+                       return(list(
+                           fname = "Synthetic-Calibration-EarlyMM.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Calibration-EarlyMM.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Calibration - LateExp" = {
+                       return(list(
+                           fname = "Synthetic-Calibration-LateExp.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Calibration-LateExp.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Calibration - LateMM" = {
+                       return(list(
+                           fname = "Synthetic-Calibration-LateMM.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Calibration-LateMM.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Thrombin generation - Gamma" = {
+                       return(list(
+                           fname = "Synthetic-Thrombin-generation-Gamma.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Thrombin-generation-Gamma.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Thrombin generation - T0Gamma" = {
+                       return(list(
+                           fname = "Synthetic-Thrombin-generation-T0Gamma.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Thrombin-generation-T0Gamma.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Thrombin generation - GammaInt" = {
+                       return(list(
+                           fname = "Synthetic-Thrombin-generation-GammaInt.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Thrombin-generation-GammaInt.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Thrombin generation - T0GammaInt" = {
+                       return(list(
+                           fname = "Synthetic-Thrombin-generation-T0GammaInt.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Thrombin-generation-T0GammaInt.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Thrombin generation - LateExpGammaInt" = {
+                       return(list(
+                           fname = "Synthetic-Thrombin-generation-LateExpGammaInt.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Thrombin-generation-LateExpGammaInt.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   "Synthetic - Thrombin generation - LateExpT0GammaInt" = {
+                       return(list(
+                           fname = "Synthetic-Thrombin-generation-LateExpT0GammaInt.dat",
+                           data = read.table(
+                               file = "data/Synthetic-Thrombin-generation-LateExpT0GammaInt.dat",
+                               header = T, col.names = c("x", "y"), sep = " ")
+                           ))
+                   },
+                   {  ## Default
+                       warning(">> Unknown signal chosen!");
+                       return(NULL);
+                   }
+                   )  ## End of switch
+            ## } else if (substr(signal, 0, 8) == "Synthetic") {
+            ##     }  ## End of if (substr())
         })  ## End of demo.signal
         output$demo.Show <- renderTable({
             if (!is.null(demo.signal()) && demo.signal() != "None") {
