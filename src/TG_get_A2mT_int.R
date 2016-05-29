@@ -42,6 +42,29 @@ TG.get_A2mT_int <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
+           "T0GammaInt2" = {
+               if (exists(x = "T0GammaInt2", where = fit)) {
+                   A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+                   k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+                   theta <- fit$T0GammaInt2$cff[["theta"]]; k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]];
+                   t0 <- fit$T0GammaInt2$cff[["t0"]];
+                   return(
+                       (A1 * k.a2m / gamma(k1)) * (
+                           gamma(k1) *
+                               pgamma(q = data$x - t0, shape = k1, scale = theta) * (data$x - t0) -
+                                   gamma(k1 + 1) * theta *
+                                       pgamma(q = data$x - t0, shape = k1 + 1, scale = theta)) +
+                           (A2 * k.a2m / gamma(k2)) * (
+                               gamma(k2) *
+                                   pgamma(q = data$x - t0, shape = k2, scale = theta) * (data$x - t0) -
+                                       gamma(k2 + 1) * theta *
+                                           pgamma(q = data$x - t0, shape = k2 + 1, scale = theta))
+                       );
+               } else {
+                   warning(">> fit$T0GammaInt2 does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
            "LateExpGammaInt" = {
                if (exists(x = "LateExpGammaInt", where = fit)) {
                    A <- fit$LateExpGammaInt$cff[["A"]]; k <- fit$LateExpGammaInt$cff[["k"]];

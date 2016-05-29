@@ -51,14 +51,38 @@ TG.get_drv2 <- function(tg.model) {
                    theta <- fit$T0GammaInt$cff[["theta"]]; k.a2m <- fit$T0GammaInt$cff[["k.a2m"]];
                    t0 <- fit$T0GammaInt$cff[["t0"]];
                    v <- A * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k - 1) *
-                       ((-1 / theta) + ((k - 1) / (data$x - t0))) /
-                           (gamma(k) * theta ^ k) +
+                       (((-1 / theta) + ((k - 1) / (data$x - t0))) /
+                           (gamma(k) * theta ^ k)) +
                                k.a2m * A * dgamma(x = data$x - t0, shape = k,
                                                   scale = theta);
                    v[data$x <= t0] <- 0;
                    return(v);
                } else {
                    warning(">> fit$T0GammaInt does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
+           "T0GammaInt2" = {
+               if (exists(x = "T0GammaInt2", where = fit)) {
+                   A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+                   k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+                   theta <- fit$T0GammaInt2$cff[["theta"]];
+                   k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]];
+                   t0 <- fit$T0GammaInt2$cff[["t0"]];
+                   v <- A1 * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k1 - 1) *
+                       (((-1 / theta) + ((k1 - 1) / (data$x - t0))) /
+                           (gamma(k1) * theta ^ k1)) +
+                               k.a2m * A1 * dgamma(x = data$x - t0, shape = k1,
+                                                   scale = theta) +
+                                   A2 * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k2 - 1) *
+                                       (((-1 / theta) + ((k2 - 1) / (data$x - t0))) /
+                                            (gamma(k2) * theta ^ k2)) +
+                                           k.a2m * A2 * dgamma(x = data$x - t0, shape = k2,
+                                                               scale = theta);
+                   v[data$x <= t0] <- 0;
+                   return(v);
+               } else {
+                   warning(">> fit$T0GammaInt2 does not exist!");
                    return(rep(0, length(data$x)));
                }
            },

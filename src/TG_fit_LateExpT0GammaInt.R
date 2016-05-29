@@ -28,7 +28,7 @@ TG.fit_LateExpT0GammaInt <- function(silent = TRUE) {
                     data = data, start = start.list, trace = F,
                     ## lower = c(b.min, A.min, k.min, theta.min),
                     ## upper = c(b.max, A.max, k.max, theta.max),
-                    lower = c(  0,   0,   0,   1.5,   0,   0,   0),
+                    lower = c(  0,   0,   0,   2,   0,   0,   0),
                     upper = c(Inf, Inf, Inf, Inf, Inf, Inf, Inf),
                     algorithm = "LM",
                     control = nls.lm.control(

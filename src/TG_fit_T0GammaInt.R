@@ -1,27 +1,28 @@
 ################################################################################
 TG.fit_T0GammaInt <- function(silent = TRUE) {
 ################################################################################
+    print(">> fit_T0GammaInt called!");
     if (exists(x = "T0GammaInt", where = fit)) {
         warning(">> No fitting: T0GammaInt fit already exists!");
         return(fit$T0GammaInt);
     } else {
-        if (exists(x = "GammaInt", where = fit)) {
-            start.list <- list(
-                b = fit$GammaInt$cff[["b"]], A = fit$GammaInt$cff[["A"]],
-                k = fit$GammaInt$cff[["k"]], theta = fit$GammaInt$cff[["theta"]],
-                k.a2m = fit$GammaInt$cff[["k.a2m"]], t0 = 0);
-        } else {
-            fit_GammaInt(silent = TRUE);
-            start.list <- list(
-                b = fit$GammaInt$cff[["b"]], A = fit$GammaInt$cff[["A"]],
-                k = fit$GammaInt$cff[["k"]], theta = fit$GammaInt$cff[["theta"]],
-                k.a2m = fit$GammaInt$cff[["k.a2m"]], t0 = 0);
-        }
-        ## ft <- lm(y ~ x, data = data, subset = x >= num.smry$t.lin);
-        ## A <- coef(ft)[[1]] + coef(ft)[[2]] * num.smry$t.lin;
-        ## k.a2m <- coef(ft)[[2]] / A; k <- 3; theta <- num.smry$t.peak / (k - 1);
-        ## start.list <- list(b = data$y[1], A = A, k = k,
-        ##                                theta = theta, k.a2m = k.a2m);
+        ## if (exists(x = "GammaInt", where = fit)) {
+        ##     start.list <- list(
+        ##         b = fit$GammaInt$cff[["b"]], A = fit$GammaInt$cff[["A"]],
+        ##         k = fit$GammaInt$cff[["k"]], theta = fit$GammaInt$cff[["theta"]],
+        ##         k.a2m = fit$GammaInt$cff[["k.a2m"]], t0 = 0);
+        ## } else {
+        ##     fit_GammaInt(silent = TRUE);
+        ##     start.list <- list(
+        ##         b = fit$GammaInt$cff[["b"]], A = fit$GammaInt$cff[["A"]],
+        ##         k = fit$GammaInt$cff[["k"]], theta = fit$GammaInt$cff[["theta"]],
+        ##         k.a2m = fit$GammaInt$cff[["k.a2m"]], t0 = 0);
+        ## }
+        ft <- lm(y ~ x, data = data, subset = x >= num.smry$t.lin);
+        A <- coef(ft)[[1]] + coef(ft)[[2]] * num.smry$t.lin;
+        k.a2m <- coef(ft)[[2]] / A; k <- 3; theta <- num.smry$t.peak / (k - 1);
+        start.list <- list(b = data$y[1], A = A, k = k,
+                                       theta = theta, k.a2m = k.a2m, t0 = 0);
         ## print(start.list);
 
         ft <- NULL; n.try <- 1;
@@ -36,8 +37,8 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
                     data = data, start = start.list, trace = F,
                     ## lower = c(b.min, A.min, k.min, theta.min),
                     ## upper = c(b.max, A.max, k.max, theta.max),
-                    lower = c(  0,   0, 1.5,   0,   0,   0),
-                    upper = c(Inf, Inf, Inf, Inf, Inf, Inf),
+                    lower = c(  0,   0,   0,   0, 1e-5,   0),
+                    upper = c(Inf, Inf, Inf, Inf,  Inf, Inf),
                     algorithm = "LM",
                     control = nls.lm.control(
                         ftol = sqrt(.Machine$double.eps),
@@ -47,11 +48,20 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
                     )
                 )
             }, silent = FALSE);
+            if (!is.null(ft)) {
+                print(">> Fit not NULL, checking dgn = ");
+                dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);
+                print(dgn);
+                if (dgn[1] <= "4") {
+                    print(">> dgn[1] <= 4, setting ft back to NULL");
+                    ft <- NULL;
+                }
+            }
             n.try <- n.try + 1;
             start.list <- list(b = data[[2]][1], A = runif(1) * num.smry$ampl,
                                k = runif(1, 1, 10), theta = runif(1, 1, 30),
                                k.a2m = runif(1) * 1e-3, t0 = 0);
-        }
+        }  ## End of while()
         if (is.null(ft)) {
             warning(">> fit_T0GammaInt resulted in NULL!");
             return(NULL);

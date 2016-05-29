@@ -1,11 +1,4 @@
 ################################################################################
-TG.clear <- function() {
-    data <<- data.frame(); num.smry <<- list(); fit <<- list();
-    parms <<- data.frame();
-}  ## End of TG.clear
-################################################################################
-
-################################################################################
 TG.plot <- function() {
     if (length(data) != 0) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
@@ -24,6 +17,10 @@ TG.plot <- function() {
         title(main = "Thrombin generation signal", line = 0.5, cex.main = 1.5);
         mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1.5, cex = 1.5);
         mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1.5, cex = 1.5);
+        abline(v = num.smry$t.lin);
+        ## abline(h = num.eval$a);
+        ## lines(x = data$x, y = num.eval$a + num.eval$b * (data$x - num.smry$t.lin), col = "blue");
+        ## lines(x = data$x, y = num.eval$b * (data$x - num.smry$t.lin), col = "cyan");
     } else {
         warning(">> TG$data == NULL!");
     }
@@ -35,11 +32,11 @@ TG.plot_drv1 <- function() {
     ## str(data); str(num.smry);
     if (length(data) != 0 && length(num.smry) != 0) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
-        par(mar = c(4, 6, 2, 0.25), mgp = c(10, 1, 0)); options(scipen = -2);
+        par(mar = c(4, 8, 2, 0.25), mgp = c(10, 1, 0)); options(scipen = -2);
         graphics::plot(data$x, num.smry$drv1, axes = FALSE, xlab = NA, type = "b",
                        ylab = NA, cex = 1.25, lwd = 2,
                        ylim = c(min(min(num.smry$drv1, na.rm = TRUE), 0),
-                           1.1 * max(num.smry$drv1, na.rm = TRUE))
+                           1.25 * max(num.smry$drv1, na.rm = TRUE))
                        );
         grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
         box();
@@ -49,10 +46,15 @@ TG.plot_drv1 <- function() {
         axis(side = 2, tck = -0.025, labels = NA, col = "black");
         axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
         title(ylab = "d / dt of Fluorescence, a.u. / min",
-              line = 4.5, cex.lab = 1.5);
+              line = 6, cex.lab = 1.5);
         title(main = "Thrombogram", line = 0.5, cex.main = 1.5);
+        abline(h = num.smry$cutoff); abline(v = num.smry$t.lin);
+        ## abline(h = num.eval$b, col = "orange");
+        ## lines(x = data$x, y = num.eval$A2mT, col = "cyan");
+        ## lines(x = data$x, y = num.smry$drv1 - num.eval$A2mT, col = "blue");
     } else {
         warning(">> data or num.smry are empty!");
+        return(NULL);
     }
 }  ## End of TG.plot_drv1
 ################################################################################
@@ -66,7 +68,7 @@ TG.plot_drv2 <- function() {
         graphics::plot(data$x, num.smry$drv2, axes = FALSE, xlab = NA, type = "b",
                        ylab = NA, cex = 1.25, lwd = 2,
                        ylim = c(min(min(num.smry$drv2, na.rm = TRUE), 0),
-                           1.1 * max(num.smry$drv2, na.rm = TRUE))
+                           2.25 * max(num.smry$drv2, na.rm = TRUE))
                        );
         grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
         box();
@@ -91,6 +93,12 @@ TG.plot_fit <- function(tg.model) {
     lines(data$x, get_A2mT_int(tg.model), col = "cyan", lwd = 2);
     lines(data$x, get_model(tg.model), col = "red", lwd = 3);
     lines(data$x, get_thrombin_int(tg.model), col = "blue", lwd = 2);
+    if (tg.model == "Auto") {
+        tg.model <- fit$Auto_model;
+        model.label <- paste0(fit$Auto_model, " fit (A)");
+    } else {
+        model.label <- paste0(tg.model, " fit");
+    }
     if (any(tg.model == c("LateExpGammaInt", "LateExpT0GammaInt"))) {
         ## print(tg.model);
         lines(data$x, fit[[tg.model]]$cff[["b"]] +
@@ -101,10 +109,11 @@ TG.plot_fit <- function(tg.model) {
                pch = NA, lty = 1, seg.len = 0.5,
                lwd = 4, col = "orange", bg = "white", bty = "y", cex = 1.25);
     }
-    if (tg.model == "Auto") {
-        model.label <- paste0(fit$Auto_model, " fit (A)");
-    } else {
-        model.label <- paste0(tg.model, " fit");
+    if (tg.model == "T0GammaInt2") {
+        lines(data$x, get_thrombin_int_contribution(tg.model, 1),
+              col = "blue", lwd = 2, lty = 2);
+        lines(data$x, get_thrombin_int_contribution(tg.model, 2),
+              col = "blue", lwd = 2, lty = 3);
     }
     legend("topleft",
            legend = c("Raw data", model.label, "Thrombin Integral",
@@ -152,9 +161,16 @@ TG.plot_thrombogram <- function(tg.model) {
     lines(data$x, get_drv1(tg.model), col = "red", lwd = 3);
     lines(data$x, get_thrombin(tg.model), col = "blue", lwd = 2);
     if (tg.model == "Auto") {
+        tg.model <- fit$Auto_model;
         model.label <- paste0(fit$Auto_model, " fit (A)");
     } else {
         model.label <- paste0(tg.model, " fit");
+    }
+    if (tg.model == "T0GammaInt2") {
+        lines(data$x, get_thrombin_contribution(tg.model, 1),
+              col = "blue", lwd = 2, lty = 2);
+        lines(data$x, get_thrombin_contribution(tg.model, 2),
+              col = "blue", lwd = 2, lty = 3);
     }
     legend("topright",
            legend = c("Num. Drv. 1", model.label, "Thrombin",

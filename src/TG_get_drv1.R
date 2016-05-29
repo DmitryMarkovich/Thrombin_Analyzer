@@ -44,6 +44,22 @@ TG.get_drv1 <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
+           "T0GammaInt2" = {
+               if (exists(x = "T0GammaInt2", where = fit)) {
+                   A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+                   k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+                   theta <- fit$T0GammaInt2$cff[["theta"]]; k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]];
+                   t0 <- fit$T0GammaInt2$cff[["t0"]];
+                   return(A1 * dgamma(x = data$x - t0, shape = k1, scale = theta) +
+                              A2 * dgamma(x = data$x - t0, shape = k2, scale = theta) + 
+                                  k.a2m * A1 * pgamma(q = data$x - t0, shape = k1, scale = theta) +
+                                      k.a2m * A2 * pgamma(q = data$x - t0, shape = k2, scale = theta)
+                          );
+               } else {
+                   warning(">> fit$T0GammaInt2 does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
            "LateExpGammaInt" = {
                if (exists(x = "LateExpGammaInt", where = fit)) {
                    p1 <- fit$LateExpGammaInt$cff[["p1"]];

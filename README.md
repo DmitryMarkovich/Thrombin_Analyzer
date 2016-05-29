@@ -1,5 +1,5 @@
 This application performs data analysis in thrombin generation experiments.
- 
+
 Start with loading a calibration signal via *Calibration data file input*. The loaded signal is plotted in `Calibration signal` tab. Next, choose a model to fit the signal from the options in *Select model to fit calibration signal*. Parameters obtained after fitting the signal are displayed in `Parameters` tab.
 
 Proceed with loading a thrombin generation signal via *Thrombin generation data file input*. The loaded signal is plotted in `Thrombin generation signal` tab. `Thrombogram` tab will show the first and the second derivative obtained from raw data. Choose a model to fit the loaded signal from the option in *Select model to fit thrombin generation signal*.

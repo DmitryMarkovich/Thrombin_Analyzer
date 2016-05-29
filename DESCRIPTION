@@ -2,6 +2,6 @@ Title: Thrombin Analyzer
 Author: Dmitriy Markovich
 AuthorUrl: http://www.nanotech.dtu.dk/english/Service/Phonebook/Person?id=69192&tab=0
 License: BSD
-DisplayMode: Showcase
-Tags: thrombin-analyzer
+DisplayMode: normal
+Tags: thrombin_analyzer
 Type: Shiny

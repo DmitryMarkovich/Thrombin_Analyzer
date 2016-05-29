@@ -57,6 +57,24 @@ TG.get_thrombin_vel <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
+           "T0GammaInt2" = {
+               if (exists(x = "T0GammaInt2", where = fit)) {
+                   A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+                   k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+                   theta <- fit$T0GammaInt2$cff[["theta"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
+                   v <- A1 * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k1 - 1) *
+                       ((-1 / theta) + ((k1 - 1) / (data$x - t0))) /
+                           (gamma(k1) * theta ^ k1) +
+                               A2 * exp(-(data$x - t0) / theta) * (data$x - t0) ^ (k2 - 1) *
+                                   ((-1 / theta) + ((k2 - 1) / (data$x - t0))) /
+                                       (gamma(k2) * theta ^ k2);
+                   v[data$x <= t0] <- 0;
+                   return(v);
+               } else {
+                   warning(">> fit$T0GammaInt2 does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
            "LateExpGammaInt" = {
                if (exists(x = "LateExpGammaInt", where = fit)) {
                    A <- fit$LateExpGammaInt$cff[["A"]]; k <- fit$LateExpGammaInt$cff[["k"]];

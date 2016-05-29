@@ -1,13 +1,156 @@
-library(shiny); library(minpack.lm); library(LambertW);  ## additional R libraries
+source("src/libraries.R");
 print("################################################################################");
 app.path <- getwd();  ## stores current directory
 source("src/global_parameters.R"); source("src/common_functions.R");
 source("src/Base_class.R"); source("src/Cal_class.R"); source("src/TG_class.R");
+source("src/Dataset_class.R");
 
-cal <- Cal$new(); tg <- TG$new();
+dataset <- Dataset$new(); cal <- Cal$new(); tg <- TG$new();
 ################################################################################
 shinyServer(
     func = function(input, output) {
+################################################################################
+######################################## TG dataset tab
+################################################################################
+        dataset.fname <- reactive({
+            return(input$dataset.fname);
+        })  ## End of dataset.fname
+        dataset.data <- reactive({
+            if (!is.null(dataset.fname())) {
+                dataset$clear();
+                dataset$load_signal(dataset.fname());
+                return(0L);
+            }
+        })  ## End of dataset.data
+        output$dataset.Menu <- renderUI({
+            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+                signals <- colnames(dataset$data)[-1];
+                fluidRow(
+                    column(width = 6, offset = -1,
+                           selectInput(inputId = "dataset.overlay1",
+                                       label = h5("Overlay"),
+                                       choices = as.list(c(signals, "None")),
+                                       selected = "None"),
+                           selectInput(inputId = "dataset.add.to.cal",
+                                       label = h6("Add to calibration"),
+                                       choices = as.list(c(signals, "None")),
+                                       selected = "None")
+                           ),
+                    column(width = 6, offset = -1,
+                           selectInput(inputId = "dataset.overlay2",
+                                       label = h5("with"),
+                                       choices = as.list(c(signals, "None")),
+                                       selected = "None"),
+                           selectInput(inputId = "dataset.add.to.tg",
+                                       label = h6("Add to thrombin generation"),
+                                       choices = as.list(c(signals, "None")),
+                                       selected = "None")
+                           )
+                    )  ## End of fluidRow
+            }  ## End of if ()
+        })  ## End of output$dataset.Menu
+        dataset.show <- reactive({
+            ## print(input$dataset.show);
+            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+                return(input$dataset.show);
+            } else {
+                return(NULL);
+            }
+        })  ## End of dataset.show
+        output$dataset.ShowAs <- renderUI({
+            if (!is.null(dataset.fname()) && !is.null(dataset.data()) &&
+                !is.null(dataset.show())) {
+                ## str(dataset$data);
+                switch(dataset.show(),
+                       "plot" = return(
+                           tagList(renderPlot({
+                               progress <- shiny::Progress$new();  ## Create a Progress object
+                               progress$set(message = "Plotting dataset", value = 0);
+                               ## Close the progress when this reactive exits (even if there's an error)
+                               on.exit(progress$close());
+                               dataset$plot(updateProgress, progress);
+                           })  ## End of RenderPlot
+                                   )  ## End of tagList
+                           ),
+                       "text" = return(
+                           tagList(renderTable({
+                               progress <- shiny::Progress$new();
+                               progress$set(message = "Showing dataset as text, please wait...", value = 0);
+                               on.exit(progress$close());
+                               dataset$data;
+                           })  ## End of renderTable
+                                   )  ## End of tagList
+                           )
+                       );  ## End of switch
+            } else {
+                return(NULL);
+            }
+        })  ## End of output$dataset.ShowAs
+        dataset.do_analysis <- eventReactive(
+            eventExpr = input$dataset.analyze, valueExpr = {
+                ## builds a reactive expression that only invalidates when the
+                ## value of input$goButton becomes out of date (i.e., when the
+                ## button is pressed)
+                if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+                    return(0L);
+                } else {
+                    return(NULL);
+                }
+            })  ## End of output$dataset.do_analysis
+        ## dataset.do_analysis <- observeEvent(
+        ##     eventExpr = input$dataset.analyze, handlerExpr = {
+        ##         ## builds a reactive expression that only invalidates when the
+        ##         ## value of input$goButton becomes out of date (i.e., when the
+        ##         ## button is pressed)
+        ##         if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+        ##             return(0);
+        ##         } else {
+        ##             return(NULL);
+        ##         }
+        ##     })  ## End of output$dataset.do_analysis
+        output$dataset.DoAnalysis <- renderTable({
+            if (!is.null(dataset.fname()) && !is.null(dataset.data()) &&
+                !is.null(dataset.do_analysis())) {
+                progress <- shiny::Progress$new();
+                progress$set(message = "Analyzing dataset,", value = 0);
+                on.exit(progress$close());
+                dataset$do_analysis(updateProgress, progress);  ## does the auto analysis
+                ##
+                x <- rep(NA, dataset$N - 1); y <- rep(NA, dataset$N - 1);
+                model <- rep(NA, dataset$N - 1);
+                for (i in 2:dataset$N) {
+                    x[i - 1] <- dataset$res[[dataset$signals[i]]]$num.smry$rat$x;
+                    y[i - 1] <- dataset$res[[dataset$signals[i]]]$num.smry$rat$y;
+                    model[i - 1] <- dataset$res[[dataset$signals[i]]]$Auto_model;
+                }
+                return((data.frame(Signal = dataset$signals[-1], x = x, y = y,
+                                  Auto_model = model)));
+            } else {
+                ## warning(">> Data not loaded or button not pressed!");
+                return(NULL);
+            }
+        })  ## End of output$dataset.DoAnalysis
+        output$dataset.Overlay <- renderPlot({
+            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+                if (!is.null(input$dataset.overlay1) &&
+                    !is.null(input$dataset.overlay2) &&
+                    input$dataset.overlay1 != "None" &&
+                    input$dataset.overlay2 != "None") {
+                    x <- dataset$data[[1]];
+                    y1 <- dataset$data[[input$dataset.overlay1]];
+                    y2 <- dataset$data[[input$dataset.overlay2]];
+                    graphics::plot(x, y = y1,
+                                   ylim = c(
+                                       min(c(min(y1, na.rm = TRUE),
+                                             min(y2, na.rm = TRUE))),
+                                       max(c(max(y1, na.rm = TRUE),
+                                             max(y2, na.rm = TRUE)))));
+                    lines(x = x, y = y2, type = "p", pch = 2);
+                }
+            } else {
+                return(NULL);
+            }
+        })  ## End of output$dataset.Overlay
 ################################################################################
 ######################################## Calibration signal tab
 ################################################################################
@@ -107,7 +250,16 @@ shinyServer(
                 tg$clear();
                 tg$load_signal(tg.fname());
                 tg$explore_numerically();
-                return(0);
+                tg$evaluate_numerically();
+                return(0L);
+            } else if (!is.null(input$dataset.add.to.tg) &&
+                       input$dataset.add.to.tg != "None") {
+                tg$clear();
+                tg$data <- data.frame(x = dataset$data[[1]],
+                                      y = dataset$data[[input$dataset.add.to.tg]]);
+                str(tg$data);
+                tg$explore_numerically();
+                return(0L);
             }
         })  ## End of tg.data
         tg.model <- reactive({
@@ -117,7 +269,7 @@ shinyServer(
         tg.model.fit <- reactive({
             if (!is.null(tg.model()) && tg.model() != "None") {
                 tg$fit_model(tg.model());
-                return(0);
+                return(0L);
             } else {
                 return(NULL);
             }
@@ -129,6 +281,23 @@ shinyServer(
                     tg$plot_fit(tg.model());
             }
         })  ## End of output$tg.Plot
+        output$tg.PlotResid <- renderPlot({
+            Sys.sleep(time = 0.1);
+            if (!is.null(tg.data()) && !is.null(tg.model()) &&
+                tg.model() != "None") {
+                tg$plot_residuals(tg.model());
+                ## switch(tg.model,
+                ##        "Auto" = switch(tg$fit$Auto_model,
+                ##            "None" = { return(NULL);},
+                ##            { tg$plot_residuals(tg.model());}
+                ##                        ),
+                ##        { tg$plot_residuals(tg.model());}
+                ##        );
+                ## tg$plot_residuals(tg.model());
+                ## if (tg.model() == "Auto" && tg$fit$Auto_model != "None")
+                ##     tg$plot_residuals(tg.model());
+            }
+        })  ## End of output$tg.PlotResid
         output$tg.model <- renderUI({
             if (!is.null(tg.model()) && tg.model() != "None" &&
                 !is.null(tg.data())) {
@@ -136,18 +305,12 @@ shinyServer(
                     exists(x = tg.model(), where = tg$fit)) {
                     x <- GetSummary(tg$fit[[tg.model()]]$smry, tg.model(),
                                     full = TRUE);
-                    HTML(paste(x, collapse = '<br/>'));
+                    HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
                 }
             }
         })  ## End of output$tg.model
-        output$tg.PlotResid <- renderPlot({
-            if (!is.null(tg.data()) && !is.null(tg.model()) &&
-                tg.model() != "None") {
-                tg$plot_residuals(tg.model());
-            }
-        })  ## End of output$tg.PlotResid
         output$tg.SynthHint <- renderTable({
-            if (!is.null(tg.data()) && !is.null(tg.model()) &&
+            if (!is.null(input$tg.fname) && !is.null(tg.data()) && !is.null(tg.model()) &&
                 tg.model() != "None" &&
                 substr(input$tg.fname$name, 0, 9) == "Synthetic") {
                 switch(tg.model(),
@@ -200,7 +363,7 @@ shinyServer(
 ######################################## Parameters tab
 ################################################################################
         output$cal.ShowParms <- renderTable({
-            if (!is.null(cal.fname()) && !is.null(cal.data()) && !is.null(cal.model()) &&
+            if (!is.null(cal.data()) && !is.null(cal.model()) &&  ## !is.null(cal.fname()) &&
                 exists(x = cal.model(), where = cal$fit)) {
                 cal$parms_model(cal.model(), cal.e0(), cal.s0());
             } else {
@@ -208,13 +371,20 @@ shinyServer(
             }
         }, digits = 6)  ## End of output$cal.ShowParms
         output$tg.ShowParms <- renderTable({
-            if (!is.null(tg.fname()) && !is.null(tg.data()) && !is.null(tg.model()) &&
+            if (!is.null(tg.data()) && !is.null(tg.model()) &&  ##!is.null(tg.fname()) &&
                 exists(x = tg.model(), where = tg$fit)) {
                 tg$parms_model(tg.model(), cal.CF());
             } else {
                 NULL;
             }
         }, digits = 6)  ## End of output$tg.ShowParms
+        output$tg.ShowParmsNum <- renderTable({
+            if (!is.null(tg.data())) {
+                return(tg$num.eval$parms);
+            } else {
+                return(NULL);
+            }
+        }, digits = 6)  ## End of output$tg.ShowParmsNum
 ################################################################################
 ######################################## Demo signals tab
 ################################################################################
@@ -382,7 +552,7 @@ shinyServer(
                            ))
                    },
                    {  ## Default
-                       warning(">> Unknown signal chosen!");
+                       ## warning(">> Unknown signal chosen!");
                        return(NULL);
                    }
                    )  ## End of switch

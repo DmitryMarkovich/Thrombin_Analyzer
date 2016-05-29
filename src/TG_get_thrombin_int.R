@@ -41,6 +41,18 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
+           "T0GammaInt2" = {
+               if (exists(x = "T0GammaInt2", where = fit)) {
+                   A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+                   k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+                   theta <- fit$T0GammaInt2$cff[["theta"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
+                   return(A1 * pgamma(q = data$x - t0, shape = k1, scale = theta) +
+                              A2 * pgamma(q = data$x - t0, shape = k2, scale = theta));
+               } else {
+                   warning(">> fit$T0GammaInt2 does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
            "LateExpGammaInt" = {
                if (exists(x = "LateExpGammaInt", where = fit)) {
                    A <- fit$LateExpGammaInt$cff[["A"]]; k <- fit$LateExpGammaInt$cff[["k"]];
@@ -75,4 +87,22 @@ TG.get_thrombin_int <- function(tg.model) {
            { print(paste0(">> Call to unknown tg.model", tg.model))}
            );
 }  ## End of TG.get_thrombin_int
+################################################################################
+
+################################################################################
+TG.get_thrombin_int_contribution <- function(tg.model, number = 1) {
+    if (tg.model == "T0GammaInt2") {
+        if (exists(x = "T0GammaInt2", where = fit)) {
+            A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+            k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+            theta <- fit$T0GammaInt2$cff[["theta"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
+            if (number == 1) {
+                return(A1 * pgamma(q = data$x - t0, shape = k1, scale = theta));
+            } else if (number == 2) {
+                return(A2 * pgamma(q = data$x - t0, shape = k2, scale = theta));
+            }
+        }
+    }
+    return(rep(0, length(data$x)));
+}  ## End of TG.get_thrombin_int_contribution
 ################################################################################

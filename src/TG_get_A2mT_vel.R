@@ -36,6 +36,21 @@ TG.get_A2mT_vel <- function(tg.model) {
                    return(rep(0, length(data$x)));
                }
            },
+           "T0GammaInt2" = {
+               if (exists(x = "T0GammaInt2", where = fit)) {
+                   A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
+                   k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
+                   theta <- fit$T0GammaInt2$cff[["theta"]]; k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]];
+                   t0 <- fit$T0GammaInt2$cff[["t0"]];
+                   v <- k.a2m * A1 * dgamma(x = data$x - t0, shape = k1, scale = theta) +
+                       k.a2m * A2 * dgamma(x = data$x - t0, shape = k2, scale = theta);
+                   ## v[data$x == 0] <- 0;
+                   return(v);
+               } else {
+                   warning(">> fit$T0GammaInt2 does not exist!");
+                   return(rep(0, length(data$x)));
+               }
+           },
            "LateExpT0GammaInt" = {
                if (exists(x = "LateExpT0GammaInt", where = fit)) {
                    A <- fit$LateExpT0GammaInt$cff[["A"]]; k <- fit$LateExpT0GammaInt$cff[["k"]];

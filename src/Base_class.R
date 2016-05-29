@@ -6,9 +6,13 @@ Base.load_signal <- function(inFile) {
            "dat" = {
                data <<- read.table(file = inFile$datapath, header = TRUE,
                                    col.names = c("x", "y"), sep = " ");
-               data <<- data[complete.cases(data), ];
+           },
+           "csv" = {
+               data <<- read.csv(file = inFile$datapath, header = TRUE,
+                                   col.names = c("x", "y"), sep = ";");
            }
            )
+    data <<- data[complete.cases(data), ];
 }  ## End of Base.LoadSignal
 ################################################################################
 
@@ -18,20 +22,27 @@ Base.explore_numerically <- function(n = 3) {
         print(">> explore_numerically called!");
         dt <- data$x[2] - data$x[1]; N <- length(data$x); ampl <- max(data$y);
         drv1 <- rep(NA, N);
-        drv1[1:(N - 3)] = (1 / (4 * dt)) * (
+        ## drv1[1:(N - 1)] <- (1 / dt) * (data$y[2:N] - data$y[1:(N - 1)]);
+        drv1[1:(N - 3)] <- (1 / (4 * dt)) * (
             -data$y[1:(N - 3)] -data$y[2:(N - 2)] + data$y[3:(N - 1)] +
                 data$y[4:N]);
         drv2 <- rep(NA, N);
-        drv2[1:(N - 4)] = (1 / (4 * dt ^ 2)) * (
+        ## drv2[2:(N - 1)] <- (1 / (dt ^ 2)) * (-2 * data$y[2:(N - 1)] +
+        ##                                          data$y[1:(N - 2)] + data$y[3:N]);
+        drv2[1:(N - 4)] <- (1 / (4 * dt ^ 2)) * (
             data$y[1:(N - 4)] -2 * data$y[3:(N - 2)] + data$y[5:N]);
         cutoff <- median(drv1, na.rm = TRUE);
         t.peak <- data$x[drv1 == max(drv1, na.rm = TRUE)][1];
-        t.lin <- data$x[sum(drv1 >= cutoff, na.rm = TRUE)];
-        rat <- list(x = data$x[N] / t.peak, y = ampl / min(data$y));
+        t.lin <- data$x[data$x >= t.peak & (drv1 <= 1.0 * cutoff) == TRUE][1];
+        ## t.lin <- data$x[sum(drv1 >= cutoff, na.rm = TRUE)];
+        rat <- list(x = data$x[N] / t.peak, y = ampl / data$y[[1]]);
         num.smry <<- list(rat = rat, t.peak = t.peak, t.lin = t.lin, ampl = ampl,
                           cutoff = cutoff, drv1 = drv1, drv2 = drv2);
+        ## print(num.smry);
+        return(0L);
     } else {
         warning(">> num.smry not changed: data == NULL or num.smry not empty.");
+        return(NULL);
     }
 }  ## End of Base.ExploreNumerically
 ################################################################################
