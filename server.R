@@ -130,27 +130,47 @@ shinyServer(
                 return(NULL);
             }
         })  ## End of output$dataset.DoAnalysis
-        output$dataset.Overlay <- renderPlot({
+        output$dataset.PlotOverlay <- renderPlot({
             if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
                 if (!is.null(input$dataset.overlay1) &&
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
                     input$dataset.overlay2 != "None") {
-                    x <- dataset$data[[1]];
-                    y1 <- dataset$data[[input$dataset.overlay1]];
-                    y2 <- dataset$data[[input$dataset.overlay2]];
-                    graphics::plot(x, y = y1,
-                                   ylim = c(
-                                       min(c(min(y1, na.rm = TRUE),
-                                             min(y2, na.rm = TRUE))),
-                                       max(c(max(y1, na.rm = TRUE),
-                                             max(y2, na.rm = TRUE)))));
-                    lines(x = x, y = y2, type = "p", pch = 2);
+                    dataset$plot_overlay(input$dataset.overlay1,
+                                         input$dataset.overlay2);
                 }
             } else {
                 return(NULL);
             }
-        })  ## End of output$dataset.Overlay
+        })  ## End of output$dataset.PlotOverlay
+        output$dataset.PlotDrv1Overlay <- renderPlot({
+            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+                if (!is.null(dataset.do_analysis()) &&
+                    !is.null(input$dataset.overlay1) &&
+                    !is.null(input$dataset.overlay2) &&
+                    input$dataset.overlay1 != "None" &&
+                    input$dataset.overlay2 != "None") {
+                    dataset$plot_drv1_overlay(input$dataset.overlay1,
+                                              input$dataset.overlay2);
+                }
+            } else {
+                return(NULL);
+            }
+        })  ## End of output$dataset.PlotDrv1Overlay
+        output$dataset.PlotDrv2Overlay <- renderPlot({
+            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+                if (!is.null(dataset.do_analysis()) &&
+                    !is.null(input$dataset.overlay1) &&
+                    !is.null(input$dataset.overlay2) &&
+                    input$dataset.overlay1 != "None" &&
+                    input$dataset.overlay2 != "None") {
+                    dataset$plot_drv2_overlay(input$dataset.overlay1,
+                                              input$dataset.overlay2);
+                }
+            } else {
+                return(NULL);
+            }
+        })  ## End of output$dataset.PlotDrv2Overlay
 ################################################################################
 ######################################## Calibration signal tab
 ################################################################################
@@ -255,10 +275,11 @@ shinyServer(
             } else if (!is.null(input$dataset.add.to.tg) &&
                        input$dataset.add.to.tg != "None") {
                 tg$clear();
-                tg$data <- data.frame(x = dataset$data[[1]],
-                                      y = dataset$data[[input$dataset.add.to.tg]]);
-                str(tg$data);
+                tg$data <<- data.frame(x = dataset$data[[1]],
+                                       y = dataset$data[[input$dataset.add.to.tg]]);
+                ## str(tg$data);
                 tg$explore_numerically();
+                tg$evaluate_numerically();
                 return(0L);
             }
         })  ## End of tg.data

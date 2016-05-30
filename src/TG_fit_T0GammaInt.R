@@ -37,8 +37,8 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
                     data = data, start = start.list, trace = F,
                     ## lower = c(b.min, A.min, k.min, theta.min),
                     ## upper = c(b.max, A.max, k.max, theta.max),
-                    lower = c(  0,   0,   0,   0, 1e-5,   0),
-                    upper = c(Inf, Inf, Inf, Inf,  Inf, Inf),
+                    lower = c(  0,   0, 1.25,   0, 1e-5,   0),
+                    upper = c(Inf, Inf,  Inf, Inf,  Inf, Inf),
                     algorithm = "LM",
                     control = nls.lm.control(
                         ftol = sqrt(.Machine$double.eps),
@@ -110,7 +110,7 @@ TG.parms_T0GammaInt <- function(cal.CF) {
             v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
                 exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
         } else {
-            v <- max(num.smry$drv2, na.rm = TRUE);
+            v <- num.eval$parms$Value[num.eval$parms$Parameter == "VelIndex"];
         }
         if (cal.CF != 1) {
             CF <- cal.CF;

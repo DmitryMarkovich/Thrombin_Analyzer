@@ -114,7 +114,13 @@ shinyUI(
                     tabPanel(title = "Overlay",
                              fluidRow(
                                  column(width = 12, offset = 0,
-                                        plotOutput(outputId = "dataset.Overlay")
+                                        plotOutput(outputId = "dataset.PlotOverlay")
+                                        ),
+                                 column(width = 6, offset = 0,
+                                        plotOutput(outputId = "dataset.PlotDrv1Overlay")
+                                        ),
+                                 column(width = 6, offset = 0,
+                                        plotOutput(outputId = "dataset.PlotDrv2Overlay")
                                         )
                                  )  ## End of fluidRow
                              ),

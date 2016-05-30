@@ -6,10 +6,11 @@ TG.clear <- function() {
 ################################################################################
 
 ################################################################################
-TG.evaluate_numerically <- function() {
+TG.evaluate_numerically <- function(silent = FALSE) {
     if (length(data) != 0) {
         if (is.na(num.smry$t.lin) || num.smry$rat$y <= 5) {
             warning(">> Signal is mostly noise, skipping numerical evaluation!");
+            num.eval <<- list();
             return(NULL);
         } else {
             fit.late <- lm(y ~ x, data = data.frame(x = data$x - num.smry$t.lin,
@@ -52,7 +53,8 @@ TG.evaluate_numerically <- function() {
                     Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
                         "a.u. / min"))
                 );
-            print(num.eval$parms);
+            if (!silent)
+                print(num.eval$parms);
         }
     } else {
         warning(">> length(data) == 0!");

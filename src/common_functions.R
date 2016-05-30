@@ -49,3 +49,9 @@ updateProgress <- function(progress, amount, detail = NULL) {
     progress$inc(amount = amount, detail = detail);
 }  ## End of updateProgress
 ################################################################################
+
+################################################################################
+GetPeak <- function(A, k, theta) {
+    return(A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta));
+}  ## End of GetPeak
+################################################################################

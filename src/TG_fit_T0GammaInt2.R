@@ -8,15 +8,6 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
     } else {
         if (!exists(x = "T0GammaInt", where = fit)) {
             fit_T0GammaInt(silent = TRUE);
-            ## start.list <- list(
-            ##     b = fit$T0GammaInt$cff[["b"]],
-            ##     A1 = 0.5 * fit$T0GammaInt$cff[["A"]],
-            ##     A2 = 0.5 * fit$T0GammaInt$cff[["A"]],
-            ##     k1 = fit$T0GammaInt$cff[["k"]], k2 = fit$T0GammaInt$cff[["k"]],
-            ##     theta = fit$T0GammaInt$cff[["theta"]],
-            ##     k.a2m = fit$T0GammaInt$cff[["k.a2m"]],
-            ##     t0 = fit$T0GammaInt$cff[["t0"]]
-            ##     );
         }
         ## print(fit$T0GammaInt$smry);
         start.list <- list(
@@ -138,47 +129,60 @@ TG.parms_T0GammaInt2 <- function(cal.CF) {
         A2 <- fit$T0GammaInt2$cff[["A2"]]; k1 <- fit$T0GammaInt2$cff[["k1"]];
         k2 <- fit$T0GammaInt2$cff[["k2"]]; theta <- fit$T0GammaInt2$cff[["theta"]];
         k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
-
+        ## peak1 <- GetPeak(A1, k1, theta); peak2 <- GetPeak(A2, k2, theta);
+        ## if (peak1 > peak2) {
+        ##     t.peak <- t0 + theta * (k1 - 1);
+        ## } else {
+        ##     t.peak <- t0 + theta * (k2 - 1);
+        ## }
+        ## peak <-
+        time <- seq(from = 0.75 * num.smry$t.peak, to = 1.25 * num.smry$t.peak,
+                    by = 0.1);
+        fl <- get_thrombin("T0GammaInt2", time);
+        peak <- max(fl, na.rm = TRUE); t.peak <- time[fl == peak];
+        vel.index <- max(get_thrombin_vel("T0GammaInt2", seq(t0, t.peak, by = 0.1)),
+                         na.rm = TRUE);
+        a2m <- k.a2m * (A1 + A2);
         ## if (k > 2) {
         ##     v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
         ##         exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
         ## } else {
         ##     v <- max(num.smry$drv2, na.rm = TRUE);
         ## }
-    ##     if (cal.CF != 1) {
-    ##         CF <- cal.CF;
-    ##         return(parms <<- data.frame(
-    ##             Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
-    ##                 "Alpha2M_Level"),
-    ##             Value = c(
-    ##                 t0,
-    ##                 CF * A,
-    ##                 CF * A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
-    ##                 t0 + theta * (k - 1),
-    ##                 CF * v,
-    ##                 CF * k.a2m * A
-    ##                 ),
-    ##             ## StdErr = rep(NA, 5),
-    ##             Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
-    ##                );
-    ##     } else {
-    ##         return(parms <<- data.frame(
-    ##             Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
-    ##                 "Alpha2M_Level"),
-    ##             Value = c(
-    ##                 t0,
-    ##                 A,
-    ##                 A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
-    ##                 t0 + theta * (k - 1),
-    ##                 v,
-    ##                 k.a2m * A
-    ##                 ),
-    ##             Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
-    ##                 "a.u. / min"))
-    ##                );
-    ##     }
-    ## } else {
-    ##     warning(">> fit$T0GammaInt does not exist!");
+        if (cal.CF != 1) {
+            CF <- cal.CF;
+            return(parms <<- data.frame(
+                Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+                    "Alpha2M_Level"),
+                Value = c(
+                    t0,
+                    CF * (A1 + A2),
+                    CF * peak,
+                    t.peak,
+                    CF * vel.index,
+                    CF * a2m
+                    ),
+                ## StdErr = rep(NA, 5),
+                Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
+                   );
+        } else {
+            return(parms <<- data.frame(
+                Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+                    "Alpha2M_Level"),
+                Value = c(
+                    t0,
+                    A1 + A2,
+                    peak,
+                    t.peak,
+                    vel.index,
+                    a2m
+                    ),
+                Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
+                    "a.u. / min"))
+                   );
+        }
+    } else {
+        warning(">> fit$T0GammaInt2 does not exist!");
         return(NULL);
     }
 }  ## End of TG.parms_T0GammaInt2

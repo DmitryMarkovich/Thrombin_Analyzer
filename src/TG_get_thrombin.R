@@ -1,5 +1,5 @@
 ################################################################################
-TG.get_thrombin <- function(tg.model) {
+TG.get_thrombin <- function(tg.model, time = NULL) {
     switch(tg.model,
            "Gamma" = {
                if (exists(x = "Gamma", where = fit)) {
@@ -46,8 +46,13 @@ TG.get_thrombin <- function(tg.model) {
                    A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
                    k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
                    theta <- fit$T0GammaInt2$cff[["theta"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
-                   return(A1 * dgamma(x = data$x - t0, shape = k1, scale = theta) +
-                              A2 * dgamma(x = data$x - t0, shape = k2, scale = theta));
+                   if (!is.null(time)) {
+                       return(A1 * dgamma(x = time - t0, shape = k1, scale = theta) +
+                                  A2 * dgamma(x = time - t0, shape = k2, scale = theta));
+                   } else {
+                       return(A1 * dgamma(x = data$x - t0, shape = k1, scale = theta) +
+                                  A2 * dgamma(x = data$x - t0, shape = k2, scale = theta));
+                   }
                } else {
                    warning(">> fit$T0GammaInt2 does not exist!");
                    return(rep(0, length(data$x)));
@@ -108,16 +113,24 @@ TG.get_thrombin <- function(tg.model) {
 ################################################################################
 
 ################################################################################
-TG.get_thrombin_contribution <- function(tg.model, number = 1) {
+TG.get_thrombin_contribution <- function(tg.model, number = 1, time = NULL) {
     if (tg.model == "T0GammaInt2") {
         if (exists(x = "T0GammaInt2", where = fit)) {
             A1 <- fit$T0GammaInt2$cff[["A1"]]; A2 <- fit$T0GammaInt2$cff[["A2"]];
             k1 <- fit$T0GammaInt2$cff[["k1"]]; k2 <- fit$T0GammaInt2$cff[["k2"]];
             theta <- fit$T0GammaInt2$cff[["theta"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
             if (number == 1) {
-                return(A1 * dgamma(x = data$x - t0, shape = k1, scale = theta));
+                if (!is.null(time)) {
+                    return(A1 * dgamma(x = time - t0, shape = k1, scale = theta));
+                } else {
+                    return(A1 * dgamma(x = data$x - t0, shape = k1, scale = theta));
+                }
             } else if (number == 2) {
-                return(A2 * dgamma(x = data$x - t0, shape = k2, scale = theta));
+                if (!is.null(time)) {
+                    return(A2 * dgamma(x = time - t0, shape = k2, scale = theta));
+                } else {
+                    return(A2 * dgamma(x = data$x - t0, shape = k2, scale = theta));
+                }
             }
         }
     }
