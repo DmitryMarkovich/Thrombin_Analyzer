@@ -27,7 +27,7 @@ TG.fit_Auto <- function(silent = TRUE) {
         ft <- NULL;
         if (num.smry$rat$y <= 5) {
             fit$Auto_model <<- "None";
-        } else if (num.smry$rat$x <= 2.5 && num.smry$rat$y <= 40) {
+        } else if (num.smry$rat$x <= 2.5 && num.smry$rat$y <= 34) {
             ft <- fit_T0Gamma(silent = TRUE);
             if (!is.null(ft)) {
                 fit$Auto <<- ft;

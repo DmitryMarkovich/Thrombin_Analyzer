@@ -205,6 +205,7 @@ shinyServer(
             }
         })  ## End of output$cal.Plot
         output$cal.PlotResid <- renderPlot({
+            Sys.sleep(time = 0.1);
             if (!is.null(cal.data()) && !is.null(cal.model()) &&
                 cal.model() != "None" && !is.null(cal.model.fit()) &&
                 exists(cal.model(), where = cal$fit)) {
@@ -218,7 +219,7 @@ shinyServer(
                     exists(x = cal.model(), where = cal$fit)) {
                     x <- GetSummary(cal$fit[[cal.model()]]$smry, cal.model(),
                                     full = TRUE);
-                    HTML(paste(x, collapse = '<br/>'));
+                    HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
                 }
             }
         })  ## End of output$cal.model

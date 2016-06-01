@@ -40,7 +40,8 @@ shinyUI(
                     column(width = 7,
                            selectInput(inputId = "cal.model",
                                        label = h4("Select model to fit calibration signal"), 
-                                       choices = c("Auto", "LateMM", "LateExp", "EarlyMM",
+                                       choices = c("Auto", "T0LateMM", "LateMM",
+                                           "T0LateExp", "LateExp", "EarlyMM",
                                            "LM", "None"),
                                        selected = "None")
                            )

@@ -34,7 +34,7 @@ Cal.plot <- function() {
 Cal.plot_fit <- function(cal.model) {
     plot();
     lines(data$x, get_model(cal.model), col = "red", lwd = 3);
-    if (any(cal.model == c("LateMM", "LateExp"))) {
+    if (any(cal.model == c("T0LateMM", "LateMM", "T0LateExp", "LateExp"))) {
         lines(data$x, get_init_rate(cal.model), col = "red", lwd = 3, lty = 2);
         legend("bottomright", legend = c("Initial rate"), pch = c(NA),
                lty = c(2), seg.len = 2.0, lwd = 4, col = c("red"), bg = "white",
