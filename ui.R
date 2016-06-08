@@ -10,11 +10,24 @@ shinyUI(
         sidebarLayout(
             sidebarPanel = sidebarPanel(
 ######################################## Dataset
-                h2("Dataset", align = "center"),
                 fluidRow(
+                    column(width = 3, offset = 0,
+                           h2("Dataset", align = "center")
+                           ),
                     column(width = 5, offset = 0,
                            fileInput(inputId = "dataset.fname", accept = ("text/csv"),
                                      label = h5("Load dataset file"))
+                           ),
+                    column(width = 4, offset = 0,
+                           fileInput(inputId = "res.fname", accept = (".RData"),
+                                     label = h5("Load results file"))
+                           )
+                    ),
+                fluidRow(
+                    column(width = 3, offset = 0,
+                           actionButton(inputId = "dataset.analyze",
+                                        label = h5("Analyze!"),
+                                        inline = TRUE)
                            ),
                     column(width = 4, offset = 0,
                            radioButtons(inputId = "dataset.show",
@@ -23,10 +36,9 @@ shinyUI(
                                             "text" = "text"),
                                         selected = "plot", inline = TRUE)
                            ),
-                    column(width = 3, offset = 0,
-                           actionButton(inputId = "dataset.analyze",
-                                        label = h5("Analyze!"),
-                                        inline = TRUE)
+                    column(width = 5, offset = 0,
+                           uiOutput(outputId = "parms.Download"),
+                           uiOutput(outputId = "res.Download")
                            )
                     ),  ## End of FluidRow
                 uiOutput(outputId = "dataset.Menu"),
@@ -47,7 +59,16 @@ shinyUI(
                            )
                     ),  ## End of fluidRow
 ######################################## Thrombin generation
-                h2("Thrombin generation", align = "center"),
+                fluidRow(
+                    column(width = 10, offset = 0,
+                           h2("Thrombin generation", align = "center")
+                           ),
+                    column(width = 2, offset = 0,
+                           actionButton(inputId = "tg.clear",
+                                        label = h5("Clear!"),
+                                        inline = TRUE)
+                           )
+                    ),
                 fluidRow(
                     column(width = 5,
                            fileInput(inputId = "tg.fname", accept = ("text/csv"),
@@ -111,17 +132,32 @@ shinyUI(
                                         )
                                  )  ## End of fluidRow
                              ),
+######################################## Loaded res tab
+                    tabPanel(title = "Results",
+                             fluidRow(
+                                 column(width = 12, offset = 0,
+                                        verbatimTextOutput(outputId = "res.Show")
+                                        )
+                                 ## br(),
+                                 ## column(width = 12, offset = 0,
+                                 ##        uiOutput(outputId = "dataset.DoAnalysis")
+                                 ##        )
+                                 )  ## End of fluidRow
+                             ),
 ######################################## Overlay tab
                     tabPanel(title = "Overlay",
                              fluidRow(
                                  column(width = 12, offset = 0,
                                         plotOutput(outputId = "dataset.PlotOverlay")
                                         ),
-                                 column(width = 6, offset = 0,
-                                        plotOutput(outputId = "dataset.PlotDrv1Overlay")
+                                 column(width = 12, offset = 0,
+                                        plotOutput(outputId = "dataset.PlotDrvOverlay")
                                         ),
-                                 column(width = 6, offset = 0,
-                                        plotOutput(outputId = "dataset.PlotDrv2Overlay")
+                                 ## column(width = 6, offset = 0,
+                                 ##        plotOutput(outputId = "dataset.PlotDrv2Overlay")
+                                 ##        ),
+                                 column(width = 12, offset = 0,
+                                        tableOutput(outputId = "dataset.ShowParmsOverlay")
                                         )
                                  )  ## End of fluidRow
                              ),

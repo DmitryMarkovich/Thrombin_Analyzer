@@ -55,3 +55,22 @@ GetPeak <- function(A, k, theta) {
     return(A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta));
 }  ## End of GetPeak
 ################################################################################
+
+################################################################################
+GetVelPeak <- function(A, k, theta) {
+    return(A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
+               exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2));
+}  ## End of GetVelPeak
+################################################################################
+
+################################################################################
+LoadRData <- function(fname = NULL) {
+    if (!is.null(fname)) {
+        load(fname);
+        return(get(x = ls()[ls() != "fname"]));
+    } else {
+        warning(">> NULL name in LoadRData!");
+        return(NULL);
+    }
+}  ## End of LoadRdata
+################################################################################

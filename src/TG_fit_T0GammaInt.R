@@ -1,7 +1,8 @@
 ################################################################################
 TG.fit_T0GammaInt <- function(silent = TRUE) {
 ################################################################################
-    print(">> fit_T0GammaInt called!");
+    if (!silent)
+        print(">> fit_T0GammaInt called!");
     if (exists(x = "T0GammaInt", where = fit)) {
         warning(">> No fitting: T0GammaInt fit already exists!");
         return(fit$T0GammaInt);
@@ -28,7 +29,7 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
         ft <- NULL; n.try <- 1;
         while (is.null(ft) && n.try <= N.tries) {
             try(expr = {
-                ft <- nlsLM(
+                ft <- suppressWarnings(nlsLM(
                     y ~ b + A * pgamma(q = x - t0, shape = k, scale = theta) +
                         (A * k.a2m / gamma(k)) * (
                             gamma(k) * pgamma(q = x - t0, shape = k, scale = theta) * (x - t0) -
@@ -46,14 +47,15 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
                         gtol = 0, factor = 100,  ## between [0.1, 100]
                         maxiter = 200, nprint = -1
                     )
-                )
-            }, silent = FALSE);
+                ))
+            }, silent = silent);
             if (!is.null(ft)) {
-                print(">> Fit not NULL, checking dgn = ");
-                dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);
-                print(dgn);
+                if (!silent)
+                    print(">> Fit not NULL, checking dgn = ");
+                dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);  ## print(dgn);
                 if (dgn[1] <= "4") {
-                    print(">> dgn[1] <= 4, setting ft back to NULL");
+                    if (!silent)
+                        print(">> dgn[1] <= 4, setting ft back to NULL");
                     ft <- NULL;
                 }
             }
@@ -101,7 +103,7 @@ TG.get_T0GammaInt <- function() {
 
 ################################################################################
 TG.parms_T0GammaInt <- function(cal.CF) {
-    print(">> Call to TG.parms_T0GammaInt");
+    ## print(">> Call to TG.parms_T0GammaInt");
     if (exists(x = "T0GammaInt", where = fit)) {
         A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
         theta <- fit$T0GammaInt$cff[["theta"]];

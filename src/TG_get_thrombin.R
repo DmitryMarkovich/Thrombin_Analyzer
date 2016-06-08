@@ -1,6 +1,9 @@
 ################################################################################
 TG.get_thrombin <- function(tg.model, time = NULL) {
     switch(tg.model,
+           "None" = {
+               return(rep(0, length(data$x)));
+           },
            "Gamma" = {
                if (exists(x = "Gamma", where = fit)) {
                    A <- fit$Gamma$cff[["A"]]; k <- fit$Gamma$cff[["k"]];

@@ -17,9 +17,10 @@ Base.load_signal <- function(inFile) {
 ################################################################################
 
 ################################################################################
-Base.explore_numerically <- function(n = 3) {
+Base.explore_numerically <- function(n = 3, silent = TRUE) {
     if (!is.null(data) && length(num.smry) == 0) {
-        print(">> explore_numerically called!");
+        if (!silent)
+            print(">> explore_numerically called!");
         dt <- data$x[2] - data$x[1]; N <- length(data$x); ampl <- max(data$y);
         drv1 <- rep(NA, N);
         ## drv1[1:(N - 1)] <- (1 / dt) * (data$y[2:N] - data$y[1:(N - 1)]);

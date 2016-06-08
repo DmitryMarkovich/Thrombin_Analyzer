@@ -1,6 +1,9 @@
 ################################################################################
 TG.get_A2mT_int <- function(tg.model) {
     switch(tg.model,
+           "None" = {
+               return(rep(NA, length(data$x)));
+           },
            "Gamma" = {
                if (!exists(x = "Gamma", where = fit)) {
                    warning(">> fit$Gamma does not exist!");

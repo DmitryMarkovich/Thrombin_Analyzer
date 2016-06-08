@@ -1,7 +1,8 @@
 ################################################################################
 TG.fit_T0GammaInt2 <- function(silent = TRUE) {
 ################################################################################
-    print(">> fit_T0GammaInt2 called!");
+    if (!silent)
+        print(">> fit_T0GammaInt2 called!");
     if (exists(x = "T0GammaInt2", where = fit)) {
         warning(">> No fitting: T0GammaInt2 fit already exists!");
         return(fit$T0GammaInt2);
@@ -32,7 +33,7 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
             ## print(paste0(">> Fit try ", n.try, " of ", N.tries, " with start.list = "));
             ## print(start.list);
             try(expr = {
-                ft <- nlsLM(
+                ft <- suppressWarnings(nlsLM(
                     y ~ b + A1 * pgamma(q = x - t0, shape = k1, scale = theta) +
                         A2 * pgamma(q = x - t0, shape = k2, scale = theta) +
                         (A1 * k.a2m / gamma(k1)) * (
@@ -55,14 +56,15 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
                         gtol = 0, factor = 50,  ## between [0.1, 100]
                         maxiter = 200, nprint = -1
                     )
-                )
-            }, silent = FALSE);
+                ))
+            }, silent = silent);
             if (!is.null(ft)) {
-                print(">> Fit not NULL, checking dgn = ");
-                dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);
-                print(dgn);
+                if (!silent)
+                    print(">> Fit not NULL, checking dgn = ");
+                dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);  ## print(dgn);
                 if (dgn[1] <= "5") {
-                    print(">> dgn[1] <= 5, setting ft back to NULL");
+                    if (!silent)
+                        print(">> dgn[1] <= 5, setting ft back to NULL");
                     ft <- NULL;
                 }
             }
@@ -122,27 +124,45 @@ TG.get_T0GammaInt2 <- function() {
 ################################################################################
 
 ################################################################################
-TG.parms_T0GammaInt2 <- function(cal.CF) {
-    print(">> Call to TG.parms_T0GammaInt2");
+TG.parms_T0GammaInt2 <- function(cal.CF = 1) {
+    ## print(">> Call to TG.parms_T0GammaInt2");
     if (exists(x = "T0GammaInt2", where = fit)) {
         b <- fit$T0GammaInt2$cff[["b"]]; A1 <- fit$T0GammaInt2$cff[["A1"]];
         A2 <- fit$T0GammaInt2$cff[["A2"]]; k1 <- fit$T0GammaInt2$cff[["k1"]];
         k2 <- fit$T0GammaInt2$cff[["k2"]]; theta <- fit$T0GammaInt2$cff[["theta"]];
         k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
-        ## peak1 <- GetPeak(A1, k1, theta); peak2 <- GetPeak(A2, k2, theta);
-        ## if (peak1 > peak2) {
-        ##     t.peak <- t0 + theta * (k1 - 1);
-        ## } else {
-        ##     t.peak <- t0 + theta * (k2 - 1);
-        ## }
+        ## numerical estimation
+        ## time <- seq(from = 0.75 * num.smry$t.peak, to = 1.25 * num.smry$t.peak,
+        ##             by = 0.01);
+        ## fl <- get_thrombin("T0GammaInt2", time);
+        ## peak <- max(fl, na.rm = TRUE); t.peak <- time[fl == peak];
+        ## vel.index <- max(get_thrombin_vel("T0GammaInt2", seq(t0, t.peak, by = 0.01)),
+        ##                  na.rm = TRUE);
+        ## print(">> Numerical estimation");
+        ## print(peak); print(t.peak); print(vel.index);
+        ## analytical result
+        ## print(">> Analytical result");
+        peak1 <- GetPeak(A1, k1, theta); peak2 <- GetPeak(A2, k2, theta);
+        if (peak1 > peak2) {
+            t.peak <- t0 + theta * (k1 - 1);
+            peak <- peak1 + get_thrombin_contribution("T0GammaInt2", number = 2,
+                                                      time = t.peak);
+            t.vel.peak <- t0 + theta * (k1 - 1 - sqrt(k1 - 1));
+            vel.index <- GetVelPeak(A1, k1, theta) +
+                get_thrombin_vel_contribution("T0GammaInt2", number = 2,
+                                              time = t.vel.peak);
+        } else {
+            t.peak <- t0 + theta * (k2 - 1);
+            peak <- peak2 + get_thrombin_contribution("T0GammaInt2", number = 1,
+                                                      time = t.peak);
+            t.vel.peak <- t0 + theta * (k2 - 1 - sqrt(k2 - 1));
+            vel.index <- GetVelPeak(A2, k2, theta) +
+                get_thrombin_vel_contribution("T0GammaInt2", number = 1,
+                                              time = t.vel.peak);
+        }
+        ## print(peak); print(t.peak); print(vel.index);
         ## peak <-
-        time <- seq(from = 0.75 * num.smry$t.peak, to = 1.25 * num.smry$t.peak,
-                    by = 0.1);
-        fl <- get_thrombin("T0GammaInt2", time);
-        peak <- max(fl, na.rm = TRUE); t.peak <- time[fl == peak];
-        vel.index <- max(get_thrombin_vel("T0GammaInt2", seq(t0, t.peak, by = 0.1)),
-                         na.rm = TRUE);
-        a2m <- k.a2m * (A1 + A2);
+
         ## if (k > 2) {
         ##     v <- A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
         ##         exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
@@ -160,7 +180,7 @@ TG.parms_T0GammaInt2 <- function(cal.CF) {
                     CF * peak,
                     t.peak,
                     CF * vel.index,
-                    CF * a2m
+                    CF * k.a2m * (A1 + A2)
                     ),
                 ## StdErr = rep(NA, 5),
                 Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
@@ -175,7 +195,7 @@ TG.parms_T0GammaInt2 <- function(cal.CF) {
                     peak,
                     t.peak,
                     vel.index,
-                    a2m
+                    k.a2m * (A1 + A2)
                     ),
                 Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
                     "a.u. / min"))

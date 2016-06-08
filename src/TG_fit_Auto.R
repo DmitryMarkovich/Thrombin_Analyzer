@@ -1,17 +1,21 @@
 ################################################################################
-TG.compare_T0GammaInt2_and_T0GammaInt <- function(ft, ft2) {
+TG.compare_T0GammaInt2_and_T0GammaInt <- function(ft, ft2, silent = TRUE) {
     if (is.null(ft2)) {
-        warning(">> T0GammaInt2 does not exist!");
-        warning(">> Returning T0GammaInt without comparison!");
+        if (!silent) {
+            warning(">> T0GammaInt2 does not exist!");
+            warning(">> Returning T0GammaInt without comparison!");
+        }
         fit$Auto <<- ft; fit$Auto_model <<- "T0GammaInt";
         return(0L);
     } else {
         if (ft$smry$sigma <= ft2$smry$sigma) {
-            print(">> Returning T0GammaInt because of lower sigma!");
+            if (!silent)
+                print(">> Returning T0GammaInt because of lower sigma!");
             fit$Auto <<- ft; fit$Auto_model <<- "T0GammaInt";
             return(0L);
         } else {
-            print(">> Returning T0GammaInt2 because of lower sigma!");
+            if (!silent)
+                print(">> Returning T0GammaInt2 because of lower sigma!");
             fit$Auto <<- ft2; fit$Auto_model <<- "T0GammaInt2";
             return(0L);
         }
@@ -25,15 +29,25 @@ TG.fit_Auto <- function(silent = TRUE) {
         warning(">> No fitting: Auto fit already exists!");
     } else {
         ft <- NULL;
-        if (num.smry$rat$y <= 5) {
+        if (num.smry$rat$y <= 3) {
             fit$Auto_model <<- "None";
         } else if (num.smry$rat$x <= 2.5 && num.smry$rat$y <= 34) {
-            ft <- fit_T0Gamma(silent = TRUE);
-            if (!is.null(ft)) {
-                fit$Auto <<- ft;
-                fit$Auto_model <<- "T0Gamma";
+            if (num.smry$rat$x <= 1.6) {
+                ft <- fit_T0Gamma(silent = TRUE);
+                if (!is.null(ft)) {
+                    fit$Auto <<- ft;
+                    fit$Auto_model <<- "T0Gamma";
+                } else {
+                    fit$Auto_model <<- "None";
+                }
             } else {
-                fit$Auto_model <<- "None";
+                ft <- fit_T0GammaInt(silent = TRUE);
+                if (!is.null(ft)) {
+                    fit$Auto <<- ft;
+                    fit$Auto_model <<- "T0GammaInt";
+                } else {
+                    fit$Auto_model <<- "None";
+                }
             }
         } else {
             ft <- fit_T0GammaInt(silent = TRUE);  ## print(ft);

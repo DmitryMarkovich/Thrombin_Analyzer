@@ -1,3 +1,5 @@
+## TODO allow saving and loading the res object of the dataset that holds all parameters and etc
+
 source("src/libraries.R");
 print("################################################################################");
 app.path <- getwd();  ## stores current directory
@@ -10,40 +12,66 @@ dataset <- Dataset$new(); cal <- Cal$new(); tg <- TG$new();
 shinyServer(
     func = function(input, output) {
 ################################################################################
-######################################## TG dataset tab
+######################################## Dataset tab
 ################################################################################
         dataset.fname <- reactive({
             return(input$dataset.fname);
         })  ## End of dataset.fname
         dataset.data <- reactive({
             if (!is.null(dataset.fname())) {
-                dataset$clear();
-                dataset$load_signal(dataset.fname());
+                if (!dataset$is_empty()) {
+                    dataset$clear(); r$DO <- NULL;
+                }
+                dataset$load(dataset.fname());
                 return(0L);
+            } else {
+                return(NULL);
             }
         })  ## End of dataset.data
+        res.fname <- reactive({
+            return(input$res.fname);
+        })  ## End of res.fname
+        res.data <- reactive({
+            if (!is.null(res.fname())) {
+                dataset$load_results(res.fname());
+                return(0L);
+            } else {
+                return(NULL);
+            }
+        })  ## End of res.data
+        output$res.Show <- renderPrint({
+            if (!is.null(res.data())) {
+                ## print(">> Loaded ");
+                ## print(res.fname());
+                ## dataset$load_results(res.fname());
+                ## print(">> dataset$res = ");
+                print(length(dataset$res));
+            } else {
+                print(NULL);
+            }
+        })  ## End of output$res.show
         output$dataset.Menu <- renderUI({
             if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
-                signals <- colnames(dataset$data)[-1];
+                ## signals <- colnames(dataset$data)[-1];
                 fluidRow(
                     column(width = 6, offset = -1,
                            selectInput(inputId = "dataset.overlay1",
                                        label = h5("Overlay"),
-                                       choices = as.list(c(signals, "None")),
+                                       choices = as.list(c(dataset$signals[-1], "None")),
                                        selected = "None"),
                            selectInput(inputId = "dataset.add.to.cal",
                                        label = h6("Add to calibration"),
-                                       choices = as.list(c(signals, "None")),
+                                       choices = as.list(c(dataset$signals[-1], "None")),
                                        selected = "None")
                            ),
                     column(width = 6, offset = -1,
                            selectInput(inputId = "dataset.overlay2",
                                        label = h5("with"),
-                                       choices = as.list(c(signals, "None")),
+                                       choices = as.list(c(dataset$signals[-1], "None")),
                                        selected = "None"),
                            selectInput(inputId = "dataset.add.to.tg",
                                        label = h6("Add to thrombin generation"),
-                                       choices = as.list(c(signals, "None")),
+                                       choices = as.list(c(dataset$signals[-1], "None")),
                                        selected = "None")
                            )
                     )  ## End of fluidRow
@@ -60,6 +88,7 @@ shinyServer(
         output$dataset.ShowAs <- renderUI({
             if (!is.null(dataset.fname()) && !is.null(dataset.data()) &&
                 !is.null(dataset.show())) {
+                print(">> output$dataset.ShowAs called!");
                 ## str(dataset$data);
                 switch(dataset.show(),
                        "plot" = return(
@@ -86,52 +115,87 @@ shinyServer(
                 return(NULL);
             }
         })  ## End of output$dataset.ShowAs
-        dataset.do_analysis <- eventReactive(
-            eventExpr = input$dataset.analyze, valueExpr = {
-                ## builds a reactive expression that only invalidates when the
-                ## value of input$goButton becomes out of date (i.e., when the
-                ## button is pressed)
-                if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
-                    return(0L);
-                } else {
-                    return(NULL);
-                }
-            })  ## End of output$dataset.do_analysis
-        ## dataset.do_analysis <- observeEvent(
-        ##     eventExpr = input$dataset.analyze, handlerExpr = {
+        r <- reactiveValues(DO = NULL, DONE = NULL);
+        ## dataset.do_analysis <- eventReactive(
+        ##     eventExpr = input$dataset.analyze, valueExpr = {
         ##         ## builds a reactive expression that only invalidates when the
         ##         ## value of input$goButton becomes out of date (i.e., when the
         ##         ## button is pressed)
-        ##         if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
-        ##             return(0);
+        ##         if (!dataset$is_empty()) {  ##!is.null(dataset.fname()) && !is.null(dataset.data())
+        ##             return(0L);
         ##         } else {
         ##             return(NULL);
         ##         }
         ##     })  ## End of output$dataset.do_analysis
+        dataset.do_analysis <- observeEvent(
+            eventExpr = input$dataset.analyze, handlerExpr = {
+                ## builds a reactive expression that only invalidates when the
+                ## value of input$goButton becomes out of date (i.e., when the
+                ## button is pressed)
+                if (!dataset$is_empty()) {
+                    r$DO <- TRUE;
+                } else {
+                    r$DO <- FALSE;
+                }
+            })  ## End of output$dataset.do_analysis
         output$dataset.DoAnalysis <- renderTable({
-            if (!is.null(dataset.fname()) && !is.null(dataset.data()) &&
-                !is.null(dataset.do_analysis())) {
+            if (!is.null(dataset.data()) && !is.null(r$DO) && r$DO) {  #!is.null(dataset.do_analysis())
                 progress <- shiny::Progress$new();
                 progress$set(message = "Analyzing dataset,", value = 0);
                 on.exit(progress$close());
                 dataset$do_analysis(updateProgress, progress);  ## does the auto analysis
-                ##
-                x <- rep(NA, dataset$N - 1); y <- rep(NA, dataset$N - 1);
-                model <- rep(NA, dataset$N - 1);
-                for (i in 2:dataset$N) {
-                    x[i - 1] <- dataset$res[[dataset$signals[i]]]$num.smry$rat$x;
-                    y[i - 1] <- dataset$res[[dataset$signals[i]]]$num.smry$rat$y;
-                    model[i - 1] <- dataset$res[[dataset$signals[i]]]$Auto_model;
-                }
-                return((data.frame(Signal = dataset$signals[-1], x = x, y = y,
-                                  Auto_model = model)));
+                r$DONE <- dataset$res;
+                return(dataset$parms);
             } else {
                 ## warning(">> Data not loaded or button not pressed!");
                 return(NULL);
             }
         })  ## End of output$dataset.DoAnalysis
+########################################
+        output$parms.Download <- renderUI({
+            if (!is.null(dataset.data()) &&
+                !is.null(r$DO) && r$DO) {  ##!is.null(dataset.do_analysis())
+                downloadButton(outputId = "parms.Download_active",
+                               "Download parameters now!");
+            }
+        })  ## End of output$parms.Download
+        output$parms.Download_active <- downloadHandler(
+            filename = function() paste0(Sys.Date(), "-",
+                format(Sys.time(), "%H-%M-%S"), "-parameters-", dataset.fname()),
+            content = function(file) {
+                write.table(x = dataset$parms, file = file, quote = FALSE, sep = ";");
+            }
+            )  ## End of output$parms.Download_active
+        output$res.Download <- renderUI({
+            if (!is.null(dataset.data()) &&
+                !is.null(r$DO) && r$DO) { ##!is.null(dataset.do_analysis())
+                downloadButton(outputId = "res.Download_active",
+                               "Download results now!");
+                ## str(dataset$res);
+            }
+        })  ## End of output$res.Download
+        ## Create a reactive value rf2 to store dataset$res
+        rv <- reactiveValues();
+        observe({
+            if (!is.null(r$DO) && r$DO && length(r$DONE) != 0) {
+                ##!is.null(dataset.do_analysis()
+                isolate(rv <<- r$DONE)
+                ## print(">> from observe")
+                ## print(rv)
+            }
+        })
+        output$res.Download_active <- downloadHandler(
+            filename = function() paste0(Sys.Date(), "-",
+                format(Sys.time(), "%H-%M-%S"), "-results-",
+                substr(dataset.fname(), 0, nchar(dataset.fname()) - 4), ".RData"),
+            content = function(file) {
+                save(rv, file = file);
+                ## write.table(x = dataset$parms, file = file, quote = FALSE, sep = ";")
+            }
+            )  ## End of output$res.Download_active
+########################################
         output$dataset.PlotOverlay <- renderPlot({
-            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+            if (!is.null(dataset.data())) {
                 if (!is.null(input$dataset.overlay1) &&
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
@@ -143,34 +207,48 @@ shinyServer(
                 return(NULL);
             }
         })  ## End of output$dataset.PlotOverlay
-        output$dataset.PlotDrv1Overlay <- renderPlot({
-            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
-                if (!is.null(dataset.do_analysis()) &&
+########################################
+        output$dataset.PlotDrvOverlay <- renderPlot({
+            if (!is.null(dataset.data())) {
+                par(mfrow = c(1, 2));
+                if ((!is.null(res.data()) || (!is.null(r$DO) && r$DO)) &&
                     !is.null(input$dataset.overlay1) &&
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
                     input$dataset.overlay2 != "None") {
                     dataset$plot_drv1_overlay(input$dataset.overlay1,
                                               input$dataset.overlay2);
+                    dataset$plot_drv2_overlay(input$dataset.overlay1,
+                                              input$dataset.overlay2);
+                } else {
+                    return(NULL);
                 }
-            } else {
-                return(NULL);
             }
-        })  ## End of output$dataset.PlotDrv1Overlay
-        output$dataset.PlotDrv2Overlay <- renderPlot({
-            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
-                if (!is.null(dataset.do_analysis()) &&
+        })  ## End of output$dataset.PlotDrvOverlay
+########################################
+        output$dataset.ShowParmsOverlay <- renderTable({
+            if (!is.null(dataset.data())) {
+                if ((!is.null(res.data()) || (!is.null(r$DO) && r$DO)) &&
                     !is.null(input$dataset.overlay1) &&
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
                     input$dataset.overlay2 != "None") {
-                    dataset$plot_drv2_overlay(input$dataset.overlay1,
-                                              input$dataset.overlay2);
+                    tg <- TG$new();
+                    tg$fit <- dataset$res[[input$dataset.overlay1]]$Auto_fit;
+                    table1 <- tg$parms_model(dataset$res[[input$dataset.overlay1]]$Auto_model);
+                    tg$fit <- dataset$res[[input$dataset.overlay2]]$Auto_fit;
+                    table2 <- tg$parms_model(dataset$res[[input$dataset.overlay2]]$Auto_model);
+                    table12 <- data.frame(Parameter = table1$Parameter,
+                                          x1 = table1$Value, x2 = table2$Value,
+                                          Units = table1$Units);
+                    names(table12) <- c("Parameter", input$dataset.overlay1,
+                                        input$dataset.overlay2, "Units");
+                    return(t(table12));
+                } else {
+                    return(NULL);
                 }
-            } else {
-                return(NULL);
             }
-        })  ## End of output$dataset.PlotDrv2Overlay
+        })  ## End of output$dataset.ShowParmsOverlay
 ################################################################################
 ######################################## Calibration signal tab
 ################################################################################
@@ -263,30 +341,46 @@ shinyServer(
 ################################################################################
 ######################################## Thrombin generation signal tab
 ################################################################################
+        ## TODO clear
+        ## tg.r <- reactiveValues(tg.fname = NULL);
+        tg.clear <- observeEvent(input$tg.clear, {
+                                     tg$clear();
+                                     ## tg.r$tg.fname <- NULL;
+                                     print(tg);
+        })
         tg.fname <- reactive(x = {
             return(input$tg.fname);
         })  ## End of tg.fname
         tg.data <- reactive({
             if (!is.null(tg.fname())) {
-                tg$clear();
-                tg$load_signal(tg.fname());
-                tg$explore_numerically();
-                tg$evaluate_numerically();
+                tg$clear(); tg$load_signal(tg.fname());
+                tg$explore_numerically(); tg$evaluate_numerically();
                 return(0L);
             } else if (!is.null(input$dataset.add.to.tg) &&
                        input$dataset.add.to.tg != "None") {
                 tg$clear();
-                tg$data <<- data.frame(x = dataset$data[[1]],
-                                       y = dataset$data[[input$dataset.add.to.tg]]);
-                ## str(tg$data);
-                tg$explore_numerically();
-                tg$evaluate_numerically();
+                tg <<- dataset$copy_and_analyze_TG(
+                    x = dataset$data[[1]],
+                    y = dataset$data[[input$dataset.add.to.tg]],
+                    signal = input$dataset.add.to.tg);
+                ## print(tg);
+                ## tg$data <<- data.frame(x = dataset$data[[1]],
+                ##                        y = dataset$data[[input$dataset.add.to.tg]]);
+                ## ## str(tg$data);
+                ## tg$explore_numerically();
+                ## tg$evaluate_numerically();
                 return(0L);
+            } else {
+                return(NULL);
             }
         })  ## End of tg.data
         tg.model <- reactive({
-            tg.data();
-            return(input$tg.model);
+            if (!is.null(tg.data())) {
+                ## tg.data();
+                return(input$tg.model);
+            } else {
+                return(NULL);
+            }
         })  ## End of tg.model
         tg.model.fit <- reactive({
             if (!is.null(tg.model()) && tg.model() != "None") {
@@ -299,14 +393,18 @@ shinyServer(
         output$tg.Plot <- renderPlot({
             if (!is.null(tg.data())) {
                 tg$plot();
-                if (!is.null(tg.model.fit()))
+                if (!is.null(tg.model.fit())) {
                     tg$plot_fit(tg.model());
+                } else if (!is.null(input$dataset.add.to.tg) &&
+                           input$dataset.add.to.tg != "None") {
+                    tg$plot_fit("Auto");
+                }
             }
         })  ## End of output$tg.Plot
         output$tg.PlotResid <- renderPlot({
             Sys.sleep(time = 0.1);
             if (!is.null(tg.data()) && !is.null(tg.model()) &&
-                tg.model() != "None") {
+                tg.model() != "None" && exists(x = tg.model(), where = tg$fit)) {
                 tg$plot_residuals(tg.model());
                 ## switch(tg.model,
                 ##        "Auto" = switch(tg$fit$Auto_model,
@@ -318,17 +416,26 @@ shinyServer(
                 ## tg$plot_residuals(tg.model());
                 ## if (tg.model() == "Auto" && tg$fit$Auto_model != "None")
                 ##     tg$plot_residuals(tg.model());
+            } else if (!is.null(tg.data()) &&
+                       !is.null(input$dataset.add.to.tg) &&
+                       input$dataset.add.to.tg != "None") {
+                tg$plot_residuals("Auto");
             }
         })  ## End of output$tg.PlotResid
         output$tg.model <- renderUI({
-            if (!is.null(tg.model()) && tg.model() != "None" &&
-                !is.null(tg.data())) {
+            if (!is.null(tg.data()) && !is.null(tg.model()) &&
+                tg.model() != "None") {
                 if (!is.null(tg.model.fit()) &&
                     exists(x = tg.model(), where = tg$fit)) {
                     x <- GetSummary(tg$fit[[tg.model()]]$smry, tg.model(),
                                     full = TRUE);
                     HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
                 }
+            } else if (!is.null(tg.data()) &&
+                       !is.null(input$dataset.add.to.tg) &&
+                       input$dataset.add.to.tg != "None") {
+                x <- GetSummary(tg$fit[["Auto"]]$smry, "Auto", full = TRUE);
+                HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
             }
         })  ## End of output$tg.model
         output$tg.SynthHint <- renderTable({
@@ -376,8 +483,12 @@ shinyServer(
                 tg$plot_drv1(); tg$plot_drv2();
                 if (!is.null(tg.model.fit())) {
                     par(mfrow = c(1, 2));
-                    tg$plot_thrombogram(tg.model());
-                    tg$plot_velocity(tg.model());
+                    tg$plot_thrombogram(tg.model()); tg$plot_velocity(tg.model());
+                } else if (!is.null(tg.data()) &&
+                           !is.null(input$dataset.add.to.tg) &&
+                           input$dataset.add.to.tg != "None") {
+                    par(mfrow = c(1, 2));
+                    tg$plot_thrombogram("Auto"); tg$plot_velocity("Auto");
                 }
             }
         })  ## End of output$PlotThromb
@@ -385,7 +496,7 @@ shinyServer(
 ######################################## Parameters tab
 ################################################################################
         output$cal.ShowParms <- renderTable({
-            if (!is.null(cal.data()) && !is.null(cal.model()) &&  ## !is.null(cal.fname()) &&
+            if (!is.null(cal.data()) && !is.null(cal.model()) &&
                 exists(x = cal.model(), where = cal$fit)) {
                 cal$parms_model(cal.model(), cal.e0(), cal.s0());
             } else {
@@ -393,9 +504,13 @@ shinyServer(
             }
         }, digits = 6)  ## End of output$cal.ShowParms
         output$tg.ShowParms <- renderTable({
-            if (!is.null(tg.data()) && !is.null(tg.model()) &&  ##!is.null(tg.fname()) &&
+            if (!is.null(tg.data()) && !is.null(tg.model()) &&
                 exists(x = tg.model(), where = tg$fit)) {
                 tg$parms_model(tg.model(), cal.CF());
+            } else if (!is.null(tg.data()) &&
+                       !is.null(input$dataset.add.to.tg) &&
+                       input$dataset.add.to.tg != "None") {
+                tg$parms_model("Auto", cal.CF());
             } else {
                 NULL;
             }

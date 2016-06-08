@@ -1,13 +1,26 @@
 ################################################################################
+Dataset.is_empty <- function() {
+    if (length(data) == 0 && length(N) == 0 && length(signals) == 0 &&
+        length(parms) == 0) {
+        return(TRUE);
+    } else {
+        return(FALSE);
+    }
+}  ## End of Dataset.is_empty
+################################################################################
+
+################################################################################
 Dataset.clear <- function() {
-    data <<- data.frame();
-    res <<- list();
+    print(">> Dataset.clear called!");
+    data <<- data.frame(); N <<- 0L; signals <<- vector(mode = "character");
+    res <<- list(); parms <<- data.frame();
+    return(0L);
 }  ## End of Dataset.clear
 ################################################################################
 
 ################################################################################
-Dataset.load_signal <- function(inFile) {
-    print(">> Dataset.load_signal called!");
+Dataset.load <- function(inFile) {
+    print(">> Dataset.load called!");
     ## print(sub(pattern = ".*[.]", "", inFile$name));
     switch(sub(pattern = ".*[.]", "", inFile$name),
            "csv" = {
@@ -17,36 +30,100 @@ Dataset.load_signal <- function(inFile) {
            )
     ## remove all rows containing NA's
     data <<- data[complete.cases(data), ];
-    ## replaces all spaces with underscores in column names
-    colnames(data) <<- gsub("[.]", "_", colnames(data));
-    N <<- length(data);
-    signals <<- colnames(data);
-}  ## End of Dataset.load_signal
+    ## replace all spaces with underscores in column names
+    signals <<- gsub("[.]", "_", colnames(data));
+    colnames(data) <<- signals; N <<- length(data);
+    return(0L);
+}  ## End of Dataset.load
+################################################################################
+
+################################################################################
+Dataset.load_results <- function(inFile) {
+    print(">> Dataset.load_results called!");
+    ## print(sub(pattern = ".*[.]", "", inFile$name));
+    switch(sub(pattern = ".*[.]", "", inFile$name),
+           "RData" = {
+               print(LoadRData(fname = inFile$datapath));
+               res <<- LoadRData(fname = inFile$datapath);  ## print(res);
+           }
+           );
+    return(0L);
+}  ## End of Dataset.load_results
 ################################################################################
 source("src/Dataset_plotting_methods.R");
 
 ################################################################################
-Dataset.do_analysis <- function(updateProgress = NULL, progress) {
-    if (!is.null(data) && length(data) != 0) {
-        print(">> DoAnaysis called!");
-        time <- data[, 1];  ## print(time);
-        ## signals <- colnames(data);  ## print(signals);
-        for (i in 2:N) {
-            print(paste0(">> Processing ", signals[i]));
-            tmp <- TG$new();  ## str(tmp);
-            tmp$data <- data.frame(x = time, y = data[, signals[i]]);
-            tmp$explore_numerically(); tmp$evaluate_numerically();
+Dataset.copy_and_analyze_TG <- function(x = 0, y = 0, expl_num = TRUE,
+                                        eval_num = TRUE, fit_Auto = TRUE,
+                                        signal = NULL) {
+    tmp <- TG$new();  ## str(tmp);
+    tmp$data <- data.frame(x = x, y = y);
+    if (is.null(signal)) {
+        if (expl_num)
+            tmp$explore_numerically();
+        if (eval_num)
+            tmp$evaluate_numerically();
+        if (fit_Auto)
             tmp$fit_Auto();
-            res[[signals[i]]] <<- list(num.smry = tmp$num.smry,
-                                       Auto_model = tmp$fit$Auto_model,
-                                       Auto_fit = tmp$fit);
-            ## str(tmp);
-            if (is.function(updateProgress)) {
-                text <- paste0("compound ", i - 1, " out of ", N - 1);
-                updateProgress(progress, amount = 1 / (N - 1), detail = text);
+    } else {
+        if (any(signal == signals)) {
+            if (exists(x = signal, where = res)) {
+                tmp$num.smry <- res[[signal]]$num.smry;
+                tmp$num.eval <- res[[signal]]$num.eval;
+                tmp$fit <- res[[signal]]$Auto_fit;
             }
         }
-        print(res);
+    }
+    return(tmp);
+}  ## End of Dataset.copy_and_analyze_TG
+################################################################################
+
+################################################################################
+Dataset.do_analysis <- function(updateProgress = NULL, progress) {
+    if (!is.null(data) && length(data) != 0) {
+        print(">> DoAnalysis called!");
+        time <- data[, 1];  ## print(time);
+        parms <<- data.frame(
+            Signal = signals[-1], Reliable = rep("No", N - 1),
+            Lagtime = rep(NA, N - 1), ETP = rep(NA, N - 1),
+            Peak = rep(NA, N - 1), ttPeak = rep(NA, N - 1),
+            VelIndex = rep(NA, N - 1), Alpha2M_Level = rep(NA, N - 1),
+            stringsAsFactors = FALSE);
+        for (i in 2:N) {
+            ## print(paste0(">> Processing ", signals[i]));
+            tmp <- copy_and_analyze_TG(x = time, y = data[, signals[i]]);
+            res[[signals[i]]] <<- list(num.smry = tmp$num.smry,
+                                       num.eval = tmp$num.eval,
+                                       Auto_model = tmp$fit$Auto_model,
+                                       Auto_fit = tmp$fit,
+                                       parms = tmp$parms_model(tmp$fit$Auto_model));
+            if (!any(tmp$fit$Auto_model == c("None", "T0Gamma"))) {
+                parms[i - 1, 2:(2 + length(kParameterNames))] <<- list(
+                    Reliable = "Yes",
+                    tmp$parms$Value[tmp$parms$Parameter == "Lagtime"],
+                    tmp$parms$Value[tmp$parms$Parameter == "ETP"],
+                    tmp$parms$Value[tmp$parms$Parameter == "Peak"],
+                    tmp$parms$Value[tmp$parms$Parameter == "ttPeak"],
+                    tmp$parms$Value[tmp$parms$Parameter == "VelIndex"],
+                    tmp$parms$Value[tmp$parms$Parameter == "Alpha2M_Level"]
+                    );
+            } else {
+                parms[i - 1, 3:(2 + length(kParameterNames))] <<- list(
+                    tmp$parms$Value[tmp$parms$Parameter == "Lagtime"],
+                    tmp$parms$Value[tmp$parms$Parameter == "ETP"],
+                    tmp$parms$Value[tmp$parms$Parameter == "Peak"],
+                    tmp$parms$Value[tmp$parms$Parameter == "ttPeak"],
+                    tmp$parms$Value[tmp$parms$Parameter == "VelIndex"],
+                    tmp$parms$Value[tmp$parms$Parameter == "Alpha2M_Level"]
+                    );
+            }
+            if (is.function(updateProgress)) {
+                text <- paste0(" compound ", i - 1, " out of ", N - 1);
+                updateProgress(progress, amount = 1 / (N - 1), detail = text);
+            }
+        }  ## End of for
+        ## print(res); ## print(parms);
+        return(0L);
     } else {
         warning(">> data is NULL or empty!");
         return(NULL);
@@ -58,10 +135,11 @@ Dataset.do_analysis <- function(updateProgress = NULL, progress) {
 Dataset <- setRefClass(
     Class = "Dataset",
     fields = list(data = "data.frame", N = "integer", signals = "vector",
-        res = "list"),
+        res = "list", parms = "data.frame"),
     methods = list(
-        clear = Dataset.clear,
-        load_signal = Dataset.load_signal,
+        is_empty = Dataset.is_empty, clear = Dataset.clear,
+        load = Dataset.load, load_results = Dataset.load_results,
+        copy_and_analyze_TG = Dataset.copy_and_analyze_TG,
         plot = Dataset.plot, plot_overlay = Dataset.plot_overlay,
         plot_drv1_overlay = Dataset.plot_drv1_overlay,
         plot_drv2_overlay = Dataset.plot_drv2_overlay,

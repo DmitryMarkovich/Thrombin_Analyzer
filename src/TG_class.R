@@ -1,15 +1,16 @@
 ################################################################################
 TG.clear <- function() {
-    data <<- data.frame(); num.smry <<- list(); fit <<- list();
-    parms <<- data.frame();
+    data <<- data.frame(); num.smry <<- list(); num.eval <<- list();
+    fit <<- list(); parms <<- data.frame();
 }  ## End of TG.clear
 ################################################################################
 
 ################################################################################
-TG.evaluate_numerically <- function(silent = FALSE) {
+TG.evaluate_numerically <- function(silent = TRUE) {
     if (length(data) != 0) {
         if (is.na(num.smry$t.lin) || num.smry$rat$y <= 5) {
-            warning(">> Signal is mostly noise, skipping numerical evaluation!");
+            if (!silent)
+                warning(">> Signal is mostly noise, skipping numerical evaluation!");
             num.eval <<- list();
             return(NULL);
         } else {
@@ -88,6 +89,7 @@ TG.fit_model <- function(tg.model) {
 ################################################################################
 TG.get_model <- function(tg.model) {
     switch(tg.model,
+           "None" = return(rep(NA, length(data$x))),
            "Gamma" = get_Gamma(), "T0Gamma" = get_T0Gamma(),
            "GammaInt" = get_GammaInt(), "T0GammaInt" = get_T0GammaInt(),
            "T0GammaInt2" = get_T0GammaInt2(),
@@ -105,8 +107,10 @@ source("src/TG_get_drv2.R");
 source("src/TG_get_thrombin_vel.R"); source("src/TG_get_A2mT_vel.R");
 source("src/TG_plotting_methods.R");
 ################################################################################
-TG.parms_model <- function(tg.model, cal.CF) {
+TG.parms_model <- function(tg.model, cal.CF = 1) {
     switch(tg.model,
+           "None" = return(parms <<- data.frame(Parameter = kParameterNames,
+               Value = rep(NA, 6), Units = kAUnits)),
            "Gamma" = parms_Gamma(cal.CF),
            "T0Gamma" = parms_T0Gamma(cal.CF),
            "GammaInt" = parms_GammaInt(cal.CF),
@@ -167,6 +171,7 @@ TG <- setRefClass(
         get_thrombin_contribution = TG.get_thrombin_contribution,
         get_A2mT = TG.get_A2mT,
         get_thrombin_vel = TG.get_thrombin_vel, get_A2mT_vel = TG.get_A2mT_vel,
+        get_thrombin_vel_contribution = TG.get_thrombin_vel_contribution,
         get_drv1 = TG.get_drv1, get_drv2 = TG.get_drv2,
         plot_fit = TG.plot_fit, plot_residuals = TG.plot_residuals,
         plot_thrombogram = TG.plot_thrombogram,

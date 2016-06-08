@@ -32,8 +32,8 @@ Cal.fit_T0LateMM <- function(silent = TRUE) {
                     lower = c(  0,   0,   0,   0, -Inf),
                     upper = c(Inf, Inf, Inf, Inf,  Inf),
                     control = nls.lm.control(
-                        ftol = sqrt(.Machine$double.eps),
-                        ptol = sqrt(.Machine$double.eps),
+                        ftol = 0.1 *  sqrt(.Machine$double.eps),
+                        ptol = 0.1 * sqrt(.Machine$double.eps),
                         gtol = 0, nprint = -1, factor = 100,  ## between [0.1, 100]
                         maxiter = 200
                     )

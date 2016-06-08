@@ -1,6 +1,9 @@
 ################################################################################
 TG.get_A2mT_vel <- function(tg.model) {
     switch(tg.model,
+           "None" = {
+               return(rep(0, length(data$x)));
+           },
            "Gamma" = {
                if (!exists(x = "Gamma", where = fit))
                    warning(">> fit$Gamma does not exist!");

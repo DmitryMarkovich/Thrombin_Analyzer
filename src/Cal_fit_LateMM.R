@@ -21,11 +21,11 @@ Cal.fit_LateMM <- function(silent = TRUE) {
                 ft <- nlsLM(
                     y ~ b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * x)) / p2)),
                     data = data, start = start.list, algorithm = "LM",
-                    lower = c(0, 0, 0, 0),
+                    lower = c(  0,   0,   0,   0),
                     upper = c(Inf, Inf, Inf, Inf),
                     control = nls.lm.control(
-                        ftol = sqrt(.Machine$double.eps),
-                        ptol = sqrt(.Machine$double.eps),
+                        ftol = 0.1 * sqrt(.Machine$double.eps),
+                        ptol = 0.1 * sqrt(.Machine$double.eps),
                         gtol = 0, nprint = -1, factor = 100,  ## between [0.1, 100]
                         maxiter = 200
                     )

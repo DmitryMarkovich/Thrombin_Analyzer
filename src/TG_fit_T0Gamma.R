@@ -20,7 +20,7 @@ TG.fit_T0Gamma <- function(silent = TRUE) {
         ft <- NULL; n.try <- 1;
         while (is.null(ft) && n.try <= N.tries) {
             try(expr = {
-                ft <- nlsLM(
+                ft <- suppressWarnings(nlsLM(
                     y ~ b + A * pgamma(q = x - t0, shape = k, scale = theta),
                     data = data, start = start.list, trace = F,
                     ## lower = c(b.min, A.min, k.min, theta.min, t0.min),
@@ -34,7 +34,7 @@ TG.fit_T0Gamma <- function(silent = TRUE) {
                         gtol = 0, factor = 100,  ## between [0.1, 100]
                         maxiter = 200, nprint = -1
                     )
-                )
+                ))
             }, silent = FALSE);
             n.try <- n.try + 1;
             start.list <- list(b = data[[2]][1], A = runif(1) * num.smry$ampl,
@@ -74,7 +74,7 @@ TG.get_T0Gamma <- function() {
 
 ################################################################################
 TG.parms_T0Gamma <- function(cal.CF) {
-    print(">> Call to TG.parms_T0Gamma");
+    ## print(">> Call to TG.parms_T0Gamma");
     if (exists(x = "T0Gamma", where = fit)) {
         A <- fit$T0Gamma$cff[["A"]]; k <- fit$T0Gamma$cff[["k"]];
         theta <- fit$T0Gamma$cff[["theta"]];

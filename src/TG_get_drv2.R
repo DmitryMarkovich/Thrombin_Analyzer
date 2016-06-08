@@ -1,6 +1,9 @@
 ################################################################################
 TG.get_drv2 <- function(tg.model) {
     switch(tg.model,
+           "None" = {
+               return(rep(0, length(data$x)));
+           },
            "Gamma" = {
                if (exists(x = "Gamma", where = fit)) {
                    A <- fit$Gamma$cff[["A"]]; k <- fit$Gamma$cff[["k"]];

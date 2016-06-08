@@ -68,7 +68,7 @@ TG.plot_drv2 <- function() {
         graphics::plot(data$x, num.smry$drv2, axes = FALSE, xlab = NA, type = "b",
                        ylab = NA, cex = 1.25, lwd = 2,
                        ylim = c(min(min(num.smry$drv2, na.rm = TRUE), 0),
-                           2.25 * max(num.smry$drv2, na.rm = TRUE))
+                           2.0 * max(num.smry$drv2, na.rm = TRUE))
                        );
         grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
         box();
