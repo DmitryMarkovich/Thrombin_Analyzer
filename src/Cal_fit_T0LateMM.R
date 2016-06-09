@@ -23,7 +23,7 @@ Cal.fit_T0LateMM <- function(silent = TRUE) {
             p2 = fit$LateMM$cff[["p2"]], p3 = fit$LateMM$cff[["p3"]],
             t0 = 0);
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + (x >= t0) *

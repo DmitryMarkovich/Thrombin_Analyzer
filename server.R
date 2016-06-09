@@ -1,5 +1,3 @@
-## TODO allow saving and loading the res object of the dataset that holds all parameters and etc
-
 source("src/libraries.R");
 print("################################################################################");
 app.path <- getwd();  ## stores current directory
@@ -39,17 +37,13 @@ shinyServer(
                 return(NULL);
             }
         })  ## End of res.data
-        output$res.Show <- renderPrint({
+        output$dataset.ShowLoadedResults <- renderUI({
             if (!is.null(res.data())) {
-                ## print(">> Loaded ");
-                ## print(res.fname());
-                ## dataset$load_results(res.fname());
-                ## print(">> dataset$res = ");
-                print(length(dataset$res));
-            } else {
-                print(NULL);
+                ## print(length(dataset$res));
+                ## print(paste0(">> Loaded ", length(dataset$res), " results"));
+                HTML(c("<pre>", paste0(">> Loaded ", length(dataset$res), " results"), "</pre>"));
             }
-        })  ## End of output$res.show
+        })  ## End of output$dataset.ShowLoadedResults
         output$dataset.Menu <- renderUI({
             if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
                 ## signals <- colnames(dataset$data)[-1];
@@ -79,20 +73,18 @@ shinyServer(
         })  ## End of output$dataset.Menu
         dataset.show <- reactive({
             ## print(input$dataset.show);
-            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+            if (!is.null(dataset.data())) {
                 return(input$dataset.show);
             } else {
                 return(NULL);
             }
         })  ## End of dataset.show
         output$dataset.ShowAs <- renderUI({
-            if (!is.null(dataset.fname()) && !is.null(dataset.data()) &&
-                !is.null(dataset.show())) {
-                print(">> output$dataset.ShowAs called!");
-                ## str(dataset$data);
+            if (!is.null(dataset.show())) {
                 switch(dataset.show(),
                        "plot" = return(
                            tagList(renderPlot({
+                               ## print(">> renderPlot called from switch!");
                                progress <- shiny::Progress$new();  ## Create a Progress object
                                progress$set(message = "Plotting dataset", value = 0);
                                ## Close the progress when this reactive exits (even if there's an error)
@@ -115,18 +107,7 @@ shinyServer(
                 return(NULL);
             }
         })  ## End of output$dataset.ShowAs
-        r <- reactiveValues(DO = NULL, DONE = NULL);
-        ## dataset.do_analysis <- eventReactive(
-        ##     eventExpr = input$dataset.analyze, valueExpr = {
-        ##         ## builds a reactive expression that only invalidates when the
-        ##         ## value of input$goButton becomes out of date (i.e., when the
-        ##         ## button is pressed)
-        ##         if (!dataset$is_empty()) {  ##!is.null(dataset.fname()) && !is.null(dataset.data())
-        ##             return(0L);
-        ##         } else {
-        ##             return(NULL);
-        ##         }
-        ##     })  ## End of output$dataset.do_analysis
+        r <- reactiveValues(DO = NULL, res = NULL);
         dataset.do_analysis <- observeEvent(
             eventExpr = input$dataset.analyze, handlerExpr = {
                 ## builds a reactive expression that only invalidates when the
@@ -138,19 +119,19 @@ shinyServer(
                     r$DO <- FALSE;
                 }
             })  ## End of output$dataset.do_analysis
-        output$dataset.DoAnalysis <- renderTable({
+        output$dataset.ShowParameters <- renderTable({
             if (!is.null(dataset.data()) && !is.null(r$DO) && r$DO) {  #!is.null(dataset.do_analysis())
                 progress <- shiny::Progress$new();
                 progress$set(message = "Analyzing dataset,", value = 0);
                 on.exit(progress$close());
                 dataset$do_analysis(updateProgress, progress);  ## does the auto analysis
-                r$DONE <- dataset$res;
-                return(dataset$parms);
+                r$res <- dataset$res;
+                return(summary(dataset$parms));
             } else {
                 ## warning(">> Data not loaded or button not pressed!");
                 return(NULL);
             }
-        })  ## End of output$dataset.DoAnalysis
+        })  ## End of output$dataset.ShowParameters
 ########################################
         output$parms.Download <- renderUI({
             if (!is.null(dataset.data()) &&
@@ -174,12 +155,12 @@ shinyServer(
                 ## str(dataset$res);
             }
         })  ## End of output$res.Download
-        ## Create a reactive value rf2 to store dataset$res
+        ## Create a reactive value rf2 to store r$res
         rv <- reactiveValues();
         observe({
-            if (!is.null(r$DO) && r$DO && length(r$DONE) != 0) {
+            if (!is.null(r$DO) && r$DO && length(r$res) != 0) {
                 ##!is.null(dataset.do_analysis()
-                isolate(rv <<- r$DONE)
+                isolate(rv <<- r$res)
                 ## print(">> from observe")
                 ## print(rv)
             }
@@ -215,7 +196,8 @@ shinyServer(
                     !is.null(input$dataset.overlay1) &&
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
-                    input$dataset.overlay2 != "None") {
+                    input$dataset.overlay2 != "None" &&
+                    length(dataset$res) == dataset$N - 1) {
                     dataset$plot_drv1_overlay(input$dataset.overlay1,
                                               input$dataset.overlay2);
                     dataset$plot_drv2_overlay(input$dataset.overlay1,
@@ -232,12 +214,14 @@ shinyServer(
                     !is.null(input$dataset.overlay1) &&
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
-                    input$dataset.overlay2 != "None") {
+                    input$dataset.overlay2 != "None" &&
+                    length(dataset$res) == dataset$N - 1) {
                     tg <- TG$new();
                     tg$fit <- dataset$res[[input$dataset.overlay1]]$Auto_fit;
                     table1 <- tg$parms_model(dataset$res[[input$dataset.overlay1]]$Auto_model);
                     tg$fit <- dataset$res[[input$dataset.overlay2]]$Auto_fit;
                     table2 <- tg$parms_model(dataset$res[[input$dataset.overlay2]]$Auto_model);
+                    ## print(table1); print(table2);
                     table12 <- data.frame(Parameter = table1$Parameter,
                                           x1 = table1$Value, x2 = table2$Value,
                                           Units = table1$Units);
@@ -283,7 +267,7 @@ shinyServer(
             }
         })  ## End of output$cal.Plot
         output$cal.PlotResid <- renderPlot({
-            Sys.sleep(time = 0.1);
+            Sys.sleep(time = 0.01);
             if (!is.null(cal.data()) && !is.null(cal.model()) &&
                 cal.model() != "None" && !is.null(cal.model.fit()) &&
                 exists(cal.model(), where = cal$fit)) {
@@ -295,8 +279,11 @@ shinyServer(
                 !is.null(cal.data())) {
                 if (!is.null(cal.model.fit()) &&
                     exists(x = cal.model(), where = cal$fit)) {
-                    x <- GetSummary(cal$fit[[cal.model()]]$smry, cal.model(),
-                                    full = TRUE);
+                    if (cal.model() != "Auto") {
+                        x <- GetSummary(cal$fit[[cal.model()]]$smry);
+                    } else {
+                        x <- GetSummary(cal$fit[[cal$fit$Auto_model]]$smry);
+                    }
                     HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
                 }
             }
@@ -341,13 +328,10 @@ shinyServer(
 ################################################################################
 ######################################## Thrombin generation signal tab
 ################################################################################
-        ## TODO clear
-        ## tg.r <- reactiveValues(tg.fname = NULL);
-        tg.clear <- observeEvent(input$tg.clear, {
-                                     tg$clear();
-                                     ## tg.r$tg.fname <- NULL;
-                                     print(tg);
-        })
+        ## tg.clear <- observeEvent(
+        ##     input$tg.clear, {
+        ##         tg$clear();
+        ##     })  ## End of tg.clear
         tg.fname <- reactive(x = {
             return(input$tg.fname);
         })  ## End of tg.fname
@@ -363,12 +347,6 @@ shinyServer(
                     x = dataset$data[[1]],
                     y = dataset$data[[input$dataset.add.to.tg]],
                     signal = input$dataset.add.to.tg);
-                ## print(tg);
-                ## tg$data <<- data.frame(x = dataset$data[[1]],
-                ##                        y = dataset$data[[input$dataset.add.to.tg]]);
-                ## ## str(tg$data);
-                ## tg$explore_numerically();
-                ## tg$evaluate_numerically();
                 return(0L);
             } else {
                 return(NULL);
@@ -397,29 +375,22 @@ shinyServer(
                     tg$plot_fit(tg.model());
                 } else if (!is.null(input$dataset.add.to.tg) &&
                            input$dataset.add.to.tg != "None") {
-                    tg$plot_fit("Auto");
+                    ## print(tg$fit$Auto);
+                    if (!is.null(tg$fit$Auto) && tg$fit$Auto)
+                        tg$plot_fit("Auto");
                 }
             }
         })  ## End of output$tg.Plot
         output$tg.PlotResid <- renderPlot({
-            Sys.sleep(time = 0.1);
+            Sys.sleep(time = 0.01);
             if (!is.null(tg.data()) && !is.null(tg.model()) &&
                 tg.model() != "None" && exists(x = tg.model(), where = tg$fit)) {
                 tg$plot_residuals(tg.model());
-                ## switch(tg.model,
-                ##        "Auto" = switch(tg$fit$Auto_model,
-                ##            "None" = { return(NULL);},
-                ##            { tg$plot_residuals(tg.model());}
-                ##                        ),
-                ##        { tg$plot_residuals(tg.model());}
-                ##        );
-                ## tg$plot_residuals(tg.model());
-                ## if (tg.model() == "Auto" && tg$fit$Auto_model != "None")
-                ##     tg$plot_residuals(tg.model());
             } else if (!is.null(tg.data()) &&
                        !is.null(input$dataset.add.to.tg) &&
                        input$dataset.add.to.tg != "None") {
-                tg$plot_residuals("Auto");
+                if (!is.null(tg$fit$Auto) && tg$fit$Auto && tg$fit$Auto_model != "None")
+                    tg$plot_residuals("Auto");
             }
         })  ## End of output$tg.PlotResid
         output$tg.model <- renderUI({
@@ -427,15 +398,20 @@ shinyServer(
                 tg.model() != "None") {
                 if (!is.null(tg.model.fit()) &&
                     exists(x = tg.model(), where = tg$fit)) {
-                    x <- GetSummary(tg$fit[[tg.model()]]$smry, tg.model(),
-                                    full = TRUE);
+                    if (tg.model() != "Auto") {
+                        x <- GetSummary(tg$fit[[tg.model()]]$smry);
+                    } else {
+                        x <- GetSummary(tg$fit[[tg$fit$Auto_model]]$smry);
+                    }
                     HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
                 }
             } else if (!is.null(tg.data()) &&
                        !is.null(input$dataset.add.to.tg) &&
                        input$dataset.add.to.tg != "None") {
-                x <- GetSummary(tg$fit[["Auto"]]$smry, "Auto", full = TRUE);
-                HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
+                if (!is.null(tg$fit$Auto) && tg$fit$Auto && tg$fit$Auto_model != "None") {
+                    x <- GetSummary(tg$fit[[tg$fit$Auto_model]]$smry);
+                    HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
+                }
             }
         })  ## End of output$tg.model
         output$tg.SynthHint <- renderTable({
@@ -487,8 +463,10 @@ shinyServer(
                 } else if (!is.null(tg.data()) &&
                            !is.null(input$dataset.add.to.tg) &&
                            input$dataset.add.to.tg != "None") {
-                    par(mfrow = c(1, 2));
-                    tg$plot_thrombogram("Auto"); tg$plot_velocity("Auto");
+                    if (tg$fit$Auto_model != "None") {
+                        par(mfrow = c(1, 2));
+                        tg$plot_thrombogram("Auto"); tg$plot_velocity("Auto");
+                    }
                 }
             }
         })  ## End of output$PlotThromb

@@ -29,8 +29,8 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
         ## print(start.list);
 
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
-            ## print(paste0(">> Fit try ", n.try, " of ", N.tries, " with start.list = "));
+        while (is.null(ft) && n.try <= kNumTries) {
+            ## print(paste0(">> Fit try ", n.try, " of ", kNumTries, " with start.list = "));
             ## print(start.list);
             try(expr = {
                 ft <- suppressWarnings(nlsLM(
@@ -71,10 +71,10 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
             n.try <- n.try + 1;
             start.list <- list(
                 b = runif(1, 0.9, 1.1) * start.list$b,
-                A1 = runif(1, 0.9, 1.1) * start.list$A1,
-                A2 = runif(1, 0.9, 1.1) * start.list$A2,
-                k1 = runif(1, 2, 10), k2 = runif(1, 2, 10),
-                theta = runif(1, 1, 10),
+                A1 = runif(1, 0.5, 1.5) * start.list$A1,
+                A2 = runif(1, 0.5, 1.5) * start.list$A2,
+                k1 = runif(1, 3, 10), k2 = runif(1, 3, 10),
+                theta = runif(1, 3, 10),
                 k.a2m = runif(1, 0.5, 1.5) * start.list$k.a2m,
                 t0 = runif(1, 0.9, 1.1) * start.list$t0
                 );
@@ -83,6 +83,9 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
             warning(">> fit_T0GammaInt2 resulted in NULL!");
             return(NULL);
         } else {
+            print(paste0(">> T0GammaInt2 started at n.try = ", n.try,
+                         " with start.list = "));
+            print(unlist(start.list));
             fit$T0GammaInt2 <<- list(
                 cff = coef(ft), smry = summary(ft),
                 diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
@@ -186,6 +189,7 @@ TG.parms_T0GammaInt2 <- function(cal.CF = 1) {
                 Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
                    );
         } else {
+            ## print(paste0("vel.index = ", vel.index));
             return(parms <<- data.frame(
                 Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
                     "Alpha2M_Level"),

@@ -2,7 +2,7 @@
 TG.get_thrombin_vel <- function(tg.model, time = NULL) {
     switch(tg.model,
            "None" = {
-               return(rep(0, length(data$x)));
+               return(rep(NA, length(data$x)));
            },
            "Gamma" = {
                if (exists(x = "Gamma", where = fit)) {
@@ -15,7 +15,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(v);
                } else {
                    warning(">> fit$Gamma does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0Gamma" = {
@@ -29,7 +29,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(v);
                } else {
                    warning(">> fit$T0Gamma does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "GammaInt" = {
@@ -43,7 +43,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(v);
                } else {
                    warning(">> fit$GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0GammaInt" = {
@@ -57,7 +57,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(v);
                } else {
                    warning(">> fit$T0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0GammaInt2" = {
@@ -86,7 +86,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    }
                } else {
                    warning(">> fit$T0GammaInt2 does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "LateExpGammaInt" = {
@@ -100,7 +100,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(v);
                } else {
                    warning(">> fit$LateExpGammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "LateExpT0GammaInt" = {
@@ -115,7 +115,7 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(v);
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "Auto" = {
@@ -123,12 +123,12 @@ TG.get_thrombin_vel <- function(tg.model, time = NULL) {
                    return(get_thrombin_vel(fit$Auto_model));
                } else {
                    warning(">> fit$Auto does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            {  ## Default
                warning(paste0(">> Call to unknown tg.model ", tg.model));
-               return(rep(0, length(data$x)));
+               return(rep(NA, length(data$x)));
            }
            );  ## End of switch(tg.model)
 }  ## End of TG.get_thrombin_vel
@@ -172,6 +172,6 @@ TG.get_thrombin_vel_contribution <- function(tg.model, number = 1, time = NULL) 
             }
         }
     }
-    return(rep(0, length(data$x)));
+    return(rep(NA, length(data$x)));
 }  ## End of TG.get_thrombin_vel_contribution
 ################################################################################

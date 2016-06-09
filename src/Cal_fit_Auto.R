@@ -9,21 +9,27 @@ Cal.fit_Auto <- function(silent = TRUE) {
         if (num.smry$rat$x <= 1.5 && num.smry$rat$y <= 6) {
             ft <- fit_EarlyMM(silent = TRUE);
             if (!is.null(ft)) {
-                fit$Auto <<- ft;
+                fit$Auto <<- TRUE;
                 fit$Auto_model <<- "EarlyMM";
+            } else {
+                fit$Auto_model <<- "None";
             }
         } else if (num.smry$rat$x >= 5 && num.smry$rat$x <= 25 &&
                    num.smry$rat$y >= 10 && num.smry$rat$y <= 30) {
-            ft <- fit_LateExp(silent = TRUE);
+            ft <- fit_T0LateExp(silent = TRUE);
             if (!is.null(ft)) {
                 fit$Auto <<- ft;
-                fit$Auto_model <<- "LateExp";
+                fit$Auto_model <<- "T0LateExp";
+            } else {
+                fit$Auto_model <<- "None";
             }
         } else if (num.smry$rat$x >= 15 && num.smry$rat$y >= 40) {
-            ft <- fit_LateMM(silent = TRUE);
+            ft <- fit_T0LateMM(silent = TRUE);
             if (!is.null(ft)) {
                 fit$Auto <<- ft;
-                fit$Auto_model <<- "LateMM";
+                fit$Auto_model <<- "T0LateMM";
+            } else {
+                fit$Auto_model <<- "None";
             }
         }
     }  ## End of if (exists)
@@ -36,7 +42,7 @@ Cal.get_Auto <- function() {
         return(get_model(fit$Auto_model));
     } else {
         warning(">> fit$Auto does not exist!");
-        return(rep(0, length(data$x)));
+        return(rep(NA, length(data$x)));
     }
 }  ## End of Cal_get_Auto
 ################################################################################
@@ -47,7 +53,7 @@ Cal.get_init_rate_Auto <- function() {
         return(get_init_rate(fit$Auto_model));
     } else {
         warning(">> fit$Auto does not exist!");
-        return(rep(0, length(data$x)));
+        return(rep(NA, length(data$x)));
     }
 }  ## End of Cal_get_init_rate_Auto
 ################################################################################

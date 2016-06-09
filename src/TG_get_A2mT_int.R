@@ -8,13 +8,13 @@ TG.get_A2mT_int <- function(tg.model) {
                if (!exists(x = "Gamma", where = fit)) {
                    warning(">> fit$Gamma does not exist!");
                }
-               return(rep(0, length(data$x)));
+               return(rep(NA, length(data$x)));
            },
            "T0Gamma" = {
                if (!exists(x = "T0Gamma", where = fit)) {
                    warning(">> fit$T0Gamma does not exist!");
                }
-               return(rep(0, length(data$x)));
+               return(rep(NA, length(data$x)));
            },
            "GammaInt" = {
                if (exists(x = "GammaInt", where = fit)) {
@@ -27,7 +27,7 @@ TG.get_A2mT_int <- function(tg.model) {
                                    pgamma(q = data$x, shape = k + 1, scale = theta)));
                } else {
                    warning(">> fit$GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0GammaInt" = {
@@ -42,7 +42,7 @@ TG.get_A2mT_int <- function(tg.model) {
                                    pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
                } else {
                    warning(">> fit$T0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0GammaInt2" = {
@@ -65,7 +65,7 @@ TG.get_A2mT_int <- function(tg.model) {
                        );
                } else {
                    warning(">> fit$T0GammaInt2 does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "LateExpGammaInt" = {
@@ -85,7 +85,7 @@ TG.get_A2mT_int <- function(tg.model) {
                                    pgamma(q = data$x, shape = k + 1, scale = theta)));
                } else {
                    warning(">> fit$LateExpGammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "LateExpT0GammaInt" = {
@@ -105,7 +105,7 @@ TG.get_A2mT_int <- function(tg.model) {
                                    pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "Auto" = {
@@ -113,7 +113,7 @@ TG.get_A2mT_int <- function(tg.model) {
                    return(get_A2mT_int(fit$Auto_model));
                } else {
                    warning(">> fit$Auto does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            { print(paste0(">> Call to unknown tg.model ", tg.model));}

@@ -27,7 +27,7 @@ TG.fit_T0GammaInt <- function(silent = TRUE) {
         ## print(start.list);
 
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- suppressWarnings(nlsLM(
                     y ~ b + A * pgamma(q = x - t0, shape = k, scale = theta) +
@@ -131,6 +131,7 @@ TG.parms_T0GammaInt <- function(cal.CF) {
                 Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
                    );
         } else {
+            ## print(paste0(">> k = ", k)); print(paste0(">> v = ", v));
             return(parms <<- data.frame(
                 Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
                     "Alpha2M_Level"),

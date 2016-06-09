@@ -34,7 +34,10 @@ Cal.plot <- function() {
 Cal.plot_fit <- function(cal.model) {
     plot();
     lines(data$x, get_model(cal.model), col = "red", lwd = 3);
-    if (any(cal.model == c("T0LateMM", "LateMM", "T0LateExp", "LateExp"))) {
+    if (any(cal.model == c("T0LateMM", "LateMM", "T0LateExp", "LateExp")) ||
+        (!is.null(fit$Auto_model) &&
+             any(fit$Auto_model ==
+                     c("T0LateMM", "LateMM", "T0LateExp", "LateExp")))) {
         lines(data$x, get_init_rate(cal.model), col = "red", lwd = 3, lty = 2);
         legend("bottomright", legend = c("Initial rate"), pch = c(NA),
                lty = c(2), seg.len = 2.0, lwd = 4, col = c("red"), bg = "white",
@@ -72,8 +75,15 @@ Cal.plot_residuals <- function(cal.model) {
     axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
     title(ylab = "Fluorescence, a.u.", line = 4.5, cex.lab = 1.5);
     title(main = "Residuals of the fit", line = 0.5, cex.main = 1.5);
-    abline(h = fit[[cal.model]]$smry$sigma, lwd = 3);
-    abline(h = -fit[[cal.model]]$smry$sigma, lwd = 3);
+    if (cal.model != "Auto") {
+        abline(h = fit[[cal.model]]$smry$sigma, lwd = 3);
+        abline(h = -fit[[cal.model]]$smry$sigma, lwd = 3);
+    } else {
+        abline(h = fit[[fit$Auto_model]]$smry$sigma, lwd = 3);
+        abline(h = -fit[[fit$Auto_model]]$smry$sigma, lwd = 3);
+    }
+    ## abline(h = fit[[cal.model]]$smry$sigma, lwd = 3);
+    ## abline(h = -fit[[cal.model]]$smry$sigma, lwd = 3);
     legend("top", legend = c("Residuals"), pch = c(1), lty = c(NA),
            seg.len = 0.5, lwd = 4, col = c("black"), bg = "white", bty = "y",
            cex = 1);

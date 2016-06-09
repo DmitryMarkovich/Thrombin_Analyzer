@@ -101,7 +101,7 @@ Cal <- setRefClass(
         parms_T0LateMM = Cal.parms_T0LateMM, get_init_rate_T0LateMM = Cal.get_init_rate_T0LateMM,
         ## Auto
         fit_Auto = Cal.fit_Auto, get_Auto = Cal.get_Auto,
-        parms_Auto = Cal.parms_Auto,
+        parms_Auto = Cal.parms_Auto, get_init_rate_Auto = Cal.get_init_rate_Auto,
         ## Model
         fit_model = Cal.fit_model, get_model = Cal.get_model,
         parms_model = Cal.parms_model, get_init_rate = Cal.get_init_rate,

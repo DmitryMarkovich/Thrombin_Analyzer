@@ -39,11 +39,10 @@ Dataset.load <- function(inFile) {
 
 ################################################################################
 Dataset.load_results <- function(inFile) {
-    print(">> Dataset.load_results called!");
+    ## print(">> Dataset.load_results called!");
     ## print(sub(pattern = ".*[.]", "", inFile$name));
     switch(sub(pattern = ".*[.]", "", inFile$name),
            "RData" = {
-               print(LoadRData(fname = inFile$datapath));
                res <<- LoadRData(fname = inFile$datapath);  ## print(res);
            }
            );
@@ -89,6 +88,10 @@ Dataset.do_analysis <- function(updateProgress = NULL, progress) {
             Peak = rep(NA, N - 1), ttPeak = rep(NA, N - 1),
             VelIndex = rep(NA, N - 1), Alpha2M_Level = rep(NA, N - 1),
             stringsAsFactors = FALSE);
+        if (length(res) != 0) {
+            ## res is currently loaded, but now has to be erased
+            res <<- list();
+        }
         for (i in 2:N) {
             ## print(paste0(">> Processing ", signals[i]));
             tmp <- copy_and_analyze_TG(x = time, y = data[, signals[i]]);

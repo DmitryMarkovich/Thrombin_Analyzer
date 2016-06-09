@@ -11,7 +11,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(A * pgamma(q = data$x, shape = k, scale = theta));
                } else {
                    warning(">> fit$Gamma does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0Gamma" = {
@@ -21,7 +21,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(A * pgamma(q = data$x - t0, shape = k, scale = theta));
                } else {
                    warning(">> fit$T0Gamma does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "GammaInt" = {
@@ -31,7 +31,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(A * pgamma(q = data$x, shape = k, scale = theta));
                } else {
                    warning(">> fit$GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0GammaInt" = {
@@ -41,7 +41,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(A * pgamma(q = data$x - t0, shape = k, scale = theta));
                } else {
                    warning(">> fit$T0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "T0GammaInt2" = {
@@ -53,7 +53,7 @@ TG.get_thrombin_int <- function(tg.model) {
                               A2 * pgamma(q = data$x - t0, shape = k2, scale = theta));
                } else {
                    warning(">> fit$T0GammaInt2 does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "LateExpGammaInt" = {
@@ -64,7 +64,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(p1 * A * pgamma(q = data$x, shape = k, scale = theta));
                } else {
                    warning(">> fit$LateExpGammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "LateExpT0GammaInt" = {
@@ -76,7 +76,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(p1 * A * pgamma(q = data$x - t0, shape = k, scale = theta))
                } else {
                    warning(">> fit$LateExpT0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            "Auto" = {
@@ -84,7 +84,7 @@ TG.get_thrombin_int <- function(tg.model) {
                    return(get_thrombin_int(fit$Auto_model));
                } else {
                    warning(">> fit$Auto does not exist!");
-                   return(rep(0, length(data$x)));
+                   return(rep(NA, length(data$x)));
                }
            },
            { print(paste0(">> Call to unknown tg.model", tg.model))}
@@ -106,6 +106,6 @@ TG.get_thrombin_int_contribution <- function(tg.model, number = 1) {
             }
         }
     }
-    return(rep(0, length(data$x)));
+    return(rep(NA, length(data$x)));
 }  ## End of TG.get_thrombin_int_contribution
 ################################################################################

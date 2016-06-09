@@ -4,7 +4,7 @@ Dataset.plot <- function(updateProgress = NULL, progress) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
         ## par(mar = c(4, 7, 2, 0.5), mgp = c(10, 1, 0));
         plot.matrix <- CalculatePlotLayout(N - 1);  ## print(plot.matrix);
-        par(mfrow = plot.matrix, mar = rep(0, 4));  ## options(scipen = -2); pin = c(0.5, 0.5)
+        par(mfrow = plot.matrix, mar = rep(0.1, 4));  ## options(scipen = -2); pin = c(0.5, 0.5)
         for (i in 2:N) {
             ## Sys.sleep(0.1);
             ## print(paste0(">> Plotting ", titles[i]));
@@ -51,24 +51,22 @@ Dataset.plot_overlay <- function(signal1, signal2) {
         lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
         legend("topleft", legend = c(signal1, signal2), pch = 1:2,
                cex = 1.25, seg.len = 0);
-        ## print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> From plot_overlay!");
-        ## str(res);
-        if (exists(x = signal1, where = res)) {
-            if (length(res) != N - 1) {  ## TODO check somehow for all possible signals
-                legend("center", legend = "You must have loaded different dataset and result files!",
-                       pch = NA, text.col = 2, cex = 2, seg.len = 0);
-            } else {
+
+        if (length(res) > 0 && length(res) != N - 1) {
+            legend("center", legend = "You must have loaded different dataset and result files!",
+                   pch = NA, text.col = 2, cex = 2, seg.len = 0);
+        } else {
+            if (exists(x = signal1, where = res)) {
                 tg1 <- copy_and_analyze_TG(x = x, y = y1, signal = signal1);  ## print(tg1);
                 lines(x, tg1$get_A2mT_int(res[[signal1]]$Auto_model), col = "cyan",
                       cex = 0.5, type = "b", pch = 1);
                 lines(x, tg1$get_model(res[[signal1]]$Auto_model), col = "red", lwd = 3);
                 lines(x, tg1$get_thrombin_int(res[[signal1]]$Auto_model),
                       col = "blue", cex = 0.5, type = "b", pch = 1);
-                
-            legend("topleft", legend = c(paste0(signal1, " (",
-                                  res[[signal1]]$Auto_model, ")"), signal2),
-                   pch = 1:2, cex = 1.25, seg.len = 0);
-                
+                legend("topleft", legend = c(paste0(signal1, " (",
+                                      res[[signal1]]$Auto_model, ")"), signal2),
+                       pch = 1:2, cex = 1.25, seg.len = 0);
+
                 if (exists(x = signal2, where = res)) {
                     tg2 <- copy_and_analyze_TG(x = x, y = y2, signal = signal2);  ## print(tg2);
                     lines(x, tg2$get_A2mT_int(res[[signal2]]$Auto_model),
@@ -80,10 +78,10 @@ Dataset.plot_overlay <- function(signal1, signal2) {
                                c(paste0(signal1, " (", res[[signal1]]$Auto_model, ")"),
                                  paste0(signal2, " (", res[[signal2]]$Auto_model, ")")),
                            pch = 1:2, cex = 1.25, seg.len = 0);
-                }
-            }
-        }
-    }
+                }  ## End of if (exists(signal2))
+            }  ## End of if (exists(signal1))
+        }  ## End of if (length(res))
+    }  ## End of if (!is.null)
 }  ## End of Dataset.plot_overlay
 ################################################################################
 
@@ -97,55 +95,46 @@ Dataset.plot_drv1_overlay <- function(signal1, signal2) {
             y1 <- res[[signal1]]$num.smry$drv1;
             if (exists(signal2, res)) {
                 y2 <- res[[signal2]]$num.smry$drv1;
-                ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
-                par(mar = c(4, 7, 2, 0.5), mgp = c(10, 1, 0)); options(scipen = -2);
-                graphics::plot(x, y = y1,
-                               ylim = c(
-                                   min(c(min(y1, na.rm = TRUE),
-                                         min(y2, na.rm = TRUE))),
-                                   max(c(max(y1, na.rm = TRUE),
-                                         max(y2, na.rm = TRUE)))),
-                               axes = FALSE, xlab = NA, ylab = NA, cex = 1.25, lwd = 2);
-                grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
-                box();
-                axis(side = 1, tck = -0.025, labels = NA);
-                axis(side = 1, lwd = 0, line = 0.15, cex.axis = 1.5);
-                title(xlab = "time, min", line = 2.25, cex.lab = 1.5);
-                axis(side = 2, tck = -0.025, labels = NA, col = "black");
-                axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
-                title(ylab = "Rate of change of fluorescence, a.u. / min",
-                      line = 5.5, cex.lab = 1.25);
-                lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
-                legend("topright", legend = c(signal1, signal2), pch = 1:2,
-                       cex = 1.25, seg.len = 0);
-                tg1 <- copy_and_analyze_TG(x = x, y = y1, signal = signal1);
-                ## tg1 <- TG$new();
-                ## tg1$data <- data.frame(x = x, y = y1);
-                ## tg1$num.smry <- res[[signal1]]$num.smry;
-                ## tg1$num.eval <- res[[signal1]]$num.eval;
-                ## tg1$fit <- res[[signal1]]$Auto_fit;
-                ## print(tg1);
-                lines(x, tg1$get_A2mT(res[[signal1]]$Auto_model), col = "cyan",
-                      cex = 0.5, type = "b", pch = 1);
-                lines(x, tg1$get_drv1(res[[signal1]]$Auto_model), col = "red", lwd = 3);
-                lines(x, tg1$get_thrombin(res[[signal1]]$Auto_model),
-                      col = "blue", cex = 0.5, type = "b", pch = 1);
+                if (length(y1) > 1 && length(y2) > 1) {
+                    ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
+                    par(mar = c(4, 7, 2, 0.5), mgp = c(10, 1, 0)); options(scipen = -2);
+                    graphics::plot(x, y = y1,
+                                   ylim = c(
+                                       min(c(min(y1, na.rm = TRUE),
+                                             min(y2, na.rm = TRUE))),
+                                       max(c(max(y1, na.rm = TRUE),
+                                             max(y2, na.rm = TRUE)))),
+                                   axes = FALSE, xlab = NA, ylab = NA, cex = 1.25, lwd = 2);
+                    grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
+                    box();
+                    axis(side = 1, tck = -0.025, labels = NA);
+                    axis(side = 1, lwd = 0, line = 0.15, cex.axis = 1.5);
+                    title(xlab = "time, min", line = 2.25, cex.lab = 1.5);
+                    axis(side = 2, tck = -0.025, labels = NA, col = "black");
+                    axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
+                    title(ylab = "Rate of change of fluorescence, a.u. / min",
+                          line = 5.5, cex.lab = 1.25);
+                    lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
+                    legend("topright", legend = c(signal1, signal2), pch = 1:2,
+                           cex = 1.25, seg.len = 0);
 
-                tg2 <- copy_and_analyze_TG(x = x, y = y2, signal = signal2);
-                ## tg2 <- TG$new();
-                ## tg2$data <- data.frame(x = x, y = y2);
-                ## tg2$num.smry <- res[[signal2]]$num.smry;
-                ## tg2$num.eval <- res[[signal2]]$num.eval;
-                ## tg2$fit <- res[[signal2]]$Auto_fit;
-                ## print(tg2);
-                lines(x, tg2$get_A2mT(res[[signal2]]$Auto_model), col = "cyan",
-                      cex = 0.5, type = "b", pch = 2);
-                lines(x, tg2$get_drv1(res[[signal2]]$Auto_model), col = "red", lwd = 3);
-                lines(x, tg2$get_thrombin(res[[signal2]]$Auto_model),
-                      col = "blue", cex = 0.5, type = "b", pch = 2);
-            }
-        }
-    }
+                    tg1 <- copy_and_analyze_TG(x = x, y = y1, signal = signal1);
+                    lines(x, tg1$get_A2mT(res[[signal1]]$Auto_model), col = "cyan",
+                          cex = 0.5, type = "b", pch = 1);
+                    lines(x, tg1$get_drv1(res[[signal1]]$Auto_model), col = "red", lwd = 3);
+                    lines(x, tg1$get_thrombin(res[[signal1]]$Auto_model),
+                          col = "blue", cex = 0.5, type = "b", pch = 1);
+
+                    tg2 <- copy_and_analyze_TG(x = x, y = y2, signal = signal2);
+                    lines(x, tg2$get_A2mT(res[[signal2]]$Auto_model), col = "cyan",
+                          cex = 0.5, type = "b", pch = 2);
+                    lines(x, tg2$get_drv1(res[[signal2]]$Auto_model), col = "red", lwd = 3);
+                    lines(x, tg2$get_thrombin(res[[signal2]]$Auto_model),
+                          col = "blue", cex = 0.5, type = "b", pch = 2);
+                }  ## End of if (length)
+            }  ## End of if (exists(signal2))
+        }  ## End of if (exists(signal1))
+    }  ## End of if (!is.null())
 }  ## End of Dataset.plot_drv1_overlay
 ################################################################################
 
@@ -157,52 +146,45 @@ Dataset.plot_drv2_overlay <- function(signal1, signal2) {
             y1 <- res[[signal1]]$num.smry$drv2;
             if (exists(signal2, res)) {
                 y2 <- res[[signal2]]$num.smry$drv2;
-                ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
-                par(mar = c(4, 7, 2, 0.5), mgp = c(10, 1, 0)); options(scipen = -2);
-                graphics::plot(x, y = y1,
-                               ylim = c(
-                                   min(c(min(y1, na.rm = TRUE),
-                                         min(y2, na.rm = TRUE))),
-                                   2 * max(c(max(y1, na.rm = TRUE),
-                                             max(y2, na.rm = TRUE)))),
-                               axes = FALSE, xlab = NA, ylab = NA, cex = 1.25, lwd = 2);
-                grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
-                box();
-                axis(side = 1, tck = -0.025, labels = NA);
-                axis(side = 1, lwd = 0, line = 0.15, cex.axis = 1.5);
-                title(xlab = "time, min", line = 2.25, cex.lab = 1.5);
-                axis(side = 2, tck = -0.025, labels = NA, col = "black");
-                axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
-                title(ylab = "Rate of change of fluorescence, a.u. / min * min",
-                      line = 5.5, cex.lab = 1.25);
-                lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
-                legend("topright", legend = c(signal1, signal2), pch = 1:2,
-                       cex = 1.25, seg.len = 0);
-                tg1 <- TG$new();
-                tg1$data <- data.frame(x = x, y = y1);
-                tg1$num.smry <- res[[signal1]]$num.smry;
-                tg1$num.eval <- res[[signal1]]$num.eval;
-                tg1$fit <- res[[signal1]]$Auto_fit;
-                ## print(tg1);
-                lines(x, tg1$get_A2mT_vel(res[[signal1]]$Auto_model), col = "cyan",
-                      cex = 0.5, type = "b", pch = 1);
-                lines(x, tg1$get_drv2(res[[signal1]]$Auto_model), col = "red", lwd = 3);
-                lines(x, tg1$get_thrombin_vel(res[[signal1]]$Auto_model),
-                      col = "blue", cex = 0.5, type = "b", pch = 1);
+                if (length(y1) > 1 && length(y2) > 1) {
+                    ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
+                    par(mar = c(4, 7, 2, 0.5), mgp = c(10, 1, 0)); options(scipen = -2);
+                    graphics::plot(x, y = y1,
+                                   ylim = c(
+                                       min(c(min(y1, na.rm = TRUE),
+                                             min(y2, na.rm = TRUE))),
+                                       kYlimMultDrv2 * max(c(max(y1, na.rm = TRUE),
+                                                 max(y2, na.rm = TRUE)))),
+                                   axes = FALSE, xlab = NA, ylab = NA, cex = 1.25, lwd = 2);
+                    grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
+                    box();
+                    axis(side = 1, tck = -0.025, labels = NA);
+                    axis(side = 1, lwd = 0, line = 0.15, cex.axis = 1.5);
+                    title(xlab = "time, min", line = 2.25, cex.lab = 1.5);
+                    axis(side = 2, tck = -0.025, labels = NA, col = "black");
+                    axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
+                    title(ylab = "Rate of change of fluorescence, a.u. / min * min",
+                          line = 5.5, cex.lab = 1.25);
+                    lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
+                    legend("topright", legend = c(signal1, signal2), pch = 1:2,
+                           cex = 1.25, seg.len = 0);
 
-                tg2 <- TG$new();
-                tg2$data <- data.frame(x = x, y = y2);
-                tg2$num.smry <- res[[signal2]]$num.smry;
-                tg2$num.eval <- res[[signal2]]$num.eval;
-                tg2$fit <- res[[signal2]]$Auto_fit;
-                ## print(tg2);
-                lines(x, tg2$get_A2mT_vel(res[[signal2]]$Auto_model), col = "cyan",
-                      cex = 0.5, type = "b", pch = 2);
-                lines(x, tg2$get_drv2(res[[signal2]]$Auto_model), col = "red", lwd = 3);
-                lines(x, tg2$get_thrombin_vel(res[[signal2]]$Auto_model),
-                      col = "blue", cex = 0.5, type = "b", pch = 2);
-            }
-        }
-    }
+                    tg1 <- copy_and_analyze_TG(x = x, y = y1, signal = signal1);
+                    lines(x, tg1$get_A2mT_vel(res[[signal1]]$Auto_model), col = "cyan",
+                          cex = 0.5, type = "b", pch = 1);
+                    lines(x, tg1$get_drv2(res[[signal1]]$Auto_model), col = "red", lwd = 3);
+                    lines(x, tg1$get_thrombin_vel(res[[signal1]]$Auto_model),
+                          col = "blue", cex = 0.5, type = "b", pch = 1);
+
+                    tg2 <- copy_and_analyze_TG(x = x, y = y1, signal = signal2);
+                    lines(x, tg2$get_A2mT_vel(res[[signal2]]$Auto_model), col = "cyan",
+                          cex = 0.5, type = "b", pch = 2);
+                    lines(x, tg2$get_drv2(res[[signal2]]$Auto_model), col = "red", lwd = 3);
+                    lines(x, tg2$get_thrombin_vel(res[[signal2]]$Auto_model),
+                          col = "blue", cex = 0.5, type = "b", pch = 2);
+                }  ## End of if (length)
+            }  ## End of if (exists(signal2))
+        }  ## End of if (exists(signal1))
+    }  ## End of if (!is.null())
 }  ## End of Dataset.plot_drv2_overlay
 ################################################################################

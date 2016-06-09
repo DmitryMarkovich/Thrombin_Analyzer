@@ -1,20 +1,26 @@
 ################################################################################
-GetSummary <- function(smry, model, full = FALSE) {
-    print(smry);
-    x <- capture.output(print(smry));  ## print
-    ## x <- printed("print(fit$smry)");
-    if (full || model == "LM") {
-        return(x);
+GetSummary <- function(smry) {  ## , model, full = FALSE
+    if (!is.null(smry)) {
+        return(capture.output(print(smry)));
     } else {
-        x <- x[x != ""];
-        ## return(c(x[((1:length(x))[x ==
-        ## "Parameters:"]):((1:length(x))[substr(x, 0, 3) == "---"] - 1)],
-        ## x[substr(x, 0, 8) == "Residual"]));
-        x <- x[substr(x, 0, 7) != "Signif."];
-        y <- c(x[((1:length(x))[x == "Parameters:"]):((1:length(x))[substr(x, 0, 8) == "Residual"])]);
-        y[length(y)] <- paste(substr(y[length(y)], 0, nchar(y[length(y)]) - 19), "d.o.f.");
-        return(y);
+        warning(">> smry == NULL!");
+        return(NULL);
     }
+    ## print(smry);
+    ## x <- capture.output(print(smry));  ## print
+    ## x <- printed("print(fit$smry)");
+    ## if (full || model == "LM") {
+    ##     return(x);
+    ## } else {
+    ##     x <- x[x != ""];
+    ##     ## return(c(x[((1:length(x))[x ==
+    ##     ## "Parameters:"]):((1:length(x))[substr(x, 0, 3) == "---"] - 1)],
+    ##     ## x[substr(x, 0, 8) == "Residual"]));
+    ##     x <- x[substr(x, 0, 7) != "Signif."];
+    ##     y <- c(x[((1:length(x))[x == "Parameters:"]):((1:length(x))[substr(x, 0, 8) == "Residual"])]);
+    ##     y[length(y)] <- paste(substr(y[length(y)], 0, nchar(y[length(y)]) - 19), "d.o.f.");
+    ##     return(y);
+    ## }
 }  ## End of GetSummary()
 ################################################################################
 

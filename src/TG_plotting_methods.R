@@ -15,8 +15,11 @@ TG.plot <- function() {
         axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
         title(ylab = "Fluorescence, a.u.", line = 5.5, cex.lab = 1.5);
         title(main = "Thrombin generation signal", line = 0.5, cex.main = 1.5);
-        mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1.5, cex = 1.5);
-        mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1.5, cex = 1.5);
+
+        if (length(num.smry$rat) > 0 && !is.na(num.smry$rat$x) && !is.na(num.smry$rat$y)) {
+            mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1.5, cex = 1.5);
+            mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1.5, cex = 1.5);
+        }
         abline(v = num.smry$t.lin);
         ## abline(h = num.eval$a);
         ## lines(x = data$x, y = num.eval$a + num.eval$b * (data$x - num.smry$t.lin), col = "blue");
@@ -30,7 +33,7 @@ TG.plot <- function() {
 ################################################################################
 TG.plot_drv1 <- function() {
     ## str(data); str(num.smry);
-    if (length(data) != 0 && length(num.smry) != 0) {
+    if (length(data) != 0 && length(num.smry) != 0 && length(num.smry$drv1) > 1) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
         par(mar = c(4, 8, 2, 0.25), mgp = c(10, 1, 0)); options(scipen = -2);
         graphics::plot(data$x, num.smry$drv1, axes = FALSE, xlab = NA, type = "b",
@@ -62,13 +65,13 @@ TG.plot_drv1 <- function() {
 ################################################################################
 TG.plot_drv2 <- function() {
     ## str(data); str(num.smry);
-    if (length(data) != 0 && length(num.smry) != 0) {
+    if (length(data) != 0 && length(num.smry) != 0 && length(num.smry$drv2) > 1) {
         ## mar = c(bottom, right, up, left), mgp = c(?, tick values, ticks)
         par(mar = c(4, 7, 2, 0.75), mgp = c(10, 1, 0)); options(scipen = -2);
         graphics::plot(data$x, num.smry$drv2, axes = FALSE, xlab = NA, type = "b",
                        ylab = NA, cex = 1.25, lwd = 2,
                        ylim = c(min(min(num.smry$drv2, na.rm = TRUE), 0),
-                           2.0 * max(num.smry$drv2, na.rm = TRUE))
+                           kYlimMultDrv2 * max(num.smry$drv2, na.rm = TRUE))
                        );
         grid(nx = NULL, ny = NULL, lty = 2, col = "black", lwd = 1);
         box();
@@ -143,8 +146,13 @@ TG.plot_residuals <- function(tg.model) {
     axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
     title(ylab = "Fluorescence, a.u.", line = 4.5, cex.lab = 1.5);
     title(main = "Residuals of the fit", line = 0.5, cex.main = 1.5);
-    abline(h = fit[[tg.model]]$smry$sigma, lwd = 3);
-    abline(h = -fit[[tg.model]]$smry$sigma, lwd = 3);
+    if (tg.model != "Auto") {
+        abline(h = fit[[tg.model]]$smry$sigma, lwd = 3);
+        abline(h = -fit[[tg.model]]$smry$sigma, lwd = 3);
+    } else {
+        abline(h = fit[[fit$Auto_model]]$smry$sigma, lwd = 3);
+        abline(h = -fit[[fit$Auto_model]]$smry$sigma, lwd = 3);
+    }
     legend("top", legend = c("Residuals"), pch = c(1), lty = c(NA),
            seg.len = 0.5, lwd = 4, col = c("black"), bg = "white", bty = "y",
            cex = 1);
@@ -156,47 +164,51 @@ TG.plot_residuals <- function(tg.model) {
 
 ################################################################################
 TG.plot_thrombogram <- function(tg.model) {
-    plot_drv1();
-    lines(data$x, get_A2mT(tg.model), col = "cyan", lwd = 2);
-    lines(data$x, get_drv1(tg.model), col = "red", lwd = 3);
-    lines(data$x, get_thrombin(tg.model), col = "blue", lwd = 2);
-    if (tg.model == "Auto") {
-        tg.model <- fit$Auto_model;
-        model.label <- paste0(fit$Auto_model, " fit (A)");
-    } else {
-        model.label <- paste0(tg.model, " fit");
+    if (tg.model != "None") {
+        plot_drv1();
+        lines(data$x, get_A2mT(tg.model), col = "cyan", lwd = 2);
+        lines(data$x, get_drv1(tg.model), col = "red", lwd = 3);
+        lines(data$x, get_thrombin(tg.model), col = "blue", lwd = 2);
+        if (tg.model == "Auto") {
+            tg.model <- fit$Auto_model;
+            model.label <- paste0(fit$Auto_model, " fit (A)");
+        } else {
+            model.label <- paste0(tg.model, " fit");
+        }
+        if (tg.model == "T0GammaInt2") {
+            lines(data$x, get_thrombin_contribution(tg.model, 1),
+                  col = "blue", lwd = 2, lty = 2);
+            lines(data$x, get_thrombin_contribution(tg.model, 2),
+                  col = "blue", lwd = 2, lty = 3);
+        }
+        legend("topright",
+               legend = c("Num. Drv. 1", model.label, "Thrombin",
+                   expression(paste(alpha[2], "M-T"))),
+               pch = c(1, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
+               col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
+               cex = 1.25);
     }
-    if (tg.model == "T0GammaInt2") {
-        lines(data$x, get_thrombin_contribution(tg.model, 1),
-              col = "blue", lwd = 2, lty = 2);
-        lines(data$x, get_thrombin_contribution(tg.model, 2),
-              col = "blue", lwd = 2, lty = 3);
-    }
-    legend("topright",
-           legend = c("Num. Drv. 1", model.label, "Thrombin",
-               expression(paste(alpha[2], "M-T"))),
-           pch = c(1, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
-           col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
-           cex = 1.25);
 }  ## End of TG.plot_thrombogram
 ################################################################################
 
 ################################################################################
 TG.plot_velocity <- function(tg.model) {
-    plot_drv2();
-    lines(data$x, get_A2mT_vel(tg.model), col = "cyan", lwd = 2);
-    lines(data$x, get_drv2(tg.model), col = "red", lwd = 3);
-    lines(data$x, get_thrombin_vel(tg.model), col = "blue", lwd = 2, pch = 16);
-    if (tg.model == "Auto") {
-        model.label <- paste0(fit$Auto_model, " fit (A)");
-    } else {
-        model.label <- paste0(tg.model, " fit");
+    if (tg.model != "None") {
+        plot_drv2();
+        lines(data$x, get_A2mT_vel(tg.model), col = "cyan", lwd = 2);
+        lines(data$x, get_drv2(tg.model), col = "red", lwd = 3);
+        lines(data$x, get_thrombin_vel(tg.model), col = "blue", lwd = 2, pch = 16);
+        if (tg.model == "Auto") {
+            model.label <- paste0(fit$Auto_model, " fit (A)");
+        } else {
+            model.label <- paste0(tg.model, " fit");
+        }
+        legend("topright",
+               legend = c("Num. Drv. 2", model.label, "Thrombin velocity",
+                   expression(paste(alpha[2], "M-T velocity"))),
+               pch = c(1, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
+               col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
+               cex = 1.25, ncol = 1);
     }
-    legend("topright",
-           legend = c("Num. Drv. 2", model.label, "Thrombin velocity",
-               expression(paste(alpha[2], "M-T velocity"))),
-           pch = c(1, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
-           col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
-           cex = 1.25, ncol = 1);
 }  ## End of TG.plot_thrombogram
 ################################################################################

@@ -21,7 +21,7 @@ Cal.fit_T0LateExp <- function(silent = FALSE) {
         start.list <- list(b = fit$LateExp$cff[["b"]], p1 = fit$LateExp$cff[["p1"]],
                            p3 = fit$LateExp$cff[["p3"]], t0 = 0);
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + (x >= t0) * p1 * (1 - exp(-p3 * (x - t0))),

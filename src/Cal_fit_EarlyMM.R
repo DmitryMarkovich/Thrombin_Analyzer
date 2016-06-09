@@ -14,7 +14,7 @@ Cal.fit_EarlyMM <- function(silent = FALSE) {
             start.list <- list(b = data$y[[1]], p1 = fit$LM$cff[[2]], p2 = 0.1);
         }
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + p1 * (x - ((1 - exp(-p2 * x)) / p2)),

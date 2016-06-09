@@ -8,7 +8,7 @@ TG.clear <- function() {
 ################################################################################
 TG.evaluate_numerically <- function(silent = TRUE) {
     if (length(data) != 0) {
-        if (is.na(num.smry$t.lin) || num.smry$rat$y <= 5) {
+        if (is.na(num.smry$t.lin) || num.smry$rat$y <= kYNone) {
             if (!silent)
                 warning(">> Signal is mostly noise, skipping numerical evaluation!");
             num.eval <<- list();
@@ -46,13 +46,11 @@ TG.evaluate_numerically <- function(silent = TRUE) {
             ## print(num.smry$drv1 - num.eval$k * (data$x[2] - data$x[1]) *
             ##           cumsum(num.smry$drv1));
             num.eval <<- list(
-                a = coef(fit.late)[[1]], b = coef(fit.late)[[2]], k = k, A2mT = A2mT,
+                ## a = coef(fit.late)[[1]], b = coef(fit.late)[[2]], k = k, A2mT = A2mT,
                 parms = data.frame(
-                    Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
-                        "Alpha2M_Level"),
+                    Parameter = kParameterNames,
                     Value = c(lagtime, ETP, peak, tt.peak, vel.index, a2m.level),
-                    Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
-                        "a.u. / min"))
+                    Units = kAUnits)
                 );
             if (!silent)
                 print(num.eval$parms);

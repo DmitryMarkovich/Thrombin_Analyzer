@@ -12,13 +12,15 @@ TG.fit_T0Gamma <- function(silent = TRUE) {
                                t0 = 0);
         } else {
             ## call fit_Gamma for estimate all parameters except t0
-            fit_Gamma(silent = TRUE);
-            start.list <- list(b = fit$Gamma$cff[["b"]], A = fit$Gamma$cff[["A"]],
-                               k = fit$Gamma$cff[["k"]], theta = fit$Gamma$cff[["theta"]],
-                               t0 = 0);
+            ## fit_Gamma(silent = TRUE);
+            ## start.list <- list(b = fit$Gamma$cff[["b"]], A = fit$Gamma$cff[["A"]],
+            ##                    k = fit$Gamma$cff[["k"]], theta = fit$Gamma$cff[["theta"]],
+            ##                    t0 = 0);
+            start.list <- list(b = data$y[1], A = 0.5 * num.smry$ampl,
+                               k = 3, theta = num.smry$t.peak / 2, t0 = 0);
         }
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- suppressWarnings(nlsLM(
                     y ~ b + A * pgamma(q = x - t0, shape = k, scale = theta),

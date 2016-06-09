@@ -16,7 +16,7 @@ Cal.fit_LateExp <- function(silent = FALSE) {
                                p3 = fit$LM$cff[[2]]);
         }
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + p1 * (1 - exp(-p3 * x)),
