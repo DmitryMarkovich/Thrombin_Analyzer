@@ -8,7 +8,7 @@ TG.fit_Gamma <- function(silent = TRUE) {
         ft <- NULL; start.list <- list(b = data$y[1], A = 0.5 * num.smry$ampl,
                                        k = 3, theta = num.smry$t.peak / 2);
         n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + A * pgamma(q = x, shape = k, scale = theta),

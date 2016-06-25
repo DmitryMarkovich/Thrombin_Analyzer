@@ -159,6 +159,7 @@ TG <- setRefClass(
         fit_Auto = TG.fit_Auto, get_Auto = TG.get_Auto,
         parms_Auto = TG.parms_Auto,
         compare_T0GammaInt2_and_T0GammaInt = TG.compare_T0GammaInt2_and_T0GammaInt,
+        compare_T0GammaInt_and_T0Gamma = TG.compare_T0GammaInt_and_T0Gamma,
         ## model
         fit_model = TG.fit_model, get_model = TG.get_model,
         parms_model = TG.parms_model,

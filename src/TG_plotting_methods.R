@@ -204,8 +204,8 @@ TG.plot_velocity <- function(tg.model) {
             model.label <- paste0(tg.model, " fit");
         }
         legend("topright",
-               legend = c("Num. Drv. 2", model.label, "Thrombin velocity",
-                   expression(paste(alpha[2], "M-T velocity"))),
+               legend = c("Num. Drv. 2", model.label, "Thrombin Velocity",
+                   expression(paste(alpha[2], "M-T Velocity"))),
                pch = c(1, NA, NA, NA), lty = c(NA, 1, 1, 1), seg.len = 0.5, lwd = 4,
                col = c("black", "red", "blue", "cyan"), bg = "white", bty = "y",
                cex = 1.25, ncol = 1);

@@ -102,7 +102,7 @@ TG.get_T0GammaInt <- function() {
 ################################################################################
 
 ################################################################################
-TG.parms_T0GammaInt <- function(cal.CF) {
+TG.parms_T0GammaInt <- function(cal.CF = 1) {
     ## print(">> Call to TG.parms_T0GammaInt");
     if (exists(x = "T0GammaInt", where = fit)) {
         A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
@@ -131,7 +131,28 @@ TG.parms_T0GammaInt <- function(cal.CF) {
                 Units = c("min", "nM * min", "nM", "min", "nM / min", "nM"))
                    );
         } else {
-            ## print(paste0(">> k = ", k)); print(paste0(">> v = ", v));
+            ## print(paste0("t0 = ", t0));
+            ## print(paste0("A = ", A));
+            ## print(paste0("Peak = ", A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta)));
+            ## print(paste0("ttPeak = ", t0 + theta * (k - 1)));
+            ## print(paste0(">> v = ", v));
+            ## print(paste0(">> k.a2m = ", k.a2m * A));
+            ## print(paste0(">> k = ", k));
+            ## parms <<- data.frame(
+            ##     Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
+            ##         "Alpha2M_Level"),
+            ##     Value = c(
+            ##         t0,
+            ##         A,
+            ##         A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta),
+            ##         t0 + theta * (k - 1),
+            ##         v,
+            ##         k.a2m * A
+            ##         ),
+            ##     Units = c("min", "a.u.", "a.u. / min", "min", "a.u. / min * min",
+            ##         "a.u. / min"));
+            ## print(parms);
+            ## return(parms);
             return(parms <<- data.frame(
                 Parameter = c("Lagtime", "ETP", "Peak", "ttPeak", "VelIndex",
                     "Alpha2M_Level"),

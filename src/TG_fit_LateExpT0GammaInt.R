@@ -14,7 +14,7 @@ TG.fit_LateExpT0GammaInt <- function(silent = TRUE) {
             t0 = 0);
 
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + p1 *

@@ -49,8 +49,8 @@ Dataset.plot_overlay <- function(signal1, signal2) {
         title(ylab = "Fluorescence, a.u.", line = 5.5, cex.lab = 1.5);
         title(main = "Signals overlay plot", line = 0.5, cex.main = 1.5);
         lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
-        legend("topleft", legend = c(signal1, signal2), pch = 1:2,
-               cex = 1.25, seg.len = 0);
+        legend("top", legend = c(signal1, signal2), pch = 1:2,
+               cex = 1.25, seg.len = 0.0, horiz = TRUE);
 
         if (length(res) > 0 && length(res) != N - 1) {
             legend("center", legend = "You must have loaded different dataset and result files!",
@@ -59,25 +59,31 @@ Dataset.plot_overlay <- function(signal1, signal2) {
             if (exists(x = signal1, where = res)) {
                 tg1 <- copy_and_analyze_TG(x = x, y = y1, signal = signal1);  ## print(tg1);
                 lines(x, tg1$get_A2mT_int(res[[signal1]]$Auto_model), col = "cyan",
-                      cex = 0.5, type = "b", pch = 1);
+                      cex = 0.75, type = "b", pch = 1);
                 lines(x, tg1$get_model(res[[signal1]]$Auto_model), col = "red", lwd = 3);
                 lines(x, tg1$get_thrombin_int(res[[signal1]]$Auto_model),
-                      col = "blue", cex = 0.5, type = "b", pch = 1);
-                legend("topleft", legend = c(paste0(signal1, " (",
+                      col = "blue", cex = 0.75, type = "b", pch = 1);
+                legend("top", legend = c(paste0(signal1, " (",
                                       res[[signal1]]$Auto_model, ")"), signal2),
-                       pch = 1:2, cex = 1.25, seg.len = 0);
-
+                       pch = 1:2, cex = 1.25, seg.len = 0.0, horiz = TRUE);
+                legend("topleft",
+                       legend = c("Fit", "Thrombin Integral",
+                           expression(paste(alpha[2], "M-T Integral"))),
+                       fill = c("red", "blue", "cyan"),
+                       ## pch = c(NA), lty = c(1), seg.len = 0.5, lwd = 4,
+                       ## col = ,
+                       bg = "white", bty = "y", cex = 1.25);
                 if (exists(x = signal2, where = res)) {
                     tg2 <- copy_and_analyze_TG(x = x, y = y2, signal = signal2);  ## print(tg2);
                     lines(x, tg2$get_A2mT_int(res[[signal2]]$Auto_model),
-                          col = "cyan", cex = 0.5, type = "b", pch = 2);
+                          col = "cyan", cex = 0.75, type = "b", pch = 2);
                     lines(x, tg2$get_model(res[[signal2]]$Auto_model), col = "red", lwd = 3);
                     lines(x, tg2$get_thrombin_int(res[[signal2]]$Auto_model),
-                          col = "blue", cex = 0.5, type = "b", pch = 2);
-                    legend("topleft", legend =
+                          col = "blue", cex = 0.75, type = "b", pch = 2);
+                    legend("top", legend =
                                c(paste0(signal1, " (", res[[signal1]]$Auto_model, ")"),
                                  paste0(signal2, " (", res[[signal2]]$Auto_model, ")")),
-                           pch = 1:2, cex = 1.25, seg.len = 0);
+                           pch = 1:2, cex = 1.25, seg.len = 0.0, horiz = TRUE);
                 }  ## End of if (exists(signal2))
             }  ## End of if (exists(signal1))
         }  ## End of if (length(res))
@@ -114,6 +120,7 @@ Dataset.plot_drv1_overlay <- function(signal1, signal2) {
                     axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
                     title(ylab = "Rate of change of fluorescence, a.u. / min",
                           line = 5.5, cex.lab = 1.25);
+                    title(main = "Thrombogram", line = 0.5, cex.main = 1.5);
                     lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
                     legend("topright", legend = c(signal1, signal2), pch = 1:2,
                            cex = 1.25, seg.len = 0);
@@ -131,6 +138,13 @@ Dataset.plot_drv1_overlay <- function(signal1, signal2) {
                     lines(x, tg2$get_drv1(res[[signal2]]$Auto_model), col = "red", lwd = 3);
                     lines(x, tg2$get_thrombin(res[[signal2]]$Auto_model),
                           col = "blue", cex = 0.5, type = "b", pch = 2);
+
+                    legend("right",
+                           legend = c("Fit", "Thrombin",
+                               expression(paste(alpha[2], "M-T"))),
+                           ## pch = c(NA), lty = c(1), seg.len = 0.5, lwd = 4,
+                           fill = c("red", "blue", "cyan"),
+                           bg = "white", bty = "y", cex = 1.25);
                 }  ## End of if (length)
             }  ## End of if (exists(signal2))
         }  ## End of if (exists(signal1))
@@ -165,6 +179,7 @@ Dataset.plot_drv2_overlay <- function(signal1, signal2) {
                     axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
                     title(ylab = "Rate of change of fluorescence, a.u. / min * min",
                           line = 5.5, cex.lab = 1.25);
+                    title(main = "Thrombin Velocity", line = 0.5, cex.main = 1.5);
                     lines(x = x, y = y2, type = "p", pch = 2, cex = 1.25, lwd = 2);
                     legend("topright", legend = c(signal1, signal2), pch = 1:2,
                            cex = 1.25, seg.len = 0);
@@ -182,6 +197,13 @@ Dataset.plot_drv2_overlay <- function(signal1, signal2) {
                     lines(x, tg2$get_drv2(res[[signal2]]$Auto_model), col = "red", lwd = 3);
                     lines(x, tg2$get_thrombin_vel(res[[signal2]]$Auto_model),
                           col = "blue", cex = 0.5, type = "b", pch = 2);
+
+                    legend("bottomright",
+                           legend = c("Fit", "Thrombin Velocity",
+                               expression(paste(alpha[2], "M-T Velocity"))),
+                           ## pch = c(NA), lty = c(1), seg.len = 0.5, lwd = 4,
+                           fill = c("red", "blue", "cyan"),
+                           bg = "white", bty = "y", cex = 1.25);
                 }  ## End of if (length)
             }  ## End of if (exists(signal2))
         }  ## End of if (exists(signal1))

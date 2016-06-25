@@ -13,7 +13,7 @@ TG.fit_LateExpGammaInt <- function(silent = TRUE) {
             theta = fit$GammaInt$cff[["theta"]], k.a2m = fit$GammaInt$cff[["k.a2m"]]);
 
         ft <- NULL; n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + p1 *

@@ -11,25 +11,25 @@ shinyUI(
             sidebarPanel = sidebarPanel(
 ######################################## Dataset
                 fluidRow(
-                    column(width = 3, offset = 0,
+                    column(width = 4, offset = 0,
                            h2("Dataset", align = "center")
                            ),
                     column(width = 5, offset = 0,
                            fileInput(inputId = "dataset.fname", accept = ("text/csv"),
                                      label = h5("Load dataset file"))
                            ),
-                    column(width = 4, offset = 0,
+                    column(width = 3, offset = 0,
                            fileInput(inputId = "res.fname", accept = (".RData"),
                                      label = h5("Load results file"))
                            )
                     ),
                 fluidRow(
-                    column(width = 2, offset = 0,
+                    column(width = 3, offset = 0,
                            actionButton(inputId = "dataset.analyze",
                                         label = h5("Analyze!"),
                                         inline = TRUE)
                            ),
-                    column(width = 5, offset = 0,
+                    column(width = 4, offset = 0,
                            radioButtons(inputId = "dataset.show",
                                         label = h5("Show as"),
                                         choices = list("plot" = "plot",

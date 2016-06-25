@@ -83,9 +83,9 @@ TG.fit_T0GammaInt2 <- function(silent = TRUE) {
             warning(">> fit_T0GammaInt2 resulted in NULL!");
             return(NULL);
         } else {
-            print(paste0(">> T0GammaInt2 started at n.try = ", n.try,
-                         " with start.list = "));
-            print(unlist(start.list));
+            ## print(paste0(">> T0GammaInt2 started at n.try = ", n.try,
+            ##              " with start.list = "));
+            ## print(unlist(start.list));
             fit$T0GammaInt2 <<- list(
                 cff = coef(ft), smry = summary(ft),
                 diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])

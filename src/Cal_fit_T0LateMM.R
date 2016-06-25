@@ -63,6 +63,64 @@ Cal.fit_T0LateMM <- function(silent = TRUE) {
 ################################################################################
 
 ################################################################################
+CalR6$set(
+    which = "public", name = "fit_T0LateMM",
+    value = compiler::cmpfun(
+        f = function(silent = TRUE) {
+            if (exists(x = "T0LateMM", where = fit)) {
+                warning(">> No fitting: T0LateMM fit already exists!");
+                return(fit$LateMM);
+            } else {
+                print(">> fit_T0LateMM called!");
+                if (!exists(x = "LateMM", where = fit)) {
+                    fit_LateMM(silent = TRUE);
+                }
+                start.list <- list(
+                    b = fit$LateMM$cff[["b"]], p1 = fit$LateMM$cff[["p1"]],
+                    p2 = fit$LateMM$cff[["p2"]], p3 = fit$LateMM$cff[["p3"]],
+                    t0 = 0);
+                ft <- NULL; n.try <- 1;
+                while (is.null(ft) && n.try <= kNumTries) {
+                    try(expr = {
+                            ft <- minpack.lm::nlsLM(
+                                y ~ b + (x >= t0) *
+                                    p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * (x - t0))) / p2)),
+                                data = data, start = start.list, algorithm = "LM",
+                                lower = c(  0,   0,   0,   0, -Inf),
+                                upper = c(Inf, Inf, Inf, Inf,  Inf),
+                                control = nls.lm.control(
+                                    ftol = 0.1 *  sqrt(.Machine$double.eps),
+                                    ptol = 0.1 * sqrt(.Machine$double.eps),
+                                    gtol = 0, nprint = -1, factor = 100,  ## between [0.1, 100]
+                                    maxiter = 200
+                                    )
+                                )
+                        }, silent = F);
+                    n.try <- n.try + 1;
+                    start.list <- list(b = data$y[1],
+                                       p1 = runif(1) * num.smry$ampl,
+                                       p2 = runif(1, 0, 2),
+                                       p3 = runif(1) * fit$LateExp$cff[["p3"]],
+                                       t0 = 0);
+                }
+                if (is.null(ft)) {
+                    warning(">> Cal.fit_T0LateMM resulted in NULL");
+                    return(NULL);
+                } else {
+                    fit$T0LateMM <<- list(
+                        cff = coef(ft), smry = summary(ft),
+                        diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
+                        );
+                    if (!silent)
+                        print(fit[names(fit) != "LM"]);
+                    return(fit$T0LateMM);
+                }  ## End of if (is.null(ft))
+            }  ## End of if (exists())
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of CalR6$fit_T0LateMM
+################################################################################
+
+################################################################################
 Cal.get_T0LateMM <- function() {
     if (exists(x = "T0LateMM", where = fit)) {
         ## y ~ b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * x)) / p2)),
@@ -76,6 +134,26 @@ Cal.get_T0LateMM <- function() {
         return(rep(0, length(data$x)));
     }
 }  ## End of Cal.get_T0LateMM
+################################################################################
+
+################################################################################
+CalR6$set(
+    which = "public", name = "get_T0LateMM",
+    value = compiler::cmpfun(
+        f = function() {
+            if (exists(x = "T0LateMM", where = fit)) {
+                ## y ~ b + p1 * (1 - (W(p2 * exp(p2) * exp(-p3 * x)) / p2)),
+                b <- fit$T0LateMM$cff[["b"]]; p1 <- fit$T0LateMM$cff[["p1"]];
+                p2 <- fit$T0LateMM$cff[["p2"]]; p3 <- fit$T0LateMM$cff[["p3"]];
+                t0 <- fit$T0LateMM$cff[["t0"]];
+                return(b + (data$x >= t0) * p1 *
+                           (1 - (W(p2 * exp(p2) * exp(-p3 * (data$x - t0))) / p2)));
+            } else {
+                warning(">> fit$T0LateMM does not exist!");
+                return(rep(0, length(data$x)));
+            }
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of CalR6$get_T0LateMM
 ################################################################################
 
 ##         e0 = e0, s0 = s0, C = cff[["p1"]] / s0, K.m = s0 / cff[["p2"]],
@@ -113,6 +191,37 @@ Cal.parms_T0LateMM <- function(e0, s0) {
 ################################################################################
 
 ################################################################################
+CalR6$set(
+    which = "public", name = "parms_T0LateMM",
+    value = compiler::cmpfun(
+        f = function(e0, s0) {
+            print(">> Call to Cal.parms_T0LateMM");
+            if (exists(x = "T0LateMM", where = fit)) {
+                ## print(fit$T0LateMM);
+                p1 <- fit$T0LateMM$cff[["p1"]]; p2 <- fit$T0LateMM$cff[["p2"]];
+                p3 <- fit$T0LateMM$cff[["p3"]];
+                ## print(paste0(p1, p2, p3));
+                ## print(paste0(e0, s0));
+                Value <- c(e0, s0, e0 * (1 + p2) / (p1 * p3), e0 / (p1 * p3),
+                           1e3 * s0 / p2, (1e3 * s0 / e0) * (p3 / p2), p1 / (1e3 * s0),
+                           (p1 * p3 / (1 + p2)));
+                ## print(Value);
+                ## print(parms);  ##str(fit$T0LateMM);
+                return(parms <<- data.frame(
+                    Parameter = kParameterNamesLateMM,
+                    Value = Value,
+                    ## StdErr = rep(NA, 7),
+                    Units = kParameterUnitsLateMM
+                    ));
+            } else {
+                warning(">> fit$T0LateMM does not exist!");
+                return(NULL);
+            }
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of CalR6$parms_T0LateMM
+################################################################################
+
+################################################################################
 Cal.get_init_rate_T0LateMM <- function() {
     print(">> Call to Cal.parms_T0LateMM");
     if (exists(x = "T0LateMM", where = fit)) {
@@ -125,6 +234,25 @@ Cal.get_init_rate_T0LateMM <- function() {
         return(rep(0, length(data$x)));
     }
 }  ## End of Cal.get_init_rate_T0LateMM
+################################################################################
+
+################################################################################
+CalR6$set(
+    which = "public", name = "get_init_rate_T0LateMM",
+    value = compiler::cmpfun(
+        f = function() {
+            print(">> Call to Cal.parms_T0LateMM");
+            if (exists(x = "T0LateMM", where = fit)) {
+                p1 <- fit$T0LateMM$cff[["p1"]]; p2 <- fit$T0LateMM$cff[["p2"]];
+                p3 <- fit$T0LateMM$cff[["p3"]]; b <- fit$T0LateMM$cff[["b"]];
+                t0 <- fit$T0LateMM$cff[["t0"]];
+                return(b + (data$x >= t0) * (p1 * p3 / (1 + p2)) * (data$x - t0));
+            } else {
+                warning(">> fit$T0LateMM does not exist!");
+                return(rep(0, length(data$x)));
+            }
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of CalR6$get_init_rate_T0LateMM
 ################################################################################
 
 ## ################################################################################

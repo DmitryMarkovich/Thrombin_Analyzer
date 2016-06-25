@@ -13,7 +13,7 @@ TG.fit_GammaInt <- function(silent = TRUE) {
                                        theta = theta, k.a2m = k.a2m);
         ## print(start.list);
         n.try <- 1;
-        while (is.null(ft) && n.try <= N.tries) {
+        while (is.null(ft) && n.try <= kNumTries) {
             try(expr = {
                 ft <- nlsLM(
                     y ~ b + A * pgamma(q = x, shape = k, scale = theta) +
