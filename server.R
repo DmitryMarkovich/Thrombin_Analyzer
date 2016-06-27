@@ -5,7 +5,7 @@ source("src/global_parameters.R"); source("src/common_functions.R");
 source("src/Base_class.R"); source("src/Cal_class.R"); source("src/TG_class.R");
 source("src/Dataset_class.R");
 
-dataset <- Dataset$new(); cal <- CalR6$new(); tg <- TG$new();
+dataset <- Dataset$new(); cal <- Cal$new(); tg <- TG$new();
 ################################################################################
 shinyServer(
     func = function(input, output) {

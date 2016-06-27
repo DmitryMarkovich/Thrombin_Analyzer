@@ -20,7 +20,7 @@ library(LambertW);
 
 compiler::setCompilerOptions("optimize" = 3);
 ## print(compiler::getCompilerOption(name = "optimize"));
-bkCmpFunOptions <- list("optimize" = 3, "suppressAll" = TRUE,
+kCmpFunOptions <- list("optimize" = 3, "suppressAll" = TRUE,
                        "suppressUndefined" = TRUE);
 
 ## Fast C++ versions of R functions
