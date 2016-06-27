@@ -5,7 +5,7 @@ source("src/global_parameters.R"); source("src/common_functions.R");
 source("src/Base_class.R"); source("src/Cal_class.R"); source("src/TG_class.R");
 source("src/Dataset_class.R");
 
-dataset <- Dataset$new(); cal <- Cal$new(); tg <- TG$new();
+dataset <- Dataset$new(); cal <- Cal$new(); tg <- TGR6$new();
 ################################################################################
 shinyServer(
     func = function(input, output) {
@@ -396,11 +396,14 @@ shinyServer(
         output$tg.PlotResid <- renderPlot({
             Sys.sleep(time = 0.01);
             if (!is.null(tg.data()) && !is.null(tg.model()) &&
-                tg.model() != "None" && exists(x = tg.model(), where = tg$fit)) {
+                tg.model() != "None" &&
+                tg$model_exists(tg.model())
+                ## exists(x = tg.model(), where = tg$fit)
+                ) {
                 if (tg.model() != "Auto") {
                     tg$plot_residuals(tg.model());
-                } else if (tg$fit$Auto_model != "None") {
-                    tg$plot_residuals(tg$fit$Auto_model);
+                } else if (!tg$is_none_auto_model()) {  ## tg$fit$Auto_model != "None"
+                    tg$plot_residuals("Auto");
                 }
             } else if (!is.null(tg.data()) &&
                        !is.null(input$dataset.add.to.tg) &&
@@ -415,16 +418,21 @@ shinyServer(
             if (!is.null(tg.data()) && !is.null(tg.model()) &&
                 tg.model() != "None") {
                 if (!is.null(tg.model.fit()) &&
-                    exists(x = tg.model(), where = tg$fit)) {
-                    if (tg.model() != "Auto") {
-                        x <- GetSummary(tg$fit[[tg.model()]]$smry);
-                    } else if (tg$fit$Auto_model != "None") {
-                        x <- GetSummary(tg$fit[[tg$fit$Auto_model]]$smry);
-                    } else {
-                        x <- NULL;
-                    }
-                    if (!is.null(x))
-                        HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
+                    tg$model_exists(tg.model())
+                    ## exists(x = tg.model(), where = tg$fit)
+                    ) {
+                    HTML(c("<pre>",
+                           paste(GetSummary(tg$get_summary(tg.model())),
+                                 collapse = '<br/>'), "</pre>"));
+                    ## if (tg.model() != "Auto") {
+                    ##     x <- GetSummary(tg$fit[[tg.model()]]$smry);
+                    ## } else if (tg$fit$Auto_model != "None") {
+                    ##     x <- GetSummary(tg$fit[[tg$fit$Auto_model]]$smry);
+                    ## } else {
+                    ##     x <- NULL;
+                    ## }
+                    ## if (!is.null(x))
+                    ##     HTML(c("<pre>", paste(x, collapse = '<br/>'), "</pre>"));
                 }
             } else if (!is.null(tg.data()) &&
                        !is.null(input$dataset.add.to.tg) &&
@@ -476,8 +484,9 @@ shinyServer(
 ######################################## Thrombogram tab
 ################################################################################
         output$tg.PlotDrv1 <- renderPlot({
-            if (!is.null(tg.data()) && length(tg$num.smry) != 0 &&
-                length(tg$num.smry$drv1) > 1) {
+            if (!is.null(tg.data()) && tg$is_ok_num_smry()
+                ## length(tg$num.smry) != 0 && length(tg$num.smry$drv1) > 1
+                ) {
                 par(mfrow = c(1, 2));
                 tg$plot_drv1(); tg$plot_drv2();
                 if (!is.null(tg.model.fit())) {
@@ -485,12 +494,13 @@ shinyServer(
                     tg$plot_thrombogram(tg.model()); tg$plot_velocity(tg.model());
                 } else if (!is.null(tg.data()) &&
                            !is.null(input$dataset.add.to.tg) &&
-                           input$dataset.add.to.tg != "None"
-                           && length(tg$num.smry) != 0 &&
-                           length(tg$num.smry$drv1) > 1) {
+                           input$dataset.add.to.tg != "None" &&
+                           tg$is_ok_num_smry()
+                           ## length(tg$num.smry) != 0 && length(tg$num.smry$drv1) > 1
+                           ) {
                     par(mfrow = c(1, 2));
                     tg$plot_drv1(); tg$plot_drv2();
-                    if (!is.null(tg$fit$Auto_model) && tg$fit$Auto_model != "None") {
+                    if (!is.null(tg$auto_model()) && !tg$is_none_auto_model()) {  ## tg$fit$Auto_model != "None"
                         par(mfrow = c(1, 2));
                         tg$plot_thrombogram("Auto"); tg$plot_velocity("Auto");
                     }
@@ -512,7 +522,9 @@ shinyServer(
         }, digits = 6)  ## End of output$cal.ShowParms
         output$tg.ShowParms <- renderTable({
             if (!is.null(tg.data()) && !is.null(tg.model()) &&
-                exists(x = tg.model(), where = tg$fit)) {
+                tg$model_exists(tg.model())
+                ## exists(x = tg.model(), where = tg$fit)
+                ) {
                 tg$parms_model(tg.model(), cal.CF());
             } else if (!is.null(tg.data()) &&
                        !is.null(input$dataset.add.to.tg) &&
@@ -524,7 +536,7 @@ shinyServer(
         }, digits = 6)  ## End of output$tg.ShowParms
         output$tg.ShowParmsNum <- renderTable({
             if (!is.null(tg.data())) {
-                return(tg$num.eval$parms);
+                return(tg$num_parms());
             } else {
                 return(NULL);
             }

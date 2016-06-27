@@ -78,10 +78,14 @@ shinyUI(
                            selectInput(inputId = "tg.model",
                                        label = h4("Select model to fit thrombin generation signal"), 
                                        choices = c("Auto",
-                                           "LateExpT0GammaInt", "LateExpGammaInt",
+                                           "LateExpT0GammaInt",
+                                           ## "LateExpGammaInt",
                                            "T0GammaInt2",
-                                           "T0GammaInt", "GammaInt", "T0Gamma",
-                                           "Gamma", "None"),
+                                           "T0GammaInt",
+                                           ## "GammaInt",
+                                           "T0Gamma",
+                                           ## "Gamma",
+                                           "None"),
                                        selected = "None")
                            )
                     ),  ## End of fluidRow

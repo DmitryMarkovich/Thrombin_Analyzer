@@ -4,21 +4,25 @@ Cal <- R6::R6Class(
     private = list(data = "data.frame", num.smry = "list", fit = "list",
         parms = "data.frame"),
     public = list(
-        model_exists = compiler::cmpfun(
-            f = function(model) {
-                return(exists(x = model, where = fit));
-            }, options = kCmpFunOptions),
-        get_summary = compiler::cmpfun(
-            f = function(model) {
-                if (model == "Auto") {
-                    return(fit[[fit$Auto_model]]$smry);
-                } else {
-                    return(fit[[model]]$smry);
-                }
+        clear = compiler::cmpfun(
+            f = function() {
+                data <<- data.frame(); num.smry <<- list(); fit <<- list();
+                parms <<- data.frame();
             }, options = kCmpFunOptions)
         )  ## End of public
     );  ## End of Cal
 ################################################################################
+
+## ################################################################################
+## Cal$set(
+##     which = "public", name = "clear",
+##     value = compiler::cmpfun(
+##         f = function() {
+##             data <<- data.frame(); num.smry <<- list(); fit <<- list();
+##             parms <<- data.frame();
+##         }, options = kCmpFunOptions),
+##     overwrite = FALSE);  ## End of Cal$clear
+## ################################################################################
 
 ################################################################################
 ## Add public methods to Cal class

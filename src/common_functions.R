@@ -56,11 +56,19 @@ updateProgress <- function(progress, amount, detail = NULL) {
 }  ## End of updateProgress
 ################################################################################
 
+GetTPeak <- function(k, theta, t0 = 0) {
+    return(t0 + (k - 1) * theta);
+}
+
 ################################################################################
 GetPeak <- function(A, k, theta) {
     return(A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta));
 }  ## End of GetPeak
 ################################################################################
+
+GetVelTPeak <- function(k, theta, t0 = 0) {
+    return(t0 + theta * (k - 1 - sqrt(k - 1)));
+}
 
 ################################################################################
 GetVelPeak <- function(A, k, theta) {

@@ -1,4 +1,129 @@
 ################################################################################
+TGR6$set(
+    which = "public", name = "compare_two_models",
+    value = compiler::cmpfun(
+        f = function(model1, model2, ft1, ft2, silent = TRUE) {
+            if (is.null(ft1)) {
+                if (!silent) {
+                    warning(paste0(">> ", model1, " does not exist!"));
+                    warning(paste0(">> Returning ", model2,
+                                   " without comparison!"));
+                }
+                fit$Auto <<- TRUE; fit$Auto_model <<- model2;
+                return(0L);
+            } else if (is.null(ft2)) {
+                if (!silent) {
+                    warning(paste0(">> ", model2, " does not exist!"));
+                    warning(paste0(">> Returning ", model1,
+                                   " without comparison!"));
+                }
+                fit$Auto <<- TRUE; fit$Auto_model <<- model1;
+                return(0L);
+            } else {
+                if (ft1$smry$sigma <= ft2$smry$sigma) {
+                    if (!silent)
+                        print(paste0(">> Returning ", model1,
+                                     " because of lower sigma!"));
+                    fit$Auto <<- TRUE; fit$Auto_model <<- model1;
+                    fit[[model2]] <<- NULL;
+                    return(0L);
+                } else {
+                    if (!silent)
+                        print(paste0(">> Returning ", model2,
+                                     " because of lower sigma!"));
+                    fit$Auto <<- TRUE; fit$Auto_model <<- model2;
+                    fit[[model1]] <<- NULL;
+                    return(0L);
+                }
+            }  ## End of if()
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## Ebd of TGR6$compare_two_models
+################################################################################
+
+################################################################################
+TGR6$set(
+    which = "public", name = "fit_Auto",
+    value = compiler::cmpfun(
+        f = function(silent = TRUE) {
+            if (exists(x = "Auto", where = fit)) {
+                warning(">> No fitting: Auto fit already exists!");
+            } else {
+                ft <- NULL;  ## print(num.smry);
+                if (num.smry$rat$y <= kYNone) {
+                    fit$Auto <<- FALSE; fit$Auto_model <<- "None";
+                    ## print(">> None model:");
+                    ## print(fit$Auto); print(fit$Auto_model);
+                } else if (num.smry$rat$x <= kXT0GammaInt &&
+                   num.smry$rat$y <= kYT0GammaInt) {
+                    if (num.smry$rat$x <= kXT0Gamma) {
+                        ft <- fit_T0Gamma(silent = TRUE);
+                        if (!is.null(ft)) {
+                            fit$Auto <<- TRUE; fit$Auto_model <<- "T0Gamma";
+                        } else {
+                            fit$Auto <<- FALSE; fit$Auto_model <<- "None";
+                        }
+                    } else {
+                        ft <- fit_T0GammaInt(silent = TRUE);
+                        if (!is.null(ft)) {
+                            ft2 <- fit_T0Gamma(silent = TRUE);
+                            compare_two_models("T0GammaInt", "T0Gamma", ft, ft2);
+                            ## compare_T0GammaInt_and_T0Gamma(ft, ft2);
+                            ## fit$Auto <<- TRUE; fit$Auto_model <<- "T0GammaInt";
+                        } else {
+                            fit$Auto <<- FALSE; fit$Auto_model <<- "None";
+                        }
+                    }
+                } else {
+                    ft <- fit_T0GammaInt(silent = TRUE);  ## print(ft);
+                    if (!is.null(ft)) {
+                        ft2 <- fit_T0GammaInt2(silent = TRUE);
+                        compare_two_models("T0GammaInt", "T0GammaInt2", ft, ft2);
+                        ## compare_T0GammaInt2_and_T0GammaInt(ft, ft2);
+                    } else {
+                        fit$Auto <<- FALSE; fit$Auto_model <<- "None";
+                    }
+                }
+            }  ## End of if (exists)
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of TGR6$fit_Auto
+################################################################################
+
+################################################################################
+TGR6$set(
+    which = "public", name = "get_Auto",
+    value = compiler::cmpfun(
+        f = function() {
+            if (exists(x = "Auto", where = fit)) {
+                return(get_model(fit$Auto_model));
+            } else {
+                warning(">> fit$Auto does not exist!");
+                return(rep(NA, length(data$x)));
+            }
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of TGR6$get_Auto
+################################################################################
+
+################################################################################
+TGR6$set(
+    which = "public", name = "parms_Auto",
+    value = compiler::cmpfun(
+        f = function(cal.CF) {
+            ## print(">> Call to TG.parms_Auto");
+            if (exists(x = "Auto", where = fit)) {
+                return(parms_model(fit$Auto_model, cal.CF));
+            } else {
+                warning(">> fit$Auto does not exist!");
+                return(NULL);
+            }
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of TGR6$parms_Auto
+################################################################################
+
+################################################################################
+######################################## Legacy RF classes code
+################################################################################
+
+################################################################################
 TG.compare_T0GammaInt_and_T0Gamma <- function(ft, ft2, silent = TRUE) {
     if (is.null(ft2)) {
         if (!silent) {
@@ -115,4 +240,8 @@ TG.parms_Auto <- function(cal.CF) {
         return(NULL);
     }
 }  ## End of TG.parms_Auto
+################################################################################
+
+################################################################################
+######################################## End of Legacy RF classes code
 ################################################################################

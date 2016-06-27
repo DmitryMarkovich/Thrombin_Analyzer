@@ -1,4 +1,153 @@
 ################################################################################
+TGR6 <- R6::R6Class(
+    classname = "TGR6", portable = FALSE, inherit = BaseR6,
+    private = list(
+        data = "data.frame", num.smry = "list", num.eval = "list",
+        fit = "list", parms = "data.frame"),
+    public = list(
+        clear = compiler::cmpfun(
+            f = function() {
+                data <<- data.frame(); num.smry <<- list(); num.eval <<- list();
+                fit <<- list(); parms <<- data.frame();
+                return(0L);
+            }, options = kCmpFunOptions),
+        num_parms = compiler::cmpfun(
+            f = function() {
+                return(num.eval$parms);
+            }, options = kCmpFunOptions),
+        auto_model = compiler::cmpfun(
+            f = function() {
+                return(fit$Auto_model);
+            }, options = kCmpFunOptions),
+        is_none_auto_model = compiler::cmpfun(
+            f = function() {
+                return(fit$Auto_model == "None");
+            }, options = kCmpFunOptions),
+        is_ok_num_smry = compiler::cmpfun(
+            f = function() {
+                return(length(num.smry) != 0 && length(num.smry$drv1) > 1);
+            }, options = kCmpFunOptions),
+        get_tpeak = compiler::cmpfun(
+            f = function(k, theta, t0 = 0) {
+                return(t0 + (k - 1) * theta);
+            }, options = kCmpFunOptions),
+        get_peak = compiler::cmpfun(
+            f = function(A, k, theta) {
+                return(A * (k - 1) ^ (k - 1) * exp(-(k - 1)) / (gamma(k) * theta));
+            }, options = kCmpFunOptions),
+        get_vel_tpeak = compiler::cmpfun(
+            f = function(k, theta, t0 = 0) {
+                return(t0 + theta * (k - 1 - sqrt(k - 1)));
+            }, options = kCmpFunOptions),
+        get_vel_peak = compiler::cmpfun(
+            f = function(A, k, theta) {
+                return(A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
+                           exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2));
+            }, options = kCmpFunOptions)
+        )  ## End of public
+    );  ## End of TGR6
+################################################################################
+
+## ################################################################################
+## TGR6$set(
+##     which = "public", name = "clear",
+##     value = compiler::cmpfun(
+##         f = function() {
+##             data <<- data.frame(); num.smry <<- list(); num.eval <<- list();
+##             fit <<- list(); parms <<- data.frame();
+##         }, options = kCmpFunOptions),
+##     overwrite = FALSE);  ## End of TGR6$clear
+## ################################################################################
+
+################################################################################
+TGR6$set(
+    which = "public", name = "evaluate_numerically",
+    value = compiler::cmpfun(
+        f = function(silent = TRUE) {
+            if (length(data) != 0) {
+                if (is.na(num.smry$t.lin) || num.smry$rat$y <= kYNone) {
+                    if (!silent)
+                        warning(">> Signal is mostly noise, skipping numerical evaluation!");
+                    num.eval <<- list();
+                    return(NULL);
+                } else {
+                    fit.late <- lm(y ~ x,
+                                   data = data.frame(x = data$x - num.smry$t.lin,
+                                       y = data$y), subset = data$x >= num.smry$t.lin);
+                    ## print(summary(fit.late));
+                    k <- coef(fit.late)[[2]] / (coef(fit.late)[[1]] - data$y[1]);
+                    dt <- data$x[2] - data$x[1];
+
+                    ## A2mT <- rep(0, length(data$x));
+                    ## for (i in 2:length(A2mT)) {
+                    ##     A2mT[i] <- A2mT[i - 1] + k * 0.5 * dt *
+                    ##         (num.smry$drv1[i] + num.smry$drv1[i - 1]);
+                    ## }
+
+                    A2mT <- eval_A2mT(num.smry$drv1, k, dt);
+                    ## print(A2mT);
+                    thromb <- num.smry$drv1 - A2mT;
+                    lagtime <- data$x[data$x < num.smry$t.peak &
+                                          num.smry$drv1 <= 0.1 * data$y[1]];
+                    lagtime <- lagtime[!is.na(lagtime)]; lagtime <- lagtime[length(lagtime)];
+                    ## print(lagtime);
+                    ETP <- dt * (
+                        sum(thromb, na.rm = TRUE) -
+                            0.5 * (thromb[1] + thromb[length(thromb[!is.na(thromb)])]));
+                    ## print(ETP);
+                    peak <- max(thromb, na.rm = TRUE)[1];
+                    ## print(peak);
+                    tt.peak <- data$x[thromb == peak][1];
+                    ## print(tt.peak);
+                    vel.index <- max(num.smry$drv2, na.rm = TRUE)[1];
+                    ## print(vel.index);
+                    a2m.level <- max(A2mT, na.rm = TRUE)[1];
+                    ## print(a2m.level);
+                    ## print(data$x);
+                    ## print(num.smry$drv1 - num.eval$k * (data$x[2] - data$x[1]) *
+                    ##           cumsum(num.smry$drv1));
+                    num.eval <<- list(
+                        ## a = coef(fit.late)[[1]], b = coef(fit.late)[[2]], k = k, A2mT = A2mT,
+                        parms = data.frame(
+                            Parameter = kParameterNames,
+                            Value = c(lagtime, ETP, peak, tt.peak, vel.index, a2m.level),
+                            Units = kAUnits)
+                        );
+                    if (!silent)
+                        print(num.eval$parms);
+                }
+            } else {
+                warning(">> length(data) == 0!");
+                return(NULL);
+            }
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of TGR6$evaluate_numerically
+################################################################################
+
+
+
+source("src/TG_fit_Gamma.R");
+source("src/TG_fit_GammaInt.R");
+source("src/TG_fit_T0Gamma.R");
+source("src/TG_fit_T0GammaInt.R");
+source("src/TG_fit_T0GammaInt2.R");
+source("src/TG_fit_LateExpGammaInt.R");
+source("src/TG_fit_LateExpT0GammaInt.R");
+source("src/TG_fit_Auto.R");
+
+source("src/TG_get_thrombin_int.R"); source("src/TG_get_A2mT_int.R");
+source("src/TG_get_drv1.R");
+source("src/TG_get_thrombin.R"); source("src/TG_get_A2mT.R");
+source("src/TG_get_drv2.R");
+source("src/TG_get_thrombin_vel.R"); source("src/TG_get_A2mT_vel.R");
+source("src/TG_model_dispatchers.R"); source("src/TG_plotting_methods.R");
+
+## print(TGR6);
+################################################################################
+######################################## Legacy RF classes code
+################################################################################
+
+################################################################################
 TG.clear <- function() {
     data <<- data.frame(); num.smry <<- list(); num.eval <<- list();
     fit <<- list(); parms <<- data.frame();
@@ -19,18 +168,20 @@ TG.evaluate_numerically <- function(silent = TRUE) {
                            subset = data$x >= num.smry$t.lin);
             ## print(summary(fit.late));
             k <- coef(fit.late)[[2]] / (coef(fit.late)[[1]] - data$y[1]);
-            A2mT <- rep(0, length(data$x)); delta.t <- data$x[2] - data$x[1];
-            for (i in 2:length(A2mT)) {
-                A2mT[i] <- A2mT[i - 1] + k * 0.5 * delta.t *
-                    (num.smry$drv1[i] + num.smry$drv1[i - 1]);
-            }
+            dt <- data$x[2] - data$x[1];
+            ## A2mT <- rep(0, length(data$x)); 
+            ## for (i in 2:length(A2mT)) {
+            ##     A2mT[i] <- A2mT[i - 1] + k * 0.5 * dt *
+            ##         (num.smry$drv1[i] + num.smry$drv1[i - 1]);
+            ## }
+            A2mT <- eval_A2mT(num.smry$drv1, k, dt);
             ## print(A2mT);
             thromb <- num.smry$drv1 - A2mT;
             lagtime <- data$x[data$x < num.smry$t.peak &
                                   num.smry$drv1 <= 0.1 * data$y[1]];
             lagtime <- lagtime[!is.na(lagtime)]; lagtime <- lagtime[length(lagtime)];
             ## print(lagtime);
-            ETP <- delta.t * (
+            ETP <- dt * (
                 sum(thromb, na.rm = TRUE) -
                     0.5 * (thromb[1] + thromb[length(thromb[!is.na(thromb)])]));
             ## print(ETP);
@@ -38,7 +189,7 @@ TG.evaluate_numerically <- function(silent = TRUE) {
             ## print(peak);
             tt.peak <- data$x[thromb == peak][1];
             ## print(tt.peak);
-            vel.index <- max(num.smry$drv2, na.rm = TRUE)[1];
+            vel.index <- max(num.smry$drv2[data$x <= tt.peak], na.rm = TRUE)[1];
             ## print(vel.index);
             a2m.level <- max(A2mT, na.rm = TRUE)[1];
             ## print(a2m.level);
@@ -61,66 +212,6 @@ TG.evaluate_numerically <- function(silent = TRUE) {
     }
 }  ## End of TG.evaluate_numerically
 ################################################################################
-source("src/TG_fit_Gamma.R");
-source("src/TG_fit_GammaInt.R");
-source("src/TG_fit_T0Gamma.R");
-source("src/TG_fit_T0GammaInt.R");
-source("src/TG_fit_T0GammaInt2.R");
-source("src/TG_fit_LateExpGammaInt.R");
-source("src/TG_fit_LateExpT0GammaInt.R");
-source("src/TG_fit_Auto.R");
-################################################################################
-TG.fit_model <- function(tg.model) {
-    switch(tg.model,
-           "Gamma" = fit_Gamma(silent = TRUE),
-           "T0Gamma" = fit_T0Gamma(silent = TRUE),
-           "GammaInt" = fit_GammaInt(silent = TRUE),
-           "T0GammaInt" = fit_T0GammaInt(silent = TRUE),
-           "T0GammaInt2" = fit_T0GammaInt2(silent = TRUE),
-           "LateExpGammaInt" = fit_LateExpGammaInt(silent = TRUE),
-           "LateExpT0GammaInt" = fit_LateExpT0GammaInt(silent = TRUE),
-           "Auto" = fit_Auto(silent = TRUE),
-           { warning(paste0(">> Call to unknown model", tg.model))}
-           );
-}  ## End of TG.fit_model
-################################################################################
-################################################################################
-TG.get_model <- function(tg.model) {
-    switch(tg.model,
-           "None" = return(rep(NA, length(data$x))),
-           "Gamma" = get_Gamma(), "T0Gamma" = get_T0Gamma(),
-           "GammaInt" = get_GammaInt(), "T0GammaInt" = get_T0GammaInt(),
-           "T0GammaInt2" = get_T0GammaInt2(),
-           "LateExpGammaInt" = get_LateExpGammaInt(),
-           "LateExpT0GammaInt" = get_LateExpT0GammaInt(),
-           "Auto" = get_Auto(),
-           { warning(paste0(">> Call to unknown get_model ", tg.model))}
-           );
-}  ## End of TG.get_model
-################################################################################
-source("src/TG_get_thrombin_int.R"); source("src/TG_get_A2mT_int.R");
-source("src/TG_get_drv1.R");
-source("src/TG_get_thrombin.R"); source("src/TG_get_A2mT.R");
-source("src/TG_get_drv2.R");
-source("src/TG_get_thrombin_vel.R"); source("src/TG_get_A2mT_vel.R");
-source("src/TG_plotting_methods.R");
-################################################################################
-TG.parms_model <- function(tg.model, cal.CF = 1) {
-    switch(tg.model,
-           "None" = return(parms <<- data.frame(Parameter = kParameterNames,
-               Value = rep(NA, 6), Units = kAUnits)),
-           "Gamma" = parms_Gamma(cal.CF),
-           "T0Gamma" = parms_T0Gamma(cal.CF),
-           "GammaInt" = parms_GammaInt(cal.CF),
-           "T0GammaInt" = parms_T0GammaInt(cal.CF),
-           "T0GammaInt2" = parms_T0GammaInt2(cal.CF),
-           "LateExpGammaInt" = parms_LateExpGammaInt(cal.CF),
-           "LateExpT0GammaInt" = parms_LateExpT0GammaInt(cal.CF),
-           "Auto" = parms_Auto(cal.CF),
-           { warning(paste0(">> Call to unknown model ", tg.model))}
-           );
-}  ## End of TG.parms_model
-################################################################################
 
 ################################################################################
 TG <- setRefClass(
@@ -132,6 +223,9 @@ TG <- setRefClass(
     methods = list(
         clear = TG.clear, evaluate_numerically = TG.evaluate_numerically,
         plot = TG.plot, plot_drv1 = TG.plot_drv1, plot_drv2 = TG.plot_drv2,
+        ## getter functions
+        get_tpeak = GetTPeak, get_peak = GetPeak,
+        get_vel_tpeak = GetVelTPeak, get_vel_peak = GetVelPeak,
         ## Gamma
         fit_Gamma = TG.fit_Gamma, get_Gamma = TG.get_Gamma,
         parms_Gamma = TG.parms_Gamma,
@@ -177,4 +271,8 @@ TG <- setRefClass(
         plot_velocity = TG.plot_velocity
     )
 );  ## End of TG setRefClass
+################################################################################
+
+################################################################################
+######################################## End of Legacy RF classes code
 ################################################################################
