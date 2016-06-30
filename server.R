@@ -1,11 +1,12 @@
-print("################################################################################");
+print("######################################## >> Thrombin Analyzer reloaded! << ########################################");
 source("src/libraries.R");
 app.path <- getwd();  ## stores current directory
 source("src/global_parameters.R"); source("src/common_functions.R");
 source("src/Base_class.R"); source("src/Cal_class.R"); source("src/TG_class.R");
 source("src/Dataset_class.R");
 
-dataset <- Dataset$new(); cal <- Cal$new(); tg <- TGR6$new();
+dataset <- DatasetR6$new(); cal <- Cal$new(); tg <- TG$new();
+print(">> Ready to analyze!");
 ################################################################################
 shinyServer(
     func = function(input, output) {
@@ -45,27 +46,27 @@ shinyServer(
             }
         })  ## End of output$dataset.ShowLoadedResults
         output$dataset.Menu <- renderUI({
-            if (!is.null(dataset.fname()) && !is.null(dataset.data())) {
+            if (!is.null(dataset.data())) {
                 ## signals <- colnames(dataset$data)[-1];
                 fluidRow(
                     column(width = 6, offset = -1,
                            selectInput(inputId = "dataset.overlay1",
                                        label = h5("Overlay"),
-                                       choices = as.list(c(dataset$signals[-1], "None")),
+                                       choices = as.list(c(dataset$get_signals()[-1], "None")),
                                        selected = "None"),
                            selectInput(inputId = "dataset.add.to.cal",
                                        label = h6("Add to calibration"),
-                                       choices = as.list(c(dataset$signals[-1], "None")),
+                                       choices = as.list(c(dataset$get_signals()[-1], "None")),
                                        selected = "None")
                            ),
                     column(width = 6, offset = -1,
                            selectInput(inputId = "dataset.overlay2",
                                        label = h5("with"),
-                                       choices = as.list(c(dataset$signals[-1], "None")),
+                                       choices = as.list(c(dataset$get_signals()[-1], "None")),
                                        selected = "None"),
                            selectInput(inputId = "dataset.add.to.tg",
                                        label = h6("Add to thrombin generation"),
-                                       choices = as.list(c(dataset$signals[-1], "None")),
+                                       choices = as.list(c(dataset$get_signals()[-1], "None")),
                                        selected = "None")
                            )
                     )  ## End of fluidRow
@@ -98,7 +99,7 @@ shinyServer(
                                progress <- shiny::Progress$new();
                                progress$set(message = "Showing dataset as text, please wait...", value = 0);
                                on.exit(progress$close());
-                               dataset$data;
+                               dataset$get_data();
                            }, digits = 6)  ## End of renderTable
                                    )  ## End of tagList
                            )
@@ -125,8 +126,8 @@ shinyServer(
                 progress$set(message = "Analyzing dataset,", value = 0);
                 on.exit(progress$close());
                 dataset$do_analysis(updateProgress, progress);  ## does the auto analysis
-                r$res <- dataset$res;
-                return(summary(dataset$parms));
+                r$res <- dataset$get_res();
+                return(summary(dataset$get_parms()));
             } else {
                 ## warning(">> Data not loaded or button not pressed!");
                 return(NULL);
@@ -197,7 +198,9 @@ shinyServer(
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
                     input$dataset.overlay2 != "None" &&
-                    length(dataset$res) == dataset$N - 1) {
+                    dataset$res_length_ok()
+                    ## length(dataset$res) == dataset$N - 1
+                    ) {
                     dataset$plot_drv1_overlay(input$dataset.overlay1,
                                               input$dataset.overlay2);
                     dataset$plot_drv2_overlay(input$dataset.overlay1,
@@ -215,14 +218,22 @@ shinyServer(
                     !is.null(input$dataset.overlay2) &&
                     input$dataset.overlay1 != "None" &&
                     input$dataset.overlay2 != "None" &&
-                    length(dataset$res) == dataset$N - 1) {
+                    ## length(dataset$res) == dataset$N - 1
+                    dataset$res_length_ok()
+                    ) {
                     tg <- TG$new();
-                    tg$fit <- dataset$res[[input$dataset.overlay1]]$Auto_fit;
-                    tg$num.eval <- dataset$res[[input$dataset.overlay1]]$num.eval;
-                    table1 <- tg$parms_model(dataset$res[[input$dataset.overlay1]]$Auto_model);
-                    tg$fit <- dataset$res[[input$dataset.overlay2]]$Auto_fit;
-                    tg$num.eval <- dataset$res[[input$dataset.overlay2]]$num.eval;
-                    table2 <- tg$parms_model(dataset$res[[input$dataset.overlay2]]$Auto_model);
+                    ## tg$fit <- dataset$res[[input$dataset.overlay1]]$Auto_fit;
+                    tg$set_fit(dataset$get_Auto_fit(i = input$dataset.overlay1));
+                    ## tg$num.eval <- dataset$res[[input$dataset.overlay1]]$num.eval;
+                    tg$set_num_eval(dataset$get_num_eval(i = input$dataset.overlay1));
+                    ## table1 <- tg$parms_model(dataset$res[[input$dataset.overlay1]]$Auto_model);
+                    table1 <- tg$parms_model(dataset$get_Auto_model(i = input$dataset.overlay1));
+                    ## tg$fit <- dataset$res[[input$dataset.overlay2]]$Auto_fit;
+                    tg$set_fit(dataset$get_Auto_fit(i = input$dataset.overlay2));
+                    ## tg$num.eval <- dataset$res[[input$dataset.overlay2]]$num.eval;
+                    tg$set_num_eval(dataset$get_num_eval(i = input$dataset.overlay2));
+                    ## table2 <- tg$parms_model(dataset$res[[input$dataset.overlay2]]$Auto_model);
+                    table2 <- tg$parms_model(dataset$get_Auto_model(i = input$dataset.overlay2));
                     ## print(table1); print(table2);
                     table12 <- data.frame(Parameter = table1$Parameter,
                                           x1 = table1$Value, x2 = table2$Value,

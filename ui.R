@@ -214,11 +214,11 @@ shinyUI(
                                  column(width = 8, offset = 0,
                                         h4("Parameters for thrombin generation signal", align = "center"),
                                         column(width = 6, offset = 0,
-                                               h4("From fitted model", align = "left"),
+                                               h4("From fitted model", align = "center"),
                                                tableOutput(outputId = "tg.ShowParms")
                                                ),
                                         column(width = 6, offset = 0,
-                                               h4("Estimated numerically", align = "right"),
+                                               h4("Estimated numerically", align = "center"),
                                                tableOutput(outputId = "tg.ShowParmsNum")
                                                )
                                         )

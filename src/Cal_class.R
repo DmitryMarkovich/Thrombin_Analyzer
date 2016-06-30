@@ -1,6 +1,6 @@
 ################################################################################
 Cal <- R6::R6Class(
-    classname = "Cal", portable = FALSE, inherit = BaseR6,
+    classname = "Cal", portable = FALSE, inherit = Base,
     private = list(data = "data.frame", num.smry = "list", fit = "list",
         parms = "data.frame"),
     public = list(
