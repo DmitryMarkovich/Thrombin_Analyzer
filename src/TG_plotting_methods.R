@@ -19,11 +19,14 @@ TG$set(
                 title(ylab = "Fluorescence, a.u.", line = 5.5, cex.lab = 1.5);
                 title(main = "Thrombin generation signal", line = 0.5, cex.main = 1.5);
 
-                if (length(num.smry$rat) > 0 && !is.na(num.smry$rat$x) && !is.na(num.smry$rat$y)) {
-                    mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1.5, cex = 1.5);
-                    mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1.5, cex = 1.5);
+                if (length(num.smry$rat) > 0) {
+                    if (!is.na(num.smry$rat$x))
+                        mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1, line = -1.5, cex = 1.5);
+                    if (!is.na(num.smry$rat$y))
+                        mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3, line = -1.5, cex = 1.5);
+                    if (!is.na(num.smry$t.lin))
+                        abline(v = num.smry$t.lin);
                 }
-                abline(v = num.smry$t.lin);
                 ## abline(h = num.eval$a);
                 ## lines(x = data$x, y = num.eval$a + num.eval$b * (data$x - num.smry$t.lin), col = "blue");
                 ## lines(x = data$x, y = num.eval$b * (data$x - num.smry$t.lin), col = "cyan");

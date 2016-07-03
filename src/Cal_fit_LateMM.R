@@ -23,7 +23,7 @@ Cal$set(
                                 data = data, start = start.list, algorithm = "LM",
                                 lower = c(  0,   0,   0,   0),
                                 upper = c(Inf, Inf, Inf, Inf),
-                                control = nls.lm.control(
+                                control = minpack.lm::nls.lm.control(
                                     ftol = 0.1 * sqrt(.Machine$double.eps),
                                     ptol = 0.1 * sqrt(.Machine$double.eps),
                                     gtol = 0, nprint = -1, factor = 100,  ## between [0.1, 100]
@@ -41,7 +41,7 @@ Cal$set(
                     return(NULL);
                 } else {
                     fit$LateMM <<- list(
-                        cff = coef(ft), smry = summary(ft),
+                        cff = coef(ft), smry = get_compact_summary(ft),
                         diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
                         );
                     if (!silent)

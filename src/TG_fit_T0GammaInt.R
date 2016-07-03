@@ -2,16 +2,18 @@
 TG$set(
     which = "public", name = "fit_T0GammaInt",
     value = compiler::cmpfun(
-        f = suppressWarnings(function(silent = TRUE) {
+        f = function(silent = TRUE) {
             if (!silent)
                 print(">> fit_T0GammaInt called!");
             if (!is.null(fit$T0GammaInt)) {  ## exists(x = "T0GammaInt", where = fit, envir = environment())
-                warning(">> No fitting: T0GammaInt fit already exists!");
+                print(">> No fitting: T0GammaInt fit already exists!");
                 return(fit$T0GammaInt);
             } else {
                 ft <- lm(y ~ x, data = data, subset = x >= num.smry$t.lin);
                 A <- coef(ft)[[1]] + coef(ft)[[2]] * num.smry$t.lin;
                 k.a2m <- coef(ft)[[2]] / A; k <- 3; theta <- num.smry$t.peak / (k - 1);
+                num.eval$sigma.lm <<- summary(ft)$sigma;
+                ## print(paste0(">> num.eval$sigma.lm = ", num.eval$sigma.lm));
                 start.list <- list(b = data$y[1], A = A, k = k,
                                    theta = theta, k.a2m = k.a2m, t0 = 0);
                 ## print(start.list);
@@ -31,21 +33,21 @@ TG$set(
                                 lower = c(  0,   0, 1.25,   0, 1e-5,   0),
                                 upper = c(Inf, Inf,  Inf, Inf,  Inf, Inf),
                                 algorithm = "LM",
-                                control = nls.lm.control(
+                                control = minpack.lm::nls.lm.control(
                                     ftol = sqrt(.Machine$double.eps),
                                     ptol = sqrt(.Machine$double.eps),
                                     gtol = 0, factor = 100,  ## between [0.1, 100]
                                     maxiter = 200, nprint = -1
                                     )
                                 ))
-                        }, silent = silent);
+                        }, silent = TRUE);
                     if (!is.null(ft)) {
                         if (!silent)
                             print(">> Fit not NULL, checking dgn = ");
                         dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);  ## print(dgn);
-                        if (dgn[1] <= "4") {
+                        if (dgn[1] <= "4" || summary(ft)$sigma >= kSigmaLMRatio * num.eval$sigma.lm) {
                             if (!silent)
-                                print(">> dgn[1] <= 4, setting ft back to NULL");
+                                print(">> dgn[1] <= 4 OR sigma >= kSigmaLMRatio * sigma.lm, setting ft back to NULL");
                             ft <- NULL;
                         }
                     }
@@ -55,11 +57,11 @@ TG$set(
                                        k.a2m = runif(1) * 1e-3, t0 = 0);
                 }  ## End of while()
                 if (is.null(ft)) {
-                    warning(">> fit_T0GammaInt resulted in NULL!");
+                    print(paste0(">> fit_T0GammaInt resulted in NULL after ", n.try, " tries!"));
                     return(NULL);
                 } else {
                     fit$T0GammaInt <<- list(
-                        cff = coef(ft), smry = summary(ft),
+                        cff = coef(ft), smry = get_compact_summary(ft),  ## summary(ft),
                         diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
                         );
                     if (!silent)
@@ -67,8 +69,8 @@ TG$set(
                     return(fit$T0GammaInt);
                 }  ## End of if is.null(fit)
             }  ## End of if exists()
-        }), options = kCmpFunOptions),
-    overwrite = FALSE);  ## End of TG$fitT0GammaInt
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of TG$fit_T0GammaInt
 ################################################################################
 
 ################################################################################
@@ -88,7 +90,7 @@ TG$set(
                                            pgamma(q = data$x - t0, shape = k + 1, scale = theta))
                        );
             } else {
-                warning(">> fit$T0GammaInt does not exist!");
+                print(">> fit$T0GammaInt does not exist!");
                 return(rep(0, length(data$x)));
             }
         }, options = kCmpFunOptions),
@@ -143,7 +145,7 @@ TG$set(
                     Units = kAUnits));
             }
         } else {
-            warning(">> fit$T0GammaInt does not exist!");
+            print(">> fit$T0GammaInt does not exist!");
             return(NULL);
         }
     }, options = kCmpFunOptions),

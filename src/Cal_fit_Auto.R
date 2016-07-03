@@ -3,8 +3,8 @@ Cal$set(
     which = "public", name = "fit_Auto",
     value = compiler::cmpfun(
         f = function(silent = TRUE) {
-            if (exists(x = "Auto", where = fit)) {
-                print(fit$Auto);
+            if (!is.null(fit$Auto)) {
+                ## print(fit$Auto);
                 warning(">> No fitting: Auto fit already exists!");
             } else {
                 print(">>> Cal.fit_Auto called!");
@@ -15,25 +15,31 @@ Cal$set(
                         fit$Auto <<- TRUE;
                         fit$Auto_model <<- "EarlyMM";
                     } else {
-                        fit$Auto_model <<- "None";
+                        fit$Auto <<- FALSE; fit$Auto_model <<- "None";
                     }
                 } else if (num.smry$rat$x >= 5 && num.smry$rat$x <= 25 &&
                            num.smry$rat$y >= 10 && num.smry$rat$y <= 30) {
-                    ft <- fit_T0LateExp(silent = TRUE);
+                    ft <- fit_LateExp(silent = TRUE);
                     if (!is.null(ft)) {
-                        fit$Auto <<- ft;
-                        fit$Auto_model <<- "T0LateExp";
+                        ft2 <- fit_T0LateExp(silent = TRUE);
+                        compare_two_models("LateExp", "T0LateExp", ft, ft2);
+                        ## fit$Auto <<- ft;
+                        ## fit$Auto_model <<- "T0LateExp";
                     } else {
-                        fit$Auto_model <<- "None";
+                        fit$Auto <<- FALSE; fit$Auto_model <<- "None"; 
                     }
                 } else if (num.smry$rat$x >= 15 && num.smry$rat$y >= 40) {
-                    ft <- fit_T0LateMM(silent = TRUE);
+                    ft <- fit_LateMM(silent = TRUE);
                     if (!is.null(ft)) {
-                        fit$Auto <<- ft;
-                        fit$Auto_model <<- "T0LateMM";
+                        ft2 <- fit_T0LateMM(silent = TRUE);
+                        compare_two_models("LateMM", "T0LateMM", ft, ft2);
+                        ## fit$Auto <<- ft;
+                        ## fit$Auto_model <<- "T0LateMM";
                     } else {
-                        fit$Auto_model <<- "None";
+                        fit$Auto <<- FALSE; fit$Auto_model <<- "None";
                     }
+                } else {
+                    fit$Auto <<- FALSE; fit$Auto_model <<- "None";
                 }
             }  ## End of if (exists)
         }, options = kCmpFunOptions),

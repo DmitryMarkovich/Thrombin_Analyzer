@@ -12,7 +12,7 @@ CheckAllLibrariesAvailable(kLibraries);
 
 
 library(shiny);
-options(shiny.maxRequestSize = 50 * 1024 ^ 2);  ## max file upload size in B
+options(shiny.maxRequestSize = 500 * 1024 ^ 2);  ## max file upload size in B
 
 ## library(minpack.lm);
 ## library(LambertW);
@@ -22,7 +22,7 @@ options(shiny.maxRequestSize = 50 * 1024 ^ 2);  ## max file upload size in B
 ## compiler::setCompilerOptions("suppressAll" = TRUE);
 ## compiler::setCompilerOptions("suppressUndefined" = TRUE);
 ## print(compiler::getCompilerOption(name = "optimize"));
-options(warn = -1);
+options(warn = 0);
 kCmpFunOptions <- list("optimize" = 3, "suppressAll" = TRUE,
                        "suppressUndefined" = TRUE);
 

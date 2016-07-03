@@ -18,6 +18,7 @@ TG <- R6::R6Class(
         set_data = compiler::cmpfun(
             f = function(df) {
                 data <<- df;
+                return(0L);
             }, options = kCmpFunOptions),
         get_num_smry = compiler::cmpfun(
             f = function() {
@@ -26,6 +27,7 @@ TG <- R6::R6Class(
         set_num_smry = compiler::cmpfun(
             f = function(l) {
                 num.smry <<- l;
+                return(0L);
             }, options = kCmpFunOptions),
         get_num_eval = compiler::cmpfun(
             f = function() {
@@ -34,6 +36,7 @@ TG <- R6::R6Class(
         set_num_eval = compiler::cmpfun(
             f = function(l) {
                 num.eval <<- l;
+                return(0L);
             }, options = kCmpFunOptions),
         get_fit = compiler::cmpfun(
             f = function() {
@@ -42,6 +45,11 @@ TG <- R6::R6Class(
         set_fit = compiler::cmpfun(
             f = function(l) {
                 fit <<- l;
+                return(0L);
+            }, options = kCmpFunOptions),
+        fit_Auto_ok = compiler::cmpfun(
+            f = function() {
+                return(!is.null(fit$Auto) && fit$Auto);
             }, options = kCmpFunOptions),
         get_parms = compiler::cmpfun(
             f = function() {
@@ -57,7 +65,7 @@ TG <- R6::R6Class(
             }, options = kCmpFunOptions),
         is_none_auto_model = compiler::cmpfun(
             f = function() {
-                return(fit$Auto_model == "None");
+                return(!is.null(fit$Auto_model) && fit$Auto_model == "None");
             }, options = kCmpFunOptions),
         is_ok_num_smry = compiler::cmpfun(
             f = function() {
@@ -106,6 +114,7 @@ TG$set(
                     num.eval <<- list();
                     return(NULL);
                 } else {
+                    ## print(">> Signal is not noise, do evaluation.");
                     fit.late <- lm(y ~ x,
                                    data = data.frame(x = data$x - num.smry$t.lin,
                                        y = data$y), subset = data$x >= num.smry$t.lin);
@@ -122,10 +131,6 @@ TG$set(
                     A2mT <- eval_A2mT(num.smry$drv1, k, dt);
                     ## print(A2mT);
                     thromb <- num.smry$drv1 - A2mT;
-                    lagtime <- data$x[data$x < num.smry$t.peak &
-                                          num.smry$drv1 <= 0.1 * data$y[1]];
-                    lagtime <- lagtime[!is.na(lagtime)]; lagtime <- lagtime[length(lagtime)];
-                    ## print(lagtime);
                     ETP <- dt * (
                         sum(thromb, na.rm = TRUE) -
                             0.5 * (thromb[1] + thromb[length(thromb[!is.na(thromb)])]));
@@ -138,9 +143,22 @@ TG$set(
                     ## print(vel.index);
                     a2m.level <- max(A2mT, na.rm = TRUE)[1];
                     ## print(a2m.level);
+                    lagtime <- data$x[data$x < num.smry$t.peak &
+                                          num.smry$drv1 <= 0.1 * peak];
+                    lagtime <- lagtime[!is.na(lagtime)]; lagtime <- lagtime[length(lagtime)];
+                    if (length(lagtime) == 0) {
+                        lagtime <- 0;
+                    }
+                    ## print(lagtime);
                     ## print(data$x);
                     ## print(num.smry$drv1 - num.eval$k * (data$x[2] - data$x[1]) *
                     ##           cumsum(num.smry$drv1));
+                    ## print(lagtime);
+                    ## print(ETP);
+                    ## print(peak);
+                    ## print(tt.peak);
+                    ## print(vel.index);
+                    ## print(a2m.level);
                     num.eval <<- list(
                         ## a = coef(fit.late)[[1]], b = coef(fit.late)[[2]], k = k, A2mT = A2mT,
                         parms = data.frame(

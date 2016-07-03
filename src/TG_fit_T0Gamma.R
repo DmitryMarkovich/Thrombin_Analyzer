@@ -7,17 +7,6 @@ TG$set(
                 warning(">> No fitting: T0Gamma fit already exists!");
                 return(fit$T0Gamma);
             } else {
-                ## if (exists(x = "Gamma", where = fit)) {
-                ##     ## use existing Gamma fit for estimates of all parameters except t0
-                ##     start.list <- list(b = fit$Gamma$cff[["b"]], A = fit$Gamma$cff[["A"]],
-                ##                        k = fit$Gamma$cff[["k"]], theta = fit$Gamma$cff[["theta"]],
-                ##                        t0 = 0);
-                ## } else {
-                ##     ## call fit_Gamma for estimate all parameters except t0
-                ##     ## fit_Gamma(silent = TRUE);
-                ##     ## start.list <- list(b = fit$Gamma$cff[["b"]], A = fit$Gamma$cff[["A"]],
-                ##     ##                    k = fit$Gamma$cff[["k"]], theta = fit$Gamma$cff[["theta"]],
-                ##     ##                    t0 = 0);
                 start.list <- list(b = data$y[1], A = 0.5 * num.smry$ampl,
                                    k = 3, theta = num.smry$t.peak / 2, t0 = 0);
                 ft <- NULL; n.try <- 1;
@@ -28,10 +17,10 @@ TG$set(
                                 data = data, start = start.list, trace = F,
                                 ## lower = c(b.min, A.min, k.min, theta.min, t0.min),
                                 ## upper = c(b.max, A.max, k.max, theta.max, t0.max),
-                                lower = c(  0,   0, 1.5,   0,   0),
-                                upper = c(Inf, Inf, Inf, Inf, Inf),
+                                lower = c(  0,   0, 1.25,   0,   0),
+                                upper = c(Inf, Inf,  Inf, Inf, Inf),
                                 algorithm = "LM",
-                                control = nls.lm.control(
+                                control = minpack.lm::nls.lm.control(
                                     ftol = sqrt(.Machine$double.eps),
                                     ptol = sqrt(.Machine$double.eps),
                                     gtol = 0, factor = 100,  ## between [0.1, 100]
@@ -49,7 +38,7 @@ TG$set(
                     return(NULL);
                 } else {
                     fit$T0Gamma <<- list(
-                        cff = coef(ft), smry = summary(ft),
+                        cff = coef(ft), smry = get_compact_summary(ft),  ## summary(ft),
                         diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
                         );
                     if (!silent)
@@ -94,7 +83,11 @@ TG$set(
                     v <- get_vel_peak(A, k, theta);  ## A * sqrt(k - 1) * (k - 1 - sqrt(k - 1)) ^ (k - 2) *
                         ## exp(-(k - 1 - sqrt(k - 1))) / (gamma(k) * theta ^ 2);
                 } else {
-                    v <- max(num.smry$drv2, na.rm = TRUE);
+                    if (!is.null(num.smry$drv2)) {
+                        v <- max(num.smry$drv2, na.rm = TRUE);
+                    } else {
+                        v <- NA;
+                    }
                 }
                 if (cal.CF != 1) {
                     CF <- cal.CF;

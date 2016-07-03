@@ -10,7 +10,7 @@ Cal$set(
                 print(">> fit_LM called!");
                 ft <- lm(y ~ x, data = data);
                 fit$LM <<- list(
-                    cff = coef(ft), smry = summary(ft),
+                    cff = coef(ft), smry = get_compact_summary(ft),
                     diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
                     );
                 if (!silent)

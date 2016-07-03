@@ -19,6 +19,7 @@ kXT0GammaInt <- 2.5;  ## cutoff for rat$x - above 2.5 is T0GammaInt
 kYT0GammaInt <- 34;  ## cutoff for rat$y - above 34 signal is T0GammaInt
 
 kYlimMultDrv2 <- 1.5;
+kSigmaLMRatio <- 3;
 
 ## kPlotTypes <- c("Calibration", "Thrombin generation", "Thrombogram");
 ## kDataCodes <- c("cal", "tg", "tg.drv1");

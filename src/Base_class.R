@@ -15,6 +15,26 @@ Base <- R6::R6Class(
                     return(fit[[model]]$smry);
                 }
             }, options = kCmpFunOptions),
+        print_summary = compiler::cmpfun(
+            f = function(smry) {
+                if (!is.null(smry)) {
+                    return(capture.output(print(smry)));
+                } else {
+                    warning(">> smry == NULL!");
+                    return(NULL);
+                }
+            }, options = kCmpFunOptions),
+        get_compact_summary = compiler::cmpfun(
+            f = function(fit) {
+                tmp <- summary(fit);
+                tmp$residuals <- NULL;
+                tmp$call <- NULL;
+                tmp$cov.unscaled <- NULL;
+                ## tmp$convInfo <- NULL;
+                tmp$control <- NULL;
+                tmp$parameters <- NULL;
+                return(tmp);
+            }, options = kCmpFunOptions),
         ## from Rcpp_functions.cpp
         drv1 = drv1, drv2 = drv2
         )
@@ -54,7 +74,7 @@ Base$set(
                     print(">> explore_numerically called!");
                 dt <- data$x[2] - data$x[1]; N <- length(data$x);
                 ampl <- max(data$y, na.rm = TRUE);
-                rat <- list(x = NA, y = ampl / data$y[[1]]);
+                rat <- list(x = NA, y = abs(ampl / data$y[[1]]));
                 if (rat$y <= kYNone) {
                     if (!silent)
                         warning(">> Skipping calculation of derivatives, rat$y <= 3!");
@@ -113,6 +133,48 @@ Base$set(
                 );
         }, options = kCmpFunOptions),
     overwrite = FALSE);  ## End of Base$conv_pvals_to_signif_codes
+################################################################################
+
+################################################################################
+Base$set(
+    which = "public", name = "compare_two_models",
+    value = compiler::cmpfun(
+        f = function(model1, model2, ft1, ft2, silent = TRUE) {
+            if (is.null(ft1)) {
+                if (!silent) {
+                    print(paste0(">> ", model1, " does not exist!"));
+                    print(paste0(">> Returning ", model2,
+                                   " without comparison!"));
+                }
+                fit$Auto <<- TRUE; fit$Auto_model <<- model2;
+                return(0L);
+            } else if (is.null(ft2)) {
+                if (!silent) {
+                    print(paste0(">> ", model2, " does not exist!"));
+                    print(paste0(">> Returning ", model1,
+                                   " without comparison!"));
+                }
+                fit$Auto <<- TRUE; fit$Auto_model <<- model1;
+                return(0L);
+            } else {
+                if (ft1$smry$sigma <= ft2$smry$sigma) {
+                    if (!silent)
+                        print(paste0(">> Returning ", model1,
+                                     " because of lower sigma!"));
+                    fit$Auto <<- TRUE; fit$Auto_model <<- model1;
+                    fit[[model2]] <<- NULL;
+                    return(0L);
+                } else {
+                    if (!silent)
+                        print(paste0(">> Returning ", model2,
+                                     " because of lower sigma!"));
+                    fit$Auto <<- TRUE; fit$Auto_model <<- model2;
+                    fit[[model1]] <<- NULL;
+                    return(0L);
+                }
+            }  ## End of if()
+        }, options = kCmpFunOptions),
+    overwrite = FALSE);  ## End of Base$compare_two_models
 ################################################################################
 
 ## ################################################################################

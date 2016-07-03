@@ -11,16 +11,18 @@ shinyUI(
             sidebarPanel = sidebarPanel(
 ######################################## Dataset
                 fluidRow(
+                    h2("Dataset", align = "center"),
                     column(width = 4, offset = 0,
-                           h2("Dataset", align = "center")
-                           ),
-                    column(width = 5, offset = 0,
                            fileInput(inputId = "dataset.fname", accept = ("text/csv"),
-                                     label = h5("Load dataset file"))
+                                     label = h5("Load dataset"))
                            ),
-                    column(width = 3, offset = 0,
+                    column(width = 4, offset = 0,
+                           fileInput(inputId = "parms.fname", accept = ("csv"),
+                                     label = h6("Load parameters"))
+                           ),
+                    column(width = 4, offset = 0,
                            fileInput(inputId = "res.fname", accept = (".RData"),
-                                     label = h5("Load results file"))
+                                     label = h5("Load results"))
                            )
                     ),
                 fluidRow(
@@ -29,14 +31,14 @@ shinyUI(
                                         label = h5("Analyze!"),
                                         inline = TRUE)
                            ),
-                    column(width = 4, offset = 0,
+                    column(width = 3, offset = 0,
                            radioButtons(inputId = "dataset.show",
                                         label = h5("Show as"),
                                         choices = list("plot" = "plot",
                                             "text" = "text"),
-                                        selected = "plot", inline = TRUE)
+                                        selected = "plot", inline = FALSE)
                            ),
-                    column(width = 5, offset = 0,
+                    column(width = 6, offset = 0,
                            uiOutput(outputId = "parms.Download"),
                            uiOutput(outputId = "res.Download")
                            )
@@ -131,10 +133,10 @@ shinyUI(
                                         tableOutput(outputId = "dataset.ShowAs")
                                         ),
                                  column(width = 12, offset = 0, br()),
-                                 column(width = 8, offset = 0,
-                                        uiOutput(outputId = "dataset.ShowParameters")
+                                 column(width = 10, offset = 0,
+                                        plotOutput(outputId = "dataset.ShowParameters")
                                         ),
-                                 column(width = 4, offset = 0,
+                                 column(width = 2, offset = 0,
                                         uiOutput(outputId = "dataset.ShowLoadedResults")
                                         )
                                  )  ## End of fluidRow
@@ -225,7 +227,7 @@ shinyUI(
                                  )  ## End of fluidRow
                              ),
 ######################################## Demo signals tab
-                    tabPanel(title = "Demo signals",
+                    tabPanel(title = "Demo",
                              fluidRow(
                                  column(width = 3,
                                         tableOutput(outputId = "demo.Show")

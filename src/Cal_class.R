@@ -13,17 +13,6 @@ Cal <- R6::R6Class(
     );  ## End of Cal
 ################################################################################
 
-## ################################################################################
-## Cal$set(
-##     which = "public", name = "clear",
-##     value = compiler::cmpfun(
-##         f = function() {
-##             data <<- data.frame(); num.smry <<- list(); fit <<- list();
-##             parms <<- data.frame();
-##         }, options = kCmpFunOptions),
-##     overwrite = FALSE);  ## End of Cal$clear
-## ################################################################################
-
 ################################################################################
 ## Add public methods to Cal class
 source("src/Cal_fit_LM.R");

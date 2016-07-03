@@ -1,61 +1,21 @@
 ################################################################################
 TG$set(
-    which = "public", name = "compare_two_models",
-    value = compiler::cmpfun(
-        f = function(model1, model2, ft1, ft2, silent = TRUE) {
-            if (is.null(ft1)) {
-                if (!silent) {
-                    warning(paste0(">> ", model1, " does not exist!"));
-                    warning(paste0(">> Returning ", model2,
-                                   " without comparison!"));
-                }
-                fit$Auto <<- TRUE; fit$Auto_model <<- model2;
-                return(0L);
-            } else if (is.null(ft2)) {
-                if (!silent) {
-                    warning(paste0(">> ", model2, " does not exist!"));
-                    warning(paste0(">> Returning ", model1,
-                                   " without comparison!"));
-                }
-                fit$Auto <<- TRUE; fit$Auto_model <<- model1;
-                return(0L);
-            } else {
-                if (ft1$smry$sigma <= ft2$smry$sigma) {
-                    if (!silent)
-                        print(paste0(">> Returning ", model1,
-                                     " because of lower sigma!"));
-                    fit$Auto <<- TRUE; fit$Auto_model <<- model1;
-                    fit[[model2]] <<- NULL;
-                    return(0L);
-                } else {
-                    if (!silent)
-                        print(paste0(">> Returning ", model2,
-                                     " because of lower sigma!"));
-                    fit$Auto <<- TRUE; fit$Auto_model <<- model2;
-                    fit[[model1]] <<- NULL;
-                    return(0L);
-                }
-            }  ## End of if()
-        }, options = kCmpFunOptions),
-    overwrite = FALSE);  ## Ebd of TG$compare_two_models
-################################################################################
-
-################################################################################
-TG$set(
     which = "public", name = "fit_Auto",
     value = compiler::cmpfun(
         f = function(silent = TRUE) {
             if (!is.null(fit$Auto)) {  ## exists(x = "Auto", where = fit, envir = environment())
-                warning(">> No fitting: Auto fit already exists!");
+                print(">> No fitting: Auto fit already exists!");
             } else {
                 ft <- NULL;  ## print(num.smry);
                 if (num.smry$rat$y <= kYNone) {
+                    ## print(">> Chose None model");
                     fit$Auto <<- FALSE; fit$Auto_model <<- "None";
                     ## print(">> None model:");
                     ## print(fit$Auto); print(fit$Auto_model);
                 } else if (num.smry$rat$x <= kXT0GammaInt &&
                    num.smry$rat$y <= kYT0GammaInt) {
                     if (num.smry$rat$x <= kXT0Gamma) {
+                        ## print(">> Chose T0Gamma model");
                         ft <- fit_T0Gamma(silent = TRUE);
                         if (!is.null(ft)) {
                             fit$Auto <<- TRUE; fit$Auto_model <<- "T0Gamma";
@@ -63,10 +23,11 @@ TG$set(
                             fit$Auto <<- FALSE; fit$Auto_model <<- "None";
                         }
                     } else {
-                        ft <- fit_T0GammaInt(silent = TRUE);
+                        ## print(">> Chose T0GammaInt model");
+                        ft <- fit_T0Gamma(silent = TRUE);
                         if (!is.null(ft)) {
-                            ft2 <- fit_T0Gamma(silent = TRUE);
-                            compare_two_models("T0GammaInt", "T0Gamma", ft, ft2);
+                            ft2 <- fit_T0GammaInt(silent = TRUE);
+                            compare_two_models("T0GammaInt", "T0Gamma", ft2, ft);
                             ## compare_T0GammaInt_and_T0Gamma(ft, ft2);
                             ## fit$Auto <<- TRUE; fit$Auto_model <<- "T0GammaInt";
                         } else {
@@ -74,6 +35,7 @@ TG$set(
                         }
                     }
                 } else {
+                    ## print(">> Chose T0GammaInt model");
                     ft <- fit_T0GammaInt(silent = TRUE);  ## print(ft);
                     if (!is.null(ft)) {
                         ft2 <- fit_T0GammaInt2(silent = TRUE);
@@ -96,7 +58,7 @@ TG$set(
             if (exists(x = "Auto", where = fit)) {
                 return(get_model(fit$Auto_model));
             } else {
-                warning(">> fit$Auto does not exist!");
+                print(">> fit$Auto does not exist!");
                 return(rep(NA, length(data$x)));
             }
         }, options = kCmpFunOptions),
@@ -113,7 +75,7 @@ TG$set(
             if (!is.null(fit$Auto)) {
                 return(parms_model(fit$Auto_model, cal.CF));
             } else {
-                warning(">> fit$Auto does not exist!");
+                print(">> fit$Auto does not exist!");
                 return(NULL);
             }
         }, options = kCmpFunOptions),
