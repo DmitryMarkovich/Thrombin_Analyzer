@@ -2,17 +2,17 @@
 TG$set(
     which = "public", name = "fit_model",
     value = compiler::cmpfun(
-        f = function(tg.model) {
+        f = function(tg.model, silent = TRUE) {
             ## print(tg.model);
             switch(tg.model,
                    ## "Gamma" = fit_Gamma(silent = TRUE),
-                   "T0Gamma" = fit_T0Gamma(silent = TRUE),
-                   ## "GammaInt" = fit_GammaInt(silent = TRUE),
-                   "T0GammaInt" = fit_T0GammaInt(silent = TRUE),
-                   "T0GammaInt2" = fit_T0GammaInt2(silent = TRUE),
-                   ## "LateExpGammaInt" = fit_LateExpGammaInt(silent = TRUE),
-                   ## "LateExpT0GammaInt" = fit_LateExpT0GammaInt(silent = TRUE),
-                   "Auto" = fit_Auto(silent = TRUE),
+                   "T0Gamma" = fit_T0Gamma(silent = silent),
+                   ## "GammaInt" = fit_GammaInt(silent = silent),
+                   "T0GammaInt" = fit_T0GammaInt(silent = silent),
+                   "T0GammaInt2" = fit_T0GammaInt2(silent = silent),
+                   ## "LateExpGammaInt" = fit_LateExpGammaInt(silent = silent),
+                   ## "LateExpT0GammaInt" = fit_LateExpT0GammaInt(silent = silent),
+                   "Auto" = fit_Auto(silent = silent),
                    { warning(paste0(">> Call to unknown model", tg.model))}
                    );
         }, options = kCmpFunOptions),

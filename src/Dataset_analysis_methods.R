@@ -3,7 +3,7 @@ Dataset$set(
     which = "public", name = "copy_and_analyze_TG",
     value = compiler::cmpfun(
         f = function(x = 0, y = 0, expl_num = TRUE, eval_num = TRUE,
-            fit_Auto = TRUE, signal = NULL) {
+            fit_Auto = TRUE, signal = NULL, copy.res = TRUE) {
             tmp <- TG$new();  ## str(tmp);
             tmp$clear();
             ## tmp$data <- data.frame(x = x, y = y);
@@ -12,16 +12,16 @@ Dataset$set(
             tmp$set_data(data.frame(x = x, y = y));
             ## print("tmp$data = "); print(tmp$get_data());
             if (is.null(signal)) {
-                if (expl_num)
-                    tmp$explore_numerically();
-                if (eval_num)
-                    tmp$evaluate_numerically();
-                if (fit_Auto)
-                    tmp$fit_Auto();
+                ## if (expl_num)
+                tmp$explore_numerically();
+                ## if (eval_num)
+                tmp$evaluate_numerically();
+                ## if (fit_Auto)
+                tmp$fit_Auto();
                 tmp$parms_model(tmp$auto_model());
             } else {
                 if (any(signal == signals)) {
-                    if (exists(x = signal, where = res)) {
+                    if (copy.res && !is.null(res[[signal]])) {
                         ## print(res[[signal]]$num.smry);
                         tmp$set_num_smry(res[[signal]]$num.smry);
                         tmp$set_num_eval(res[[signal]]$num.eval);
@@ -51,11 +51,13 @@ Dataset$set(
                 tmp.res <- parallel::mclapply(
                     X = 2:N, FUN = function(i) {
                         return(copy_and_analyze_TG(x = time, y = data[, signals[i]]));
-                    }, mc.cores = parallel::detectCores()
+                    }, mc.cores = 1 ## parallel::detectCores()
                     );
                 stop.time <- proc.time() - start.time;
                 print(paste0(">> main loop took [s]"));
                 print(stop.time);
+                ## print(tmp.res[[1]]);
+                print(object.size(tmp.res) / 1e6);
                 ## print(tmp.res);
                 start.time <- proc.time();
                 ## print(paste0(">> tmp.res size = ", object.size(tmp.res) / 1e6, " MB"));

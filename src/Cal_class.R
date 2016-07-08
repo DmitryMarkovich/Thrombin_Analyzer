@@ -1,8 +1,10 @@
 ################################################################################
 Cal <- R6::R6Class(
     classname = "Cal", portable = FALSE, inherit = Base,
-    private = list(data = "data.frame", num.smry = "list", fit = "list",
-        parms = "data.frame"),
+    private = list(
+        data = data.frame(), num.smry = list(), fit = list(),
+        parms = data.frame()
+        ),
     public = list(
         clear = compiler::cmpfun(
             f = function() {

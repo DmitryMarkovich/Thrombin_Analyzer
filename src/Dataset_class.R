@@ -2,8 +2,10 @@
 Dataset <- R6::R6Class(
     classname = "Dataset", portable = FALSE,
     private = list(
-        data = "data.frame", N = "integer", signals = "vector",
-        res = "list", parms = "data.frame"
+        data = data.frame(), N = integer(0),
+        signals = vector(mode = "character", length = 0),
+        res = list(), parms = data.frame(),
+        tg1 = TG$new(), tg2 = TG$new()
         ),
     public = list(
         initialize = compiler::cmpfun(
@@ -13,6 +15,7 @@ Dataset <- R6::R6Class(
                 signals <<- NULL;
                 res <<- NULL;
                 parms <<- NULL;
+                tg1 = TG$new(); tg2 = TG$new();
             }, options = kCmpFunOptions),
         is_empty = compiler::cmpfun(
             f = function() {
@@ -26,8 +29,10 @@ Dataset <- R6::R6Class(
         clear = compiler::cmpfun(
             f = function() {
                 print(">> Dataset.clear called!");
-                data <<- data.frame(); N <<- 0L; signals <<- vector(mode = "character");
+                data <<- data.frame(); N <<- integer(0);
+                signals <<- vector(mode = "character", length = 0);
                 res <<- list(); parms <<- data.frame();
+                tg1 = TG$new(); tg2 = TG$new();
                 return(0L);
             }, options = kCmpFunOptions),
         load  = compiler::cmpfun(
@@ -111,7 +116,12 @@ Dataset <- R6::R6Class(
             }, options = kCmpFunOptions),
         get_parms = compiler::cmpfun(
             f = function() {
-                return(parms);
+                ## print(cbind(parms, Num = 1:length(parms$Signal)));
+                if (is.null(parms$Num)) {
+                    return(cbind(parms, Num = 1:length(parms$Signal)));
+                } else {
+                    return(parms);
+                }
             }, options = kCmpFunOptions),
         set_parms = compiler::cmpfun(
             f = function() {
@@ -156,6 +166,53 @@ Dataset <- R6::R6Class(
             f = function(i = 1) {
                 return(res[[i]]$num.eval);
             }, options = kCmpFunOptions),
+        get_tg = compiler::cmpfun(
+            f = function(which = 1) {
+                if (any(which == c(1, 2))) {
+                    return(get(paste0(x = "tg", which)));
+                } else {
+                    print(">> Unknown tg object to get!");
+                    return(NULL);
+                }
+            }, options = kCmpFunOptions),
+        set_tg = compiler::cmpfun(
+            f = function(input, which = 1) {
+                if (any(which == c(1, 2))) {
+                    if (which == 1) {
+                        tg1 <<- copy_and_analyze_TG(x = data[[1]],
+                                                    y = data[[input]],
+                                                    signal = input);
+                        if (!tg1$is_ok_num_smry())
+                            tg1$explore_numerically();
+                    }
+                    if (which == 2) {
+                        tg2 <<- copy_and_analyze_TG(x = data[[1]],
+                                                    y = data[[input]],
+                                                    signal = input);
+                        if (!tg2$is_ok_num_smry())
+                            tg2$explore_numerically();
+                    }
+                    ## assign(x = paste0("tg", which),
+                    ##        value = copy_and_analyze_TG(x = data[[1]],
+                    ##            y = data[[input]], signal = input),
+                    ##        pos = self);
+                    return(0L);
+                } else {
+                    print(">> Unknown tg object to set!");
+                    return(NULL);
+                }
+            }, options = kCmpFunOptions),
+        print_tg = compiler::cmpfun(
+            f = function(which = 1) {
+                if (any(which == c(1, 2))) {
+                    print(head(get(x = paste0("tg", which))$get_data()));
+                    print(head(get(x = paste0("tg", which))$get_num_smry(), n = 1));
+                    print(get(x = paste0("tg", which))$get_fit());
+                } else {
+                    print(">> Unknown tg object to print!");
+                    return(NULL);
+                }
+            }, options = kCmpFunOptions),
         overlay_parms = compiler::cmpfun(
             f = function(signal1, signal2) {
                 if (any(signal1 == signals) && any(signal2 == signals)) {
@@ -165,6 +222,19 @@ Dataset <- R6::R6Class(
                 } else {
                     return(NULL);
                 }
+            }, options = kCmpFunOptions),
+        get_ylim_overlay = compiler::cmpfun(
+            f = function(y1, y2) {
+                return(c(
+                    min(c(
+                        min(y1, na.rm = TRUE),
+                        min(y2, na.rm = TRUE)
+                        ), na.rm = TRUE),
+                    max(c(
+                        max(y1, na.rm = TRUE),
+                        max(y2, na.rm = TRUE)
+                        ), na.rm = TRUE)
+                    ));
             }, options = kCmpFunOptions)
         )  ## End of public
     );  ## End of Dataset

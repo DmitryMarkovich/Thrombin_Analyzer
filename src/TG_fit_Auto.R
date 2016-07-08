@@ -3,7 +3,7 @@ TG$set(
     which = "public", name = "fit_Auto",
     value = compiler::cmpfun(
         f = function(silent = TRUE) {
-            if (!is.null(fit$Auto)) {  ## exists(x = "Auto", where = fit, envir = environment())
+            if (!is.null(fit$Auto)) {  ## exists(x = "Auto", where = fit, envir = environment()) 
                 print(">> No fitting: Auto fit already exists!");
             } else {
                 ft <- NULL;  ## print(num.smry);
@@ -40,7 +40,6 @@ TG$set(
                     if (!is.null(ft)) {
                         ft2 <- fit_T0GammaInt2(silent = TRUE);
                         compare_two_models("T0GammaInt", "T0GammaInt2", ft, ft2);
-                        ## compare_T0GammaInt2_and_T0GammaInt(ft, ft2);
                     } else {
                         fit$Auto <<- FALSE; fit$Auto_model <<- "None";
                     }
@@ -64,7 +63,7 @@ TG$set(
         }, options = kCmpFunOptions),
     overwrite = FALSE);  ## End of TG$get_Auto
 ################################################################################
- 
+
 ################################################################################
 TG$set(
     which = "public", name = "parms_Auto",

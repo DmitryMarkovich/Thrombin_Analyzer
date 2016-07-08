@@ -2,8 +2,9 @@
 TG <- R6::R6Class(
     classname = "TG", portable = FALSE, inherit = Base,
     private = list(
-        data = "data.frame", num.smry = "list", num.eval = "list",
-        fit = "list", parms = "data.frame"),
+        data = data.frame(), num.smry = list(), num.eval = list(),
+        fit = list(), parms = data.frame()
+        ),
     public = list(
         clear = compiler::cmpfun(
             f = function() {
@@ -63,10 +64,6 @@ TG <- R6::R6Class(
             f = function() {
                 return(fit$Auto_model);
             }, options = kCmpFunOptions),
-        is_none_auto_model = compiler::cmpfun(
-            f = function() {
-                return(!is.null(fit$Auto_model) && fit$Auto_model == "None");
-            }, options = kCmpFunOptions),
         is_ok_num_smry = compiler::cmpfun(
             f = function() {
                 return(length(num.smry) >= 1 && length(num.smry$drv1) > 1);
@@ -95,6 +92,10 @@ TG <- R6::R6Class(
                 } else {
                     return(NULL);
                 }
+            }, options = kCmpFunOptions),
+        get_sigma_auto = compiler::cmpfun(
+            f = function() {
+                return(fit[[fit$Auto_model]]$smry$sigma);
             }, options = kCmpFunOptions),
         ## from Rcpp_functions.cpp
         eval_A2mT = eval_A2mT

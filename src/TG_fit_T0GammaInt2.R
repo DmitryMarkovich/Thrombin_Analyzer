@@ -158,7 +158,7 @@ TG$set(
                 k.a2m <- fit$T0GammaInt2$cff[["k.a2m"]]; t0 <- fit$T0GammaInt2$cff[["t0"]];
                 ## print(">> Parameters extracted");
                 peak1 <- get_peak(A1, k1, theta); peak2 <- get_peak(A2, k2, theta);
-                t.peak1 <- get_tpeak(k1, theta, t0); t.peak2 <- get_peak(k2, theta, t0);
+                t.peak1 <- get_tpeak(k1, theta, t0); t.peak2 <- get_tpeak(k2, theta, t0);
 
                 ## print(paste0(">> t.peak1 = ", t.peak1, ", t.peak2 = ", t.peak2));
                 ## normal scenario - both peaks happen within the time of the

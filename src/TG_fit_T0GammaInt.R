@@ -5,7 +5,7 @@ TG$set(
         f = function(silent = TRUE) {
             if (!silent)
                 print(">> fit_T0GammaInt called!");
-            if (!is.null(fit$T0GammaInt)) {  ## exists(x = "T0GammaInt", where = fit, envir = environment())
+            if (exists(x = "T0GammaInt", where = fit, envir = self)) {  ##  !is.null(fit$T0GammaInt)
                 print(">> No fitting: T0GammaInt fit already exists!");
                 return(fit$T0GammaInt);
             } else {

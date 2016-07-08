@@ -2,7 +2,7 @@ library(shiny);
 ################################################################################
 shinyUI(
     ui = fluidPage(
-        tags$head(tags$style(".rightAlign{float:right;}")),
+        tags$head(tags$style(".rightAlign{float:right;}")),  ## right-align elements in main panel
         headerPanel("Thrombin Analyzer"), ## App title
 ################################################################################
 ######################################## Sidebar layout
@@ -25,24 +25,6 @@ shinyUI(
                                      label = h5("Load results"))
                            )
                     ),
-                fluidRow(
-                    column(width = 3, offset = 0,
-                           actionButton(inputId = "dataset.analyze",
-                                        label = h5("Analyze!"),
-                                        inline = TRUE)
-                           ),
-                    column(width = 3, offset = 0,
-                           radioButtons(inputId = "dataset.show",
-                                        label = h5("Show as"),
-                                        choices = list("plot" = "plot",
-                                            "text" = "text"),
-                                        selected = "plot", inline = FALSE)
-                           ),
-                    column(width = 6, offset = 0,
-                           uiOutput(outputId = "parms.Download"),
-                           uiOutput(outputId = "res.Download")
-                           )
-                    ),  ## End of FluidRow
                 uiOutput(outputId = "dataset.Menu"),
 ######################################## Calibration
                 h2("Calibration", align = "center"),
@@ -52,12 +34,7 @@ shinyUI(
                                      label = h4("Load calibration data file"))
                            ),
                     column(width = 7,
-                           selectInput(inputId = "cal.model",
-                                       label = h4("Select model to fit calibration signal"), 
-                                       choices = c("Auto", "T0LateMM", "LateMM",
-                                           "T0LateExp", "LateExp", "EarlyMM",
-                                           "LM", "None"),
-                                       selected = "None")
+                           uiOutput(outputId = "cal.Menu")
                            )
                     ),  ## End of fluidRow
 ######################################## Thrombin generation
@@ -65,31 +42,13 @@ shinyUI(
                     column(width = 12, offset = 0,
                            h2("Thrombin generation", align = "center")
                            )
-                    ## column(width = 2, offset = 0,
-                    ##        actionButton(inputId = "tg.clear",
-                    ##                     label = h5("Clear!"),
-                    ##                     inline = TRUE)
-                    ##        )
                     ),
                 fluidRow(
                     column(width = 5,
                            fileInput(inputId = "tg.fname", accept = ("text/csv"),
                                      label = h4("Load thrombin generation data file"))
                            ),
-                    column(width = 7,
-                           selectInput(inputId = "tg.model",
-                                       label = h4("Select model to fit thrombin generation signal"), 
-                                       choices = c("Auto",
-                                           "LateExpT0GammaInt",
-                                           ## "LateExpGammaInt",
-                                           "T0GammaInt2",
-                                           "T0GammaInt",
-                                           ## "GammaInt",
-                                           "T0Gamma",
-                                           ## "Gamma",
-                                           "None"),
-                                       selected = "None")
-                           )
+                    uiOutput(outputId = "tg.Menu")
                     ),  ## End of fluidRow
 ######################################## Demo signals
                 h2("Demo signals", align = "center"),
@@ -119,42 +78,81 @@ shinyUI(
                             selected = "None"),
                 uiOutput(outputId = "demo.Download"),
                 width = 4
-                ),
+                ),  ## End of sidebarPanel
 ################################################################################
 ######################################## Main panel
 ################################################################################
             mainPanel = mainPanel(
                 tabsetPanel(
                     id = "Tab type",
-######################################## Dataset tab
-                    tabPanel(title = "Dataset",
-                             fluidRow(
-                                 column(width = 12, offset = 0,
-                                        tableOutput(outputId = "dataset.ShowAs")
-                                        ),
-                                 column(width = 12, offset = 0, br()),
-                                 column(width = 10, offset = 0,
-                                        plotOutput(outputId = "dataset.ShowParameters")
-                                        ),
-                                 column(width = 2, offset = 0,
-                                        uiOutput(outputId = "dataset.ShowLoadedResults")
-                                        )
-                                 )  ## End of fluidRow
+                    tabPanel(title = "Instructions",
+                             fluidRow(column(width = 6, offset = 3,
+                                             includeMarkdown("~/Coding/R/Shiny/Thrombin_Analyzer/README.md")))
                              ),
-######################################## Overlay tab
-                    tabPanel(title = "Overlay",
-                             fluidRow(
-                                 column(width = 12, offset = 0,
-                                        plotOutput(outputId = "dataset.PlotOverlay")
+######################################## Dataset navbarMenu
+                    navbarMenu(title = "Dataset",
+                               tabPanel(title = "Dataset",
+                                        fluidRow(
+                                            column(width = 12, offset = 0,
+                                                   tableOutput(outputId = "dataset.ShowAs")
+                                                   ),
+                                            column(width = 12, offset = 0, br()),
+                                            column(width = 4, offset = 0,
+                                                   plotOutput(outputId = "dataset.ShowLagtime")
+                                                   ),
+                                            column(width = 4, offset = 0,
+                                                   plotOutput(outputId = "dataset.ShowETP",
+                                                              brush = brushOpts(id = "plot_brush",
+                                                                  direction = "xy")
+                                                              )
+                                                   ),
+                                            column(width = 4, offset = 0,
+                                                   plotOutput(outputId = "dataset.ShowPeak")
+                                                   ),
+                                            column(width = 12, offset = 0,
+                                                   verbatimTextOutput("brush_info")
+                                                   ),
+                                            column(width = 4, offset = 0,
+                                                   plotOutput(outputId = "dataset.ShowttPeak")
+                                                   ),
+                                            column(width = 4, offset = 0,
+                                                   plotOutput(outputId = "dataset.ShowVelIndex")
+                                                   ),
+                                            column(width = 4, offset = 0,
+                                                   plotOutput(outputId = "dataset.ShowAlpha2M_Level")
+                                                   )
+                                            ## column(width = 12, offset = 0,
+                                            ##        uiOutput(outputId = "dataset.ShowLoadedResults")
+                                            ##        )
+                                            )  ## End of fluidRow
                                         ),
-                                 column(width = 12, offset = 0,
-                                        plotOutput(outputId = "dataset.PlotDrvOverlay")
+                               tabPanel(title = "Overlay",
+                                        fluidRow(
+                                            column(width = 12, offset = 0,
+                                                   plotOutput(outputId = "dataset.PlotOverlay")
+                                                   ),
+                                            column(width = 12, offset = 0,
+                                                   plotOutput(outputId = "dataset.PlotDrvOverlay")
+                                                   ),
+                                            column(width = 12, offset = 0, align = "center",
+                                                   tableOutput(outputId = "dataset.ShowParmsOverlay")
+                                                   )
+                                            )  ## End of fluidRow
                                         ),
-                                 column(width = 12, offset = 0, align = "center",
-                                        tableOutput(outputId = "dataset.ShowParmsOverlay")
+                               tabPanel(title = "Overlay details",
+                                        fluidRow(
+                                            ## column(width = 12, offset = 0,
+                                            ##        plotOutput(outputId = "dataset.PlotOverlay")
+                                            ##        ),
+                                            column(width = 12, offset = 0,
+                                                   plotOutput(outputId = "dataset.PlotResidOverlay")
+                                                   ),
+                                            column(width = 12, offset = 0, ## align = "center",
+                                                   uiOutput(outputId = "dataset.ShowSmryOverlay")
+                                                   )
+                                            )  ## End of fluidRow
                                         )
-                                 )  ## End of fluidRow
-                             ),
+                               ),  ## End of navbarMenu
 ######################################## Calibration signal tab
                     tabPanel(title = "Calibration signal",
                              plotOutput(outputId = "cal.Plot"),
@@ -169,24 +167,26 @@ shinyUI(
                              uiOutput(outputId = "cal.SynthHint",
                                       class = "rightAlign")
                              ),
-######################################## Thrombin generation signal tab
-                    tabPanel(title = "Thrombin generation signal",
-                             plotOutput(outputId = "tg.Plot"),
-                             fluidRow(
-                                 column(width = 6, offset = 0,
-                                        plotOutput(outputId = "tg.PlotResid")
+######################################## Thrombin generation signal navbarMenu
+                    navbarMenu(title = "Thrombin generation signal",
+                               tabPanel(title = "Raw data and fit",
+                                        plotOutput(outputId = "tg.Plot"),
+                                        fluidRow(
+                                            column(width = 6, offset = 0,
+                                                   plotOutput(outputId = "tg.PlotResid")
+                                                   ),
+                                            column(width = 6,
+                                                   htmlOutput(outputId = "tg.model")
+                                                   )
+                                            )  ## End of fluidRow
+                                        ## uiOutput(outputId = "tg.SynthHint",
+                                        ##          class = "rightAlign")
                                         ),
-                                 column(width = 6,
-                                        htmlOutput(outputId = "tg.model")
+                               tabPanel(title = "Thrombogram",
+                                        plotOutput(outputId = "tg.PlotDrv1"),
+                                        plotOutput(outputId = "tg.PlotDrv2")
                                         )
-                                 ),  ## End of fluidRow
-                             uiOutput(outputId = "tg.SynthHint",
-                                      class = "rightAlign")
-                             ),
-######################################## Thrombogram tab
-                    tabPanel(title = "Thrombogram",
-                             plotOutput(outputId = "tg.PlotDrv1")
-                             ),
+                               ),  ## End of navbarMenu
 ######################################## Parameters tab
                     tabPanel(title = "Parameters",
                              fluidRow(
@@ -229,15 +229,15 @@ shinyUI(
 ######################################## Demo signals tab
                     tabPanel(title = "Demo",
                              fluidRow(
-                                 column(width = 3,
-                                        tableOutput(outputId = "demo.Show")
-                                        ),
-                                 column(width = 9,
+                                 ##     column(width = 3,
+                                 ##            tableOutput(outputId = "demo.Show")
+                                 ##            ),
+                                 column(width = 12,
                                         plotOutput(outputId = "demo.Plot")
                                         )
                                  )
                              )
-                ),  ## End of tabsetPanel
+                    ),  ## End of tabsetPanel
                 width = 8
             )  ## End of mainPanel
         ),  ## End of sidebarLayout

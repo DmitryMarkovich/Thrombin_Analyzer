@@ -9,13 +9,13 @@ TG$set(
                    },
                    "Gamma" = {
                        if (is.null(fit$Gamma)) {  ## !exists(x = "Gamma", where = fit)
-                           warning(">> fit$Gamma does not exist!");
+                           print(">> fit$Gamma does not exist!");
                        }
                        return(rep(NA, length(data$x)));
                    },
                    "T0Gamma" = {
                        if (is.null(fit$T0Gamma)) {  ## !exists(x = "T0Gamma", where = fit)
-                           warning(">> fit$T0Gamma does not exist!");
+                           print(">> fit$T0Gamma does not exist!");
                        }
                        return(rep(NA, length(data$x)));
                    },
@@ -29,12 +29,13 @@ TG$set(
                                        gamma(k + 1) * theta *
                                            pgamma(q = data$x, shape = k + 1, scale = theta)));
                        } else {
-                           warning(">> fit$GammaInt does not exist!");
+                           print(">> fit$GammaInt does not exist!");
                            return(rep(NA, length(data$x)));
                        }
                    },
                    "T0GammaInt" = {
                        if (!is.null(fit$T0GammaInt)) {  ## exists(x = "T0GammaInt", where = fit)
+                           ## print(fit$T0GammaInt);
                            A <- fit$T0GammaInt$cff[["A"]]; k <- fit$T0GammaInt$cff[["k"]];
                            theta <- fit$T0GammaInt$cff[["theta"]];
                            k.a2m <- fit$T0GammaInt$cff[["k.a2m"]]; t0 <- fit$T0GammaInt$cff[["t0"]];
@@ -44,7 +45,7 @@ TG$set(
                                        gamma(k + 1) * theta *
                                            pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
                        } else {
-                           warning(">> fit$T0GammaInt does not exist!");
+                           print(">> fit$T0GammaInt does not exist!");
                            return(rep(NA, length(data$x)));
                        }
                    },
@@ -67,7 +68,7 @@ TG$set(
                                                    pgamma(q = data$x - t0, shape = k2 + 1, scale = theta))
                                );
                        } else {
-                           warning(">> fit$T0GammaInt2 does not exist!");
+                           print(">> fit$T0GammaInt2 does not exist!");
                            return(rep(NA, length(data$x)));
                        }
                    },
@@ -87,7 +88,7 @@ TG$set(
                                        gamma(k + 1) * theta *
                                            pgamma(q = data$x, shape = k + 1, scale = theta)));
                        } else {
-                           warning(">> fit$LateExpGammaInt does not exist!");
+                           print(">> fit$LateExpGammaInt does not exist!");
                            return(rep(NA, length(data$x)));
                        }
                    },
@@ -107,7 +108,7 @@ TG$set(
                                        gamma(k + 1) * theta *
                                            pgamma(q = data$x - t0, shape = k + 1, scale = theta)));
                        } else {
-                           warning(">> fit$LateExpT0GammaInt does not exist!");
+                           print(">> fit$LateExpT0GammaInt does not exist!");
                            return(rep(NA, length(data$x)));
                        }
                    },
@@ -115,7 +116,7 @@ TG$set(
                        if (!is.null(fit$Auto)) {  ## exists(x = "Auto", where = fit)
                            return(get_A2mT_int(fit$Auto_model));
                        } else {
-                           warning(">> fit$Auto does not exist!");
+                           print(">> fit$Auto does not exist!");
                            return(rep(NA, length(data$x)));
                        }
                    },

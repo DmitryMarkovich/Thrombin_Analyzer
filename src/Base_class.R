@@ -5,12 +5,20 @@ Base <- R6::R6Class(
     public = list(
         model_exists = compiler::cmpfun(
             f = function(model) {
-                return(exists(x = model, where = fit));
+                return(!is.null(fit[[model]]));  ## exists(x = model, where = fit)
+            }, options = kCmpFunOptions),
+        is_none_auto_model = compiler::cmpfun(
+            f = function() {
+                return(!is.null(fit$Auto_model) && fit$Auto_model == "None");
             }, options = kCmpFunOptions),
         get_summary = compiler::cmpfun(
             f = function(model) {
                 if (model == "Auto") {
-                    return(fit[[fit$Auto_model]]$smry);
+                    if (fit$Auto_model == "None") {
+                        return(NULL);
+                    } else {
+                        return(fit[[fit$Auto_model]]$smry);
+                    }
                 } else {
                     return(fit[[model]]$smry);
                 }

@@ -9,7 +9,7 @@ Cal$set(
             } else {
                 print(">>> Cal.fit_Auto called!");
                 ft <- NULL;
-                if (num.smry$rat$x <= 1.5 && num.smry$rat$y <= 6) {
+                if (num.smry$rat$x <= 1.5 || num.smry$rat$y <= 6) {
                     ft <- fit_EarlyMM(silent = TRUE);
                     if (!is.null(ft)) {
                         fit$Auto <<- TRUE;
