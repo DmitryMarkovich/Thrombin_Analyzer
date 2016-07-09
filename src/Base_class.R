@@ -1,7 +1,6 @@
 ################################################################################
 Base <- R6::R6Class(
     classname = "Base", portable = FALSE,  ## enables <<-
-    ## private = list(data = data.frame()),
     public = list(
         model_exists = compiler::cmpfun(
             f = function(model) {
@@ -35,6 +34,7 @@ Base <- R6::R6Class(
         get_compact_summary = compiler::cmpfun(
             f = function(fit) {
                 tmp <- summary(fit);
+                ## tmp$formula <- NULL;
                 tmp$residuals <- NULL;
                 tmp$call <- NULL;
                 tmp$cov.unscaled <- NULL;

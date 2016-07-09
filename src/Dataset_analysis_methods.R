@@ -3,7 +3,8 @@ Dataset$set(
     which = "public", name = "copy_and_analyze_TG",
     value = compiler::cmpfun(
         f = function(x = 0, y = 0, expl_num = TRUE, eval_num = TRUE,
-            fit_Auto = TRUE, signal = NULL, copy.res = TRUE) {
+            fit_Auto = TRUE, signal = NULL, copy.res = TRUE,
+                     updateProgress = NULL, progress = NULL) {
             tmp <- TG$new();  ## str(tmp);
             tmp$clear();
             ## tmp$data <- data.frame(x = x, y = y);
@@ -33,6 +34,13 @@ Dataset$set(
                 }
             }
             ## print(tmp$get_parms());
+            if (!is.null(updateProgress) && !is.null(progress)) {
+                if (is.function(updateProgress)) {
+                    ## text <- paste0(", compound ", i - 1, " out of ", N - 1);
+                    text <- "";
+                    updateProgress(progress, amount = 1 / (N - 1), detail = text);
+                }
+            }
             return(tmp);
         }, options = kCmpFunOptions),
     overwrite = FALSE);  ## End of Dataset$copy_and_analyze_TG
@@ -50,8 +58,11 @@ Dataset$set(
                 start.time <- proc.time();
                 tmp.res <- parallel::mclapply(
                     X = 2:N, FUN = function(i) {
-                        return(copy_and_analyze_TG(x = time, y = data[, signals[i]]));
-                    }, mc.cores = 1 ## parallel::detectCores()
+                        return(copy_and_analyze_TG(
+                            x = time, y = data[, signals[i]],
+                            updateProgress = updateProgress, progress = progress
+                            ));
+                    }, mc.cores = parallel::detectCores()
                     );
                 stop.time <- proc.time() - start.time;
                 print(paste0(">> main loop took [s]"));
@@ -63,8 +74,8 @@ Dataset$set(
                 ## print(paste0(">> tmp.res size = ", object.size(tmp.res) / 1e6, " MB"));
                 for (i in 2:N) {
                     res[[signals[i]]] <<- list(
-                        num.smry = tmp.res[[i - 1]]$get_num_smry(),
-                        num.eval = tmp.res[[i - 1]]$get_num_eval(),
+                        ## num.smry = tmp.res[[i - 1]]$get_num_smry(),
+                        ## num.eval = tmp.res[[i - 1]]$get_num_eval(),
                         Auto_model = tmp.res[[i - 1]]$auto_model(),
                         Auto_fit = tmp.res[[i - 1]]$get_fit()
                         );

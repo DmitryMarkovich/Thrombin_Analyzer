@@ -115,12 +115,21 @@ Dataset <- R6::R6Class(
                 return(signals);
             }, options = kCmpFunOptions),
         get_parms = compiler::cmpfun(
-            f = function() {
+            f = function(na.rm = FALSE) {
                 ## print(cbind(parms, Num = 1:length(parms$Signal)));
-                if (is.null(parms$Num)) {
-                    return(cbind(parms, Num = 1:length(parms$Signal)));
+                if (na.rm) {
+                    if (is.null(parms$Num)) {
+                        tmp <- cbind(parms, Num = 1:length(parms$Signal));
+                        return(tmp[complete.cases(tmp), ]);
+                    } else {
+                        return(parms[complete.cases(parms), ]);
+                    }
                 } else {
-                    return(parms);
+                    if (is.null(parms$Num)) {
+                        return(cbind(parms, Num = 1:length(parms$Signal)));
+                    } else {
+                        return(parms);
+                    }
                 }
             }, options = kCmpFunOptions),
         set_parms = compiler::cmpfun(
@@ -242,85 +251,3 @@ Dataset <- R6::R6Class(
 
 source("src/Dataset_plotting_methods.R");
 source("src/Dataset_analysis_methods.R");
-## print(Dataset);
-
-## ################################################################################
-## ######################################## Legacy RF classes code
-## ################################################################################
-
-## ################################################################################
-## Dataset.is_empty <- function() {
-##     if (length(data) == 0 && length(N) == 0 && length(signals) == 0 &&
-##         length(parms) == 0) {
-##         return(TRUE);
-##     } else {
-##         return(FALSE);
-##     }
-## }  ## End of Dataset.is_empty
-## ################################################################################
-
-## ################################################################################
-## Dataset.clear <- function() {
-##     print(">> Dataset.clear called!");
-##     data <<- data.frame(); N <<- 0L; signals <<- vector(mode = "character");
-##     res <<- list(); parms <<- data.frame();
-##     return(0L);
-## }  ## End of Dataset.clear
-## ################################################################################
-
-## ################################################################################
-## Dataset.load <- function(inFile) {
-##     print(">> Dataset.load called!");
-##     ## print(sub(pattern = ".*[.]", "", inFile$name));
-##     switch(sub(pattern = ".*[.]", "", inFile$name),
-##            "csv" = {
-##                data <<- read.csv(file = inFile$datapath, header = TRUE,
-##                                  sep = ";");
-##            }
-##            )
-##     ## remove all rows containing NA's
-##     data <<- data[complete.cases(data), ];
-##     ## replace all spaces with underscores in column names
-##     signals <<- gsub("[.]", "_", colnames(data));
-##     colnames(data) <<- signals; N <<- length(data);
-##     return(0L);
-## }  ## End of Dataset.load
-## ################################################################################
-
-## ################################################################################
-## Dataset.load_results <- function(inFile) {
-##     ## print(">> Dataset.load_results called!");
-##     ## print(sub(pattern = ".*[.]", "", inFile$name));
-##     switch(sub(pattern = ".*[.]", "", inFile$name),
-##            "RData" = {
-##                res <<- LoadRData(fname = inFile$datapath);  ## print(res);
-##            }
-##            );
-##     return(0L);
-## }  ## End of Dataset.load_results
-## ################################################################################
-
-## ################################################################################
-## Dataset <- setRefClass(
-##     Class = "Dataset",
-##     fields = list(data = "data.frame", N = "integer", signals = "vector",
-##         res = "list", parms = "data.frame"),
-##     methods = list(
-##         is_empty = Dataset.is_empty, clear = Dataset.clear,
-##         load = Dataset.load, load_results = Dataset.load_results,
-##         copy_and_analyze_TG = Dataset.copy_and_analyze_TG,
-##         plot = Dataset.plot, plot_overlay = Dataset.plot_overlay,
-##         plot_drv1_overlay = Dataset.plot_drv1_overlay,
-##         plot_drv2_overlay = Dataset.plot_drv2_overlay,
-##         do_analysis_in_loop = Dataset.do_analysis_in_loop,
-##         do_analysis = Dataset.do_analysis
-##         ## explore_numerically = Dataset.explore_numerically,
-##         ## conv_pvals_to_signif_codes = Dataset.ConvPValsToSignifCodes
-##         )
-##     );  ## End of Dataset
-## ################################################################################
-## ## print(Dataset);
-
-## ################################################################################
-## ######################################## End of Legacy RF classes code
-## ################################################################################
