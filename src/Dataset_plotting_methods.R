@@ -365,11 +365,10 @@ Dataset$set(
                     legend("center", legend = "You must have loaded different dataset and result files!",
                            pch = NA, text.col = 2, cex = 2, seg.len = 0);
                 } else {
-                    if (!is.null(res[[signal1]])) {
+                    if (!is.null(res[[signal1]]) && res[[signal1]]$Auto_fit$Auto) {
                         resid1 <- tg1$get_data()$y - tg1$get_model(res[[signal1]]$Auto_model);
 
-                        if (!is.null(res[[signal2]])) {  ##exists(x = signal2, where = res)
-                            ## tg2 <- copy_and_analyze_TG(x = x, y = y2, signal = signal2);  ## print(tg2);
+                        if (!is.null(res[[signal2]]) && res[[signal2]]$Auto_fit$Auto) {
                             resid2 <- tg2$get_data()$y - tg2$get_model(res[[signal2]]$Auto_model);
 
                             if (!(is.na(sum(resid1)) && is.na(sum(resid2)))) {

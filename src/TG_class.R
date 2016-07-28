@@ -184,7 +184,7 @@ source("src/TG_fit_T0Gamma.R");
 source("src/TG_fit_T0GammaInt.R");
 source("src/TG_fit_T0GammaInt2.R");
 ## source("src/TG_fit_LateExpGammaInt.R");
-## source("src/TG_fit_LateExpT0GammaInt.R");
+source("src/TG_fit_LateExpT0GammaInt.R");
 source("src/TG_fit_Auto.R");
 
 source("src/TG_get_thrombin_int.R"); source("src/TG_get_A2mT_int.R");

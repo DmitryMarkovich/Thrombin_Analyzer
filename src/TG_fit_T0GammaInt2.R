@@ -5,11 +5,11 @@ TG$set(
         f = suppressWarnings(function(silent = TRUE) {
             if (!silent)
                 print(">> fit_T0GammaInt2 called!");
-            if (!is.null(fit$T0GammaInt2)) {  ## exists(x = "T0GammaInt2", where = fit, envir = environment())
+            if (!is.null(fit$T0GammaInt2)) {
                 print(">> No fitting: T0GammaInt2 fit already exists!");
                 return(fit$T0GammaInt2);
             } else {
-                if (is.null(fit$T0GammaInt)) {  ##!exists(x = "T0GammaInt", where = fit, envir = environment())
+                if (is.null(fit$T0GammaInt)) {
                     fit_T0GammaInt(silent = TRUE);
                 }
                 ## print(fit$T0GammaInt$smry);
@@ -23,6 +23,8 @@ TG$set(
                         k.a2m = fit$T0GammaInt$cff[["k.a2m"]],
                         t0 = fit$T0GammaInt$cff[["t0"]]
                         );
+                    ## we want T0GammaInt2 to improve sigma of T0GammaInt
+                    target.sigma <- fit$T0GammaInt$smry$sigma;
                 } else {
                     start.list <- list(
                         b = data$y[[1]],
@@ -33,6 +35,7 @@ TG$set(
                         k.a2m = 1e-3,
                         t0 = 0
                         );
+                    target.sigma <- kSigmaLMRatio * num.eval$sigma.lm;
                 }
                 if (start.list$k1 < 2) {
                     start.list$k1 <- 2.5;
@@ -75,9 +78,11 @@ TG$set(
                         if (!silent)
                             print(">> Fit not NULL, checking dgn = ");
                         dgn <- conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4]);  ## print(dgn);
-                        if (dgn[1] <= "5" || summary(ft)$sigma >= kSigmaLMRatio * num.eval$sigma.lm) {
+                        if (dgn[1] <= "5" ||
+                            summary(ft)$sigma >= kSigmaLMRatio * num.eval$sigma.lm ||
+                            summary(ft)$sigma >= target.sigma) {
                             if (!silent)
-                                print(">> dgn[1] <= 5 OR sigma >= kSigmaLMRatio * sigma.lm, setting ft back to NULL");
+                                print(">> dgn[1] <= 5 OR sigma >= kSigmaLMRatio * sigma.lm OR sigma >= target.sigma, setting ft back to NULL");
                             ft <- NULL;
                         }
                     }

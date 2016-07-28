@@ -104,14 +104,18 @@ app_ui <- function() {
 ################################################################################
 ################################################################################
             mainPanel = mainPanel(
+                tabsetPanel(
+                    id = "Tab type",
 ############################################################
 ######################################## Instructions
 ############################################################
-                tabsetPanel(
-                    id = "Tab type",
                     tabPanel(title = "Instructions",
-                             fluidRow(column(width = 8, offset = 2,
-                                             includeMarkdown("~/Coding/R/Shiny/Thrombin_Analyzer/README.md")))
+                             fluidRow(
+                                 column(width = 10, offset = 1,
+                                        includeMarkdown(
+                                            paste0(getwd(), "/README.md"))
+                                        )
+                                 )
                              ),
 ############################################################
 ######################################## Dataset
@@ -129,15 +133,16 @@ app_ui <- function() {
                                             column(width = 4, offset = 0,
                                                    plotOutput(outputId = "dataset.ShowETP",
                                                               brush = brushOpts(id = "plot_brush",
-                                                                  direction = "xy")
+                                                                  direction = "xy",
+                                                                  resetOnNew = TRUE)
                                                               )
                                                    ),
                                             column(width = 4, offset = 0,
                                                    plotOutput(outputId = "dataset.ShowPeak")
                                                    ),
                                             column(width = 12, offset = 0,
-                                                   ## verbatimTextOutput("brush_info")
-                                                   uiOutput("brush_info")
+                                                   verbatimTextOutput("brush_info")
+                                                   ## uiOutput("brush_info")
                                                    ),
                                             column(width = 4, offset = 0,
                                                    plotOutput(outputId = "dataset.ShowttPeak")
@@ -186,10 +191,10 @@ app_ui <- function() {
                     tabPanel(title = "Calibration signal",
                              plotOutput(outputId = "cal.Plot"),
                              fluidRow(
-                                 column(width = 6, offset = 0,
+                                 column(width = 12, offset = 0,
                                         plotOutput(outputId = "cal.PlotResid")
                                         ),
-                                 column(width = 6,
+                                 column(width = 12,
                                         htmlOutput(outputId = "cal.model")
                                         )
                                  ),  ## End of fluidRow
@@ -203,11 +208,12 @@ app_ui <- function() {
                                tabPanel(title = "Thrombin generation signal",
                                         plotOutput(outputId = "tg.Plot"),
                                         fluidRow(
-                                            column(width = 6, offset = 0,
+                                            column(width = 12, offset = 0,
                                                    plotOutput(outputId = "tg.PlotResid")
                                                    ),
-                                            column(width = 6,
+                                            column(width = 12,
                                                    htmlOutput(outputId = "tg.model")
+                                                   ## verbatimTextOutput(outputId = "tg.model")
                                                    )
                                             )  ## End of fluidRow
                                         ## uiOutput(outputId = "tg.SynthHint",
@@ -262,10 +268,20 @@ app_ui <- function() {
 ############################################################
 ######################################## Demo signals
 ############################################################
-                    tabPanel(title = "Demo",
+                    tabPanel(title = "Demo signals",
                              fluidRow(
                                  column(width = 12,
                                         plotOutput(outputId = "demo.Plot")
+                                        )
+                                 )
+                             ),
+############################################################
+######################################## Tutorial
+############################################################
+                    tabPanel(title = "Tutorial",
+                             fluidRow(
+                                 column(width = 12, offset = 0,
+                                        htmlOutput(outputId = "show.Tutorial")
                                         )
                                  )
                              )
