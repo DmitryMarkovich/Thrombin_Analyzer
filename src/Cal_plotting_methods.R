@@ -17,10 +17,10 @@ Cal$set(
                 axis(side = 2, lwd = 0, line = -0.4, las = 1, cex.axis = 1.5);
                 title(ylab = "Fluorescence, a.u.", line = 5.5, cex.lab = 1.5);
                 title(main = "Calibration signal", line = 0.5, cex.main = 1.5);
-                mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1,
-                      line = -1.5, cex = 1.5);
-                mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3,
-                      line = -1.5, cex = 1.5);
+                ## mtext(text = as.character(signif(num.smry$rat$x, 3)), side = 1,
+                ##       line = -1.5, cex = 1.5);
+                ## mtext(text = as.character(signif(num.smry$rat$y, 3)), side = 3,
+                ##       line = -1.5, cex = 1.5);
             } else {
                 warning(">> Cal$data == NULL!");
             }

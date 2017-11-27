@@ -136,6 +136,7 @@ Dataset <- R6::R6Class(
             f = function() {
                 parms <<- data.frame(
                     Signal = signals[-1], Reliable = rep(FALSE, N - 1),
+                    Model = rep(NA_character_, N - 1),
                     Lagtime = rep(NA_real_, N - 1), ETP = rep(NA_real_, N - 1),
                     Peak = rep(NA_real_, N - 1), ttPeak = rep(NA_real_, N - 1),
                     VelIndex = rep(NA_real_, N - 1), Alpha2M_Level = rep(NA_real_, N - 1),

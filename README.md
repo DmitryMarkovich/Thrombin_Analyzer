@@ -29,6 +29,27 @@ shown in **Parameters** tab.
 Analyze a calibration or a thrombin generation signal or both following the
 steps above and check the parameters with the **Parameters** tab.
 
+> #### Controls
+
+* **SC time, min** the minimal length of the measurement that will cause the app
+  to try out models with substrate consumption (SC).  If You want all the
+  signals in Your dataset to use models without SC, set it to a value larger
+  than the maximal time in the dataset.  The default value is 121 --- all
+  signals that are shorter than 121 minutes will not be fitted with SC models by
+  the **Auto** model.
+* **SC ratio** this ratio is used by **Auto** model to make a decision whether
+  SC model should be preferred to the non-SC model.  If the residual standard
+  error of the fit without SC is greater than **SC ratio** multiplied by the
+  residual standard error of the fit with SC, than SC model would not be
+  preferred.  It means that if a fit of an SC model does not increase the
+  residual standard error of the fit enough, there is no need for SC model for
+  this signal.  The default value is 1.7.
+* **Mode** --- this radio button switches the mode of the app from
+  **Speed** to **Accuracy**.  In **Speed** mode, no attempts to fit
+  more complex models will be made to save time, whereas in **Accuracy** mode
+  the app will persistently try to fit more complicated models to the data for
+  better approximation.  The default mode is **Speed**.
+
 > #### Dataset
 
 **Dataset** tab visualizes the results of the analysis of a dataset from a
@@ -48,7 +69,7 @@ data, and analyze it following the steps above.
 
 > #### Tutorial
 
-Shows Thrombin Analyzer Tutorial directly in the app using the standard 
+Shows Thrombin Analyzer Tutorial directly in the app using the standard
 pdf-viewer of Your browser.
 
 Good luck!

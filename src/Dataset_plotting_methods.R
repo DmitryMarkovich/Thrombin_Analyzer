@@ -46,7 +46,7 @@ Dataset$set(
                                    cex = 0.5, cex.axis = 0.5, cex.main = 0.5, axes = FALSE,
                                    ylim = c(0, max(data[[i]], na.rm = TRUE)));
                     box();
-                    title(i - 1, line = -1.5, cex.main = 1.5);
+                    title(xlab = i - 1, line = -1.5, cex.main = 1.5);
                     ## If we were passed a progress update function, call it
                     if (is.function(updateProgress)) {
                         text <- paste0(", compound ", i - 1, " out of ", N - 1);
@@ -179,8 +179,8 @@ Dataset$set(
                 title(main = "Signals overlay plot", line = 0.5, cex.main = 1.5);
                 lines(x = tg2$get_data()$x, y = tg2$get_data()$y, type = "p",
                       pch = 2, cex = 1.25, lwd = 2);
-                legend("top", legend = c(signal1, signal2), pch = 1:2,
-                       cex = 1.25, seg.len = 0.0, horiz = TRUE);
+                legend("bottom", legend = c(signal1, signal2), pch = 1:2,
+                       cex = 1.25, seg.len = 0.0, horiz = FALSE);
 
                 if (length(res) > 0 && length(res) != N - 1) {
                     legend("center", legend = "You must have loaded different dataset and result files!",
@@ -194,10 +194,11 @@ Dataset$set(
                         lines(tg1$get_data()$x,
                               tg1$get_thrombin_int(res[[signal1]]$Auto_model),
                               col = "blue", cex = 0.75, type = "b", pch = 1);
-                        legend("top",
+                        legend("bottom",
                                legend = c(paste0(signal1, " (",
                                    res[[signal1]]$Auto_model, ")"), signal2),
-                               pch = 1:2, cex = 1.25, seg.len = 0.0, horiz = TRUE);
+                               pch = 1:2, cex = 1.25, seg.len = 0.0,
+                               horiz = FALSE);
                         legend("topleft",
                                legend = c("Fit", "Thrombin Integral",
                                    expression(paste(alpha[2], "M-T Integral"))),
@@ -210,10 +211,11 @@ Dataset$set(
                                   col = "red", lwd = 3);
                             lines(tg2$get_data()$x, tg2$get_thrombin_int(res[[signal2]]$Auto_model),
                                   col = "blue", cex = 0.75, type = "b", pch = 2);
-                            legend("top", legend =
+                            legend("bottom", legend =
                                        c(paste0(signal1, " (", res[[signal1]]$Auto_model, ")"),
                                          paste0(signal2, " (", res[[signal2]]$Auto_model, ")")),
-                                   pch = 1:2, cex = 1.25, seg.len = 0.0, horiz = TRUE);
+                                   pch = 1:2, cex = 1.25, seg.len = 0.0,
+                                   horiz = FALSE);
                         }  ## End of if (exists(signal2))
                     }  ## End of if (exists(signal1))
                 }  ## End of if (length(res))

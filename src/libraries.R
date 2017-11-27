@@ -1,6 +1,6 @@
 ## additional R libraries
 kLibraries <- c("shiny", "minpack.lm", "LambertW", "parallel", "compiler", "R6",
-                "Rcpp", "markdown");
+                "Rcpp", "markdown", "waved", "MASS");
 CheckAllLibrariesAvailable <- function(libraries) {
     try({require(markdown)});  ## fix for work on shinyapps.io
     for (i in 1:length(libraries)) {
@@ -11,7 +11,7 @@ CheckAllLibrariesAvailable <- function(libraries) {
 }  ## End of CheckAllLibrariesAvailable
 CheckAllLibrariesAvailable(kLibraries);  ## checks if libraries are available
 
-library(shiny);
+## library(shiny);
 options(shiny.maxRequestSize = 500 * 1024 ^ 2);  ## max file upload size in B
 ## options for compiler package
 compiler::setCompilerOptions("optimize" = 3);
@@ -21,7 +21,7 @@ compiler::setCompilerOptions("suppressUndefined" = TRUE);
 kCmpFunOptions <- list("optimize" = 3, "suppressAll" = TRUE,
                        "suppressUndefined" = TRUE);
 ## Disable warnings and set print line to 300 characters
-options(warn = -1, width = 300);
+options(warn = -1, width = 1000);
 
 ## Fast C++ versions of several simple R functions
 Rcpp::sourceCpp(file = "src/Rcpp_functions.cpp");

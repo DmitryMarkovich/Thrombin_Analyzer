@@ -9,7 +9,7 @@ TG$set(
                 print(">> No fitting: T0GammaInt fit already exists!");
                 return(fit$T0GammaInt);
             } else {
-                ft <- lm(y ~ x, data = data, subset = x >= num.smry$t.lin);
+                ft <- lm(y ~ x, data = data, subset = x >= num.smry$t.lin); #
                 A <- coef(ft)[[1]] + coef(ft)[[2]] * num.smry$t.lin;
                 k.a2m <- coef(ft)[[2]] / A; k <- 3; theta <- num.smry$t.peak / (k - 1);
                 num.eval$sigma.lm <<- summary(ft)$sigma;
@@ -30,8 +30,8 @@ TG$set(
                                 data = data, start = start.list, trace = F,
                                 ## lower = c(b.min, A.min, k.min, theta.min),
                                 ## upper = c(b.max, A.max, k.max, theta.max),
-                                lower = c(  0,   0, 1.25,   0, 1e-5,   0),
-                                upper = c(Inf, Inf,  Inf, Inf,  Inf, Inf),
+                                lower = c(  0,   0, 1.25,   0, 1e-5, -Inf),
+                                upper = c(Inf, Inf,  Inf, Inf,  Inf,  Inf),
                                 algorithm = "LM",
                                 control = minpack.lm::nls.lm.control(
                                     ftol = sqrt(.Machine$double.eps),
@@ -63,11 +63,63 @@ TG$set(
                     fit$T0GammaInt <<- list(
                         cff = coef(ft), smry = get_compact_summary(ft),  ## summary(ft),
                         diagn = conv_pvals_to_signif_codes(summary(ft)$coefficients[, 4])
+                    );
+                    if (kFitToDrv) {
+                        ## print(">> Start fitting to the derivative");
+                        ft.drv <- NULL; n.try <- 1; start.list <- as.list(coef(ft)[-1]); ##print(start.list);
+                        str(data.frame(x = data$x, y = num.smry$drv1));
+                        while (is.null(ft.drv) && n.try <= kNumTries) {
+                            try(expr = {
+                                ft.drv <- (minpack.lm::nlsLM( ##suppressWarnings
+                                    y ~ A * dgamma(x = x - t0, shape = k, scale = theta) +
+                                        A * k.a2m * (
+                                            pgamma(q = x - t0, shape = k, scale = theta)),
+                                    data = data.frame(x = data$x, y = num.smry$drv1),
+                                    start = start.list, trace = F,
+                                    ## lower = c(b.min, A.min, k.min, theta.min),
+                                    ## upper = c(b.max, A.max, k.max, theta.max),
+                                    lower = c(  0, 1.15,   0, 1e-5, -Inf),
+                                    upper = c(Inf,  Inf, Inf,  Inf,  Inf),
+                                    algorithm = "LM",
+                                    control = minpack.lm::nls.lm.control(
+                                        ftol = sqrt(.Machine$double.eps),
+                                        ptol = sqrt(.Machine$double.eps),
+                                        gtol = 0, factor = 100,  ## between [0.1, 100]
+                                        maxiter = 200, nprint = -1
+                                    )
+                                ))
+                            }, silent = FALSE);
+                            if (!is.null(ft.drv)) {
+                                ## if (!silent)
+                                print(">> Fit to drv not NULL, checking dgn = ");
+                                dgn <- conv_pvals_to_signif_codes(summary(ft.drv)$coefficients[, 4]);  ## print(dgn);
+                                if (dgn[1] <= "3") {  ## || summary(ft.drv)$sigma >= kSigmaLMRatio * num.eval$sigma.lm
+                                    ## if (!silent)
+                                    print(">> dgn[3] <= 4 OR sigma >= kSigmaLMRatio * sigma.lm, setting ft back to NULL");
+                                    ft.drv <- NULL;
+                                }
+                            }
+                            n.try <- n.try + 1;
+                            start.list <- lapply(start.list, FUN = function(x) {
+                                return(x * runif(1, 0.5, 1.5));
+                            });
+                            ## list(A = runif(1) * num.smry$ampl,
+                                ##                k = runif(1, 1, 10), theta = runif(1, 1, 30),
+                                ##                k.a2m = runif(1) * 1e-3, t0 = 0);
+                        }  ## End of while
+                        if (!is.null(ft.drv)) {
+                            print(summary(ft.drv));
+                        }
+                        ## print(">> End of fitting to drv");
+                        fit$T0GammaInt <<- list(
+                            cff = c(coef(ft)[1], coef(ft.drv)), smry = get_compact_summary(ft.drv),
+                            diagn = conv_pvals_to_signif_codes(summary(ft.drv)$coefficients[, 4])
                         );
+                    }  ## End of if (kFitToDrv)
                     if (!silent)
                         print(fit[names(fit) != "LM"]);
                     return(fit$T0GammaInt);
-                }  ## End of if is.null(fit)
+                }  ## End of if is.null(ft)
             }  ## End of if exists()
         }, options = kCmpFunOptions),
     overwrite = FALSE);  ## End of TG$fit_T0GammaInt

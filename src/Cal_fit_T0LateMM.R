@@ -2,7 +2,7 @@
 Cal$set(
     which = "public", name = "fit_T0LateMM",
     value = compiler::cmpfun(
-        f = function(silent = TRUE) {
+        f = function(silent = TRUE, weights = "Default (w = 1)") {
             if (exists(x = "T0LateMM", where = fit)) {
                 warning(">> No fitting: T0LateMM fit already exists!");
                 return(fit$LateMM);
@@ -16,6 +16,13 @@ Cal$set(
                     p2 = fit$LateMM$cff[["p2"]], p3 = fit$LateMM$cff[["p3"]],
                     t0 = 0);
                 ft <- NULL; n.try <- 1;
+                if (weights == "Default (w = 1)") {
+                    wgt <- rep(1, length(data$x));
+                } else if (weights == "Poisson (w = 1 / y)") {
+                    wgt <- 1 / (data$y);
+                } else if (weights == "Power (w = 1 / y^2)") {
+                    wgt <- 1 / (data$y^2);
+                }
                 while (is.null(ft) && n.try <= kNumTries) {
                     try(expr = {
                             ft <- minpack.lm::nlsLM(
@@ -24,6 +31,7 @@ Cal$set(
                                 data = data, start = start.list, algorithm = "LM",
                                 lower = c(  0,   0,   0,   0, -Inf),
                                 upper = c(Inf, Inf, Inf, Inf,  Inf),
+                                weights = wgt,
                                 control = minpack.lm::nls.lm.control(
                                     ftol = 0.1 *  sqrt(.Machine$double.eps),
                                     ptol = 0.1 * sqrt(.Machine$double.eps),

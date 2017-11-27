@@ -50,7 +50,7 @@ Dataset$set(
 Dataset$set(
     which = "public", name = "do_analysis",
     value =  compiler::cmpfun(
-        f = function(updateProgress = NULL, progress) {
+        f = function(updateProgress = NULL, progress = NULL) {
             if (!is.null(data) && length(data) != 0) {
                 print(">> DoAnalysis called!");
                 time <- data[, 1];  ## print(time);
@@ -62,7 +62,7 @@ Dataset$set(
                             x = time, y = data[, signals[i]],
                             updateProgress = updateProgress, progress = progress
                             ));
-                    }, mc.cores = 1 ## parallel::detectCores()
+                    }, mc.cores =  parallel::detectCores()
                     );
                 stop.time <- proc.time() - start.time;
                 print(paste0(">> main loop took [s]"));
@@ -82,8 +82,9 @@ Dataset$set(
                     ## ,
                     ## parms = tmp.res[[i - 1]]$parms_model(tmp.res[[i - 1]]$auto_model())
                     if (!any(tmp.res[[i - 1]]$auto_model() == c("None", "T0Gamma"))) {
-                        parms[i - 1, 2:(2 + length(kParameterNames))] <<- list(
+                        parms[i - 1, 2:(2 + 1 + length(kParameterNames))] <<- list(
                             Reliable = TRUE,
+                            Model = tmp.res[[i - 1]]$auto_model(),
                             tmp.res[[i - 1]]$get_parameter("Lagtime"),
                             tmp.res[[i - 1]]$get_parameter("ETP"),
                             tmp.res[[i - 1]]$get_parameter("Peak"),
@@ -92,7 +93,8 @@ Dataset$set(
                             tmp.res[[i - 1]]$get_parameter("Alpha2M_Level")
                             );
                     } else {
-                        parms[i - 1, 3:(2 + length(kParameterNames))] <<- list(
+                        parms[i - 1, 3:(2 + 1 + length(kParameterNames))] <<- list(
+                            Model = tmp.res[[i - 1]]$auto_model(),
                             tmp.res[[i - 1]]$get_parameter("Lagtime"),
                             tmp.res[[i - 1]]$get_parameter("ETP"),
                             tmp.res[[i - 1]]$get_parameter("Peak"),

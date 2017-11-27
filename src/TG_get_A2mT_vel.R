@@ -66,9 +66,33 @@ TG$set(
                            ## v[data$x == 0] <- 0;
                            return(v);
                        } else {
-                   warning(">> fit$LateExpT0GammaInt does not exist!");
-                   return(rep(0, length(data$x)));
-               }
+                           warning(">> fit$LateExpT0GammaInt does not exist!");
+                           return(rep(0, length(data$x)));
+                       }
+                   },
+                   "LateExpT0GammaInt2" = {
+                       if (exists(x = "LateExpT0GammaInt2", where = fit)) {
+                           p1 <- fit$LateExpT0GammaInt2$cff[["p1"]];
+                           A1 <- fit$LateExpT0GammaInt2$cff[["A1"]];
+                           k1 <- fit$LateExpT0GammaInt2$cff[["k1"]];
+                           A2 <- fit$LateExpT0GammaInt2$cff[["A2"]];
+                           k2 <- fit$LateExpT0GammaInt2$cff[["k2"]];
+                           theta <- fit$LateExpT0GammaInt2$cff[["theta"]];
+                           k.a2m <- fit$LateExpT0GammaInt2$cff[["k.a2m"]];
+                           t0 <- fit$LateExpT0GammaInt2$cff[["t0"]];
+
+                           v <- p1 * k.a2m * (
+                               A1 * dgamma(x = data$x - t0, shape = k1,
+                                           scale = theta) +
+                               A2 * dgamma(x = data$x - t0, shape = k2,
+                                           scale = theta)
+                           );
+                           ## v[data$x == 0] <- 0;
+                           return(v);
+                       } else {
+                           warning(">> fit$LateExpT0GammaInt2 does not exist!");
+                           return(rep(0, length(data$x)));
+                       }
                    },
                    "Auto" = {
                        if (exists(x = "Auto", where = fit)) {
@@ -80,7 +104,7 @@ TG$set(
                    },
                    {  ## Default
                        warning(paste0(">> Call to unknown tg.model ", tg.model));
-                       return(rep(0, length(data$x)));
+                       return(rep(NA_real_, length(data$x)));
                    }
                    );  ## End of switch(tg.model)
         }, options = kCmpFunOptions),

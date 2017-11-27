@@ -10,7 +10,10 @@ Cal <- R6::R6Class(
             f = function() {
                 data <<- data.frame(); num.smry <<- list(); fit <<- list();
                 parms <<- data.frame();
-            }, options = kCmpFunOptions)
+            }, options = kCmpFunOptions),
+        updateProgress = function(progress, amount, detail = NULL) {
+            progress$inc(amount = amount, detail = detail);
+        }
         )  ## End of public
     );  ## End of Cal
 ################################################################################
@@ -23,6 +26,7 @@ source("src/Cal_fit_LateExp.R");
 source("src/Cal_fit_T0LateExp.R");
 source("src/Cal_fit_LateMM.R");
 source("src/Cal_fit_T0LateMM.R");
+source("src/Cal_fit_CombinedMM.R");
 source("src/Cal_fit_Auto.R");
 source("src/Cal_model_dispatchers.R");
 source("src/Cal_plotting_methods.R");
